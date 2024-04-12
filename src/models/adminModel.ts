@@ -38,10 +38,10 @@ const adminSchema = new Schema<IAdmin>({
     },
     role: {
         type: String,
-        enum: ['admin', 'user'], // Define possible roles
-        default: 'user', // Default role is user
+        enum: ['admin', 'user'], 
+        default: 'user', 
     },
 });
 
-// Create and export the Admin model
+//export the Admin model
 export default mongoose.model<IAdmin>('Admin', adminSchema);

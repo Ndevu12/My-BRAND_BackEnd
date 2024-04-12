@@ -1,16 +1,18 @@
 // const necessary modules
 import express from 'express';
 import EducationController from '../controllers/EducationController.js';
+import { isAdmin } from '../middlewares/auth.ts';
 
 // Create a router instance
 const router = express.Router();
 
 // Define routes
-router.post('/Education/:id/createEducation', EducationController.createEducation);
-router.put('/Education/:id/updateEducation', EducationController.updateEducation);
-router.get('/Education/:id/getEducationById', EducationController.getEducationById);
-router.get('/Education/:id/getAllEducations', EducationController.getAllEducations);
-router.delete('/Education/:id/deleteEducation', EducationController.deleteEducation);
+router.patch('/create', isAdmin, EducationController.createEducation);
+router.patch('/update/:id', isAdmin, EducationController.updateEducation);
+router.delete('/delete/:id', isAdmin, EducationController.deleteEducation);
+router.get('/:id', EducationController.getEducationById);
+router.get('/All', EducationController.getAllEducations);
+
 
 // hijokl
 // Export the router

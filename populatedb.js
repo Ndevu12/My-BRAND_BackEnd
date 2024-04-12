@@ -7,9 +7,9 @@ console.log(
   // Get arguments passed on command line
   const userArgs = process.argv.slice(2);
   
-  import blog from "./BackEnd/models/Blog.js";
-  import Author from "./BackEnd/models/author.js";
-  import blogCategory from "./BackEnd/models/blogCategories.js";
+  import blog from "./src/models/Blog.ts";
+  import Author from "./src/models/author.ts";
+  import blogCategory from "./src/models/blogCategories.ts";
 
   const categories = [];
   const authors = [];
@@ -35,9 +35,6 @@ console.log(
     mongoose.connection.close();
   }
   
-  // We pass the tags to the ...Create functions so that, for example,
-  // categorie[0] will always be the Fantasy categorie, regardless of the order
-  // in which the elements of promise.all's argument complete.
   async function CreateblogCategory(name) {
     const category = new blogCategory({ name: name });
     await category.save();

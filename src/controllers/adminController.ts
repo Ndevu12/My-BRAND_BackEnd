@@ -1,7 +1,5 @@
 import { Request, Response } from 'express';
 import AdminModel, { IAdmin } from '../models/adminModel.ts';
-// import ValidationUtils from '../utils/validationUtils.ts';
-// import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { sendAuthorizationCodeByEmailAndPhone } from '../utils/authorizationUtils.ts';
 
@@ -17,17 +15,6 @@ class AdminController {
                 res.status(400).json({ message: 'Username or email already exists' });
                 return;
             }
-
-            // Hash the password before saving
-            // const hashedPassword = await bcrypt.hash(password, 10);
-
-            // const  phoneNumber  = req.body;
-
-            // Validate phone number
-            // if (!ValidationUtils.validatePhoneNumber(phoneNumber)) {
-            //     res.status(400).json({ message: 'Invalid phone number' });
-            //     return;
-            // }
 
             // Create admin object
             const newAdmin: Partial<IAdmin> = {
@@ -61,13 +48,6 @@ class AdminController {
                 res.status(401).json({ message: 'Invalid username or password' });
                 return;
             }
-
-            // Check password
-            // const passwordMatch = await bcrypt.compare(password, admin.password);
-            // if (!passwordMatch) {
-            //     res.status(401).json({ message: 'Invalid username or password' });
-            //     return;
-            // }
 
             // Generate JWT token
             const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRET || '', { expiresIn: '1h' });

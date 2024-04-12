@@ -40,6 +40,6 @@ route.use('/skill', skillRoutes);
 route.use('/spacestatus', spaceStatusRoutes);
 route.use('/subscriber', subscriberRoutes);
 route.use('/visitoranalytics', visitorAnalyticsRoutes);
-route.use('/admin', adminRoutes);
+route.use('/user', adminRoutes);
 
 export default route;

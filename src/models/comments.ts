@@ -8,8 +8,8 @@ import mongoose, { Schema, Document } from 'mongoose';
  * Interface representing the structure of a comment document.
  */
 export interface IComment extends Document {
-    post_ID: string; // ID of the post the comment belongs to
-    commenterName: string;
+    post_ID: string; 
+    commenterName: undefined;
     comment: string;
     createdAt?: Date;
 }
@@ -44,8 +44,8 @@ class CommentModel {
     }
 
     // Method to create a new comment
-    public createComment(data: Partial<IComment>): Promise<IComment> {
-        return this.model.create(data);
+    public async createComment(data: Partial<IComment>): Promise<IComment> {
+        return await (await this.model.create(data)).save();
     }
 
     // Method to find a comment by ID

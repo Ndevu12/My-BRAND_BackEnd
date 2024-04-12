@@ -1,16 +1,17 @@
 // const necessary modules
 import { Router } from 'express';
 import skillController from '../controllers/skillController.js';
+import { isAdmin } from '../middlewares/auth.ts';
 
 // Create a router instance
 const router = Router();
 
 // Define routes
-router.post('/skill/:id/createSkill', skillController.createSkill);
-router.put('/skill/:id/updateSkill', skillController.updateSkill);
-router.get('/skill/:id/getSkillById', skillController.getSkillById);
-router.get('/skill/getAllSkills', skillController.getAllSkills);
-router.delete('/skill/:id/deleteSkill', skillController.deleteSkill);
+router.patch('/create', isAdmin, skillController.createSkill);
+router.patch('/update/:id', isAdmin, skillController.updateSkill);
+router.get('/:id', skillController.getSkillById);
+router.get('/All', skillController.getAllSkills);
+router.delete('/delete/:id', isAdmin, skillController.deleteSkill);
 
 // hijokl
 // Export the router

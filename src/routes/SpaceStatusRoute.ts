@@ -1,16 +1,17 @@
 // const necessary modules
 import express from 'express';
 import SpaceStatusController from '../controllers/spaceStatusController.js';
+import { isAdmin } from '../middlewares/auth.ts';
 
 // Create a router instance
 const router = express.Router();
 
 // Define routes
-router.post('/SpaceStatus/:id/createSpaceStatus', SpaceStatusController.createSpaceStatus);
-router.put('/SpaceStatus/:id/updateSpaceStatus', SpaceStatusController.updateSpaceStatus);
-router.get('/SpaceStatus/:id/getSpaceStatusById', SpaceStatusController.getSpaceStatusById);
-router.get('/SpaceStatus/getAllSpaceStatuses', SpaceStatusController.getAllSpaceStatuses);
-router.delete('/SpaceStatus/:id/deleteSpaceStatus', SpaceStatusController.deleteSpaceStatus);
+router.post('/create', isAdmin, SpaceStatusController.createSpaceStatus);
+router.put('/update/:id', isAdmin, SpaceStatusController.updateSpaceStatus);
+router.get('/:id', isAdmin, SpaceStatusController.getSpaceStatusById);
+router.get('/All',isAdmin, SpaceStatusController.getAllSpaceStatuses);
+router.delete('/delete/:id', isAdmin, SpaceStatusController.deleteSpaceStatus);
 
 // hijokl
 // Export the router

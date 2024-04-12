@@ -2,28 +2,27 @@
 
 import nodemailer from 'nodemailer';
 
-// Function to send notifications via email
+
 export async function sendNotificationByEmail(email: string, subject: string, message: string): Promise<void> {
     try {
-        // nodemailer transporter with your SMTP configuration
+        const emailAddress = process.env.emailAddress;
+        const emailpassword = process.env.emailpassword;
+
         const transporter = nodemailer.createTransport({
-            host: 'smtp.example.com',
+            host: 'https://ndevu12.github.io/My-BRAND/',
             port: 587,
             secure: false,
             auth: {
-                user: 'ndevulion@gmail.com',
-                pass: 'elionelisa',
+                user: emailAddress,
+                pass: emailpassword,
             },
         });
 
-        // Send mail with defined transport object
         await transporter.sendMail({
-            from: '"Ndevu" <ndevulion@gmail.com>',
+            from: '"Ndevu" <emailAddress>',
             to: email,
             subject,
             text: message,
-            // HTML body
-            // html: '<p> HTML message here</p>',
         });
 
         console.log('Notification sent successfully to:', email);
