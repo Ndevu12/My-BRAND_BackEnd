@@ -6,11 +6,11 @@ import CommentController from '../controllers/CommentController.js';
 const router = express.Router();
 
 // Define routes
-router.post('/comment/postID/:id/createComment', CommentController.createComment);
-router.put('/comment/postID/:id/updateComment', CommentController.updateComment);
-router.get('/comment/postID/:id/getCommentById', CommentController.getCommentById);
-router.get('/comment/postID/getAllComments', CommentController.getAllComments);
-router.delete('/comment/postID/:id/deleteComment', CommentController.deleteComment);
+router.patch('/add', CommentController.createComment);
+router.patch('/update/:id', CommentController.updateComment);
+router.get('/:id', CommentController.getCommentById);
+router.get('/All', CommentController.getAllComments);
+router.delete('/delete/:id', CommentController.deleteComment);
 
 // hijokl
 // Export the router

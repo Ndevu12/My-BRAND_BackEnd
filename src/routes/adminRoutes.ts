@@ -1,19 +1,14 @@
 import { Router } from 'express';
-// const AdminController from '../controllers/adminController');
 import AdminController from '../controllers/adminController.ts';
+import { isAdmin } from '../middlewares/auth.ts';
+import UserValidation from "../middlewares/validation/register.ts";
 
 const router: Router = Router();
 
 // Route to register a new admin
-router.post('/admin/:id/register',AdminController.registerAdmin);
-router.get('/admin/:id/login',AdminController.loginAdmin);
-
-// router.get('/admin',AdminController.registerAdmin);
-// router.get('/admin',AdminController.registerAdmin);
-// router.post('/admin',AdminController.registerAdmin);
-// router.post('/admin',AdminController.registerAdmin);
-// router.put('/admin/:id/updateAdminData',AdminController.updateAdminData);
-// router.delete('/admin/:id/removeAdmin',AdminController.removeAdmin);
+router.patch('/signup', UserValidation.signup, AdminController.registerAdmin);
+router.get('/login', AdminController.loginAdmin);
+router.patch('/logout', isAdmin, AdminController.registerAdmin);
 
 // hijokl
 export default router;

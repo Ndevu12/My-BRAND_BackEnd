@@ -42,17 +42,17 @@ async function sendEmail(email: string, code: string): Promise<boolean> {
         const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS 
+                user: process.env.emailAddress,
+                pass: process.env.emailpassword,
             }
         });
 
         // Define email options
         const mailOptions = {
-            from: process.env.EMAIL_USER, // Sender email address
-            to: email, // Recipient email address
-            subject: 'Authorization Code', // Email subject
-            text: `Your authorization code is: ${code}` // Email body
+            from: process.env.emailAddress,
+            to: email, 
+            subject: 'Authorization Code', 
+            text: `Your authorization code is: ${code}` 
         };
 
         // Send email

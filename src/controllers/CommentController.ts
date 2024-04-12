@@ -2,7 +2,7 @@
  * Controller for handling Comment-related operations.
  */
 import { Request, Response } from 'express';
-import CommentModel, { IComment } from '../models/comments';
+import CommentModel, { IComment } from '../models/comments.js';
 
 class CommentController {
     /**

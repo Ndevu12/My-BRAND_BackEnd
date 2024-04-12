@@ -1,21 +1,22 @@
 import express, { Router } from 'express';
 import AboutController from '../controllers/AboutController.ts';
+import { isAdmin } from '../middlewares/auth.ts';
 
 const aboutRouter: Router = express.Router();
 
 // Route to create a new about
-aboutRouter.post('/abaut/create', AboutController.createAbouting);
+aboutRouter.patch('/create', isAdmin, AboutController.createAbouting);
 
 // Route to get all about entries
-aboutRouter.get('/AllAbout', AboutController.getAllAbout);
+aboutRouter.get('/All', AboutController.getAllAbout);
 
 // Route to get a specific about entry by ID
-aboutRouter.get('/abaut/:id/getAboutById', AboutController.getAboutById);
+aboutRouter.get('/get/:id', AboutController.getAboutById);
 
 // Route to update an existing about entry
-aboutRouter.put('/abaut/:id/updateAbout', AboutController.updateAbout);
+aboutRouter.patch('/update/:id', isAdmin, AboutController.updateAbout);
 
 // Route to delete an existing about entry
-aboutRouter.delete('/abaut/:id/deleteAbout', AboutController.deleteAbout);
+aboutRouter.delete('/delete/:id', isAdmin, AboutController.deleteAbout);
 
 export default aboutRouter;

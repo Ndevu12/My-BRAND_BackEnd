@@ -2,7 +2,7 @@
  * Controller for handling Analytics-related operations.
  */
 import { Request, Response } from 'express';
-import Analytics, { IAnalytics } from '../models/Analytics';
+import Analytics, { IAnalytics } from '../models/Analytics.ts';
 
 class AnalyticsController {
     /**

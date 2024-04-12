@@ -1,16 +1,17 @@
 // Import necessary modules
 import { Router } from 'express';
 import AnalyticsController from '../controllers/AnalyticsController.ts';
+import { isAdmin } from '../middlewares/auth.ts';
 
 // Create a router instance
 const AnalyticsRouter: Router  = Router();
 
 // Define routes
-AnalyticsRouter.get('/analytics/:id/getAllAnalyticss)', AnalyticsController.getAllAnalyticss);
-AnalyticsRouter.get('/analytics/getAnalyticsById', AnalyticsController.getAnalyticsById);
-AnalyticsRouter.post('/analytics/:id/createAnalytics', AnalyticsController.createAnalytics);
-AnalyticsRouter.put('/analytics/:id/updateAnalytics', AnalyticsController.updateAnalytics);
-AnalyticsRouter.delete('/analytics/:id/deleteAnalytics', AnalyticsController.deleteAnalytics);
+AnalyticsRouter.patch('/create', isAdmin, AnalyticsController.createAnalytics);
+AnalyticsRouter.patch('/update/:id', isAdmin, AnalyticsController.updateAnalytics);
+AnalyticsRouter.delete('/delete/:id', isAdmin, AnalyticsController.deleteAnalytics);
+AnalyticsRouter.get('/:id', isAdmin, AnalyticsController.getAnalyticsById);
+AnalyticsRouter.get('/All', isAdmin, AnalyticsController.getAllAnalyticss);
 
 // hijokl
 // Export the router

@@ -8,7 +8,7 @@ import mongoose, { Schema, Document } from 'mongoose';
  * Interface representing the structure of a Message document.
  */
 export interface IMessage extends Document {
-    senderName: string;
+    email: string;
     message: string;
     sendAt: Date;
     notifyMe: boolean;
@@ -23,7 +23,7 @@ class MessageModel {
 
     constructor() {
         const messageSchema = new Schema<IMessage>({
-            senderName: {
+            email: {
                 type: String,
                 required: true,
             },
@@ -37,7 +37,7 @@ class MessageModel {
             },
             notifyMe: {
                 type: Boolean,
-                required: true,
+                required: false,
             },
             avatarOrImage: {
                 type: String,

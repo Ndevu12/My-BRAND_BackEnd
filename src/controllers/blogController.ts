@@ -1,6 +1,11 @@
 import { Request, Response } from 'express';
 import BlogModel, { IBlog } from '../models/Blog.ts';
 import subscriberService from '../services/subscriberService.ts';
+import response from '../helpers/response.ts';
+import cloudinary from '../helpers/cloudinary.ts';
+import SubscriberModel from '../models/Subscriber.ts';
+import { Types } from 'mongoose';
+import { CustomeRequest } from '../middlewares/auth.ts';
 
 /**
  * Controller class responsible for handling blog-related requests.
@@ -14,11 +19,33 @@ class BlogController {
      */
     public async createBlog(req: Request, res: Response): Promise<void> {
         try {
-            const blogData: Partial<IBlog> = req.body;
-            const {title} = req.body;
+            let imageURL: string | undefined;
+            if (req.file !== undefined) {
+                const file = req.file.path;
+                const link = await cloudinary.uploader.upload(file);
+                imageURL = link.secure_url;
+              }
+
+            const { title, content } = req.body;
+            const blogExists = await BlogModel.getBlogByTitle(title);
+            if (blogExists) {
+                response(res, 409, "Blog already exists", null, "BLOG_EXISTS");
+                return;
+            }
+            const tags = Array.isArray(req.query.tags) ? req.query.tags.map(String) : [String(req.query.tags)];
+            const category = Array.isArray(req.query.category) ? req.query.category.map(String) : [String(req.query.category)];
+            const authorId = (req as CustomeRequest).user?.id as string;
+            const blogData = {
+                title,
+                content,
+                imageUrl: imageURL,
+                tags: tags,
+                category: category, 
+                author: authorId,
+            }
 
             const newBlog = await BlogModel.createBlog(blogData);
-            
+
             /**
              * Notify subscribers about the  new updates
              */
@@ -87,9 +114,14 @@ class BlogController {
     public async deleteBlog(req: Request, res: Response): Promise<void> {
         try {
             const { id } = req.params;
+            const blogExists = await BlogModel.findBlogById(id);
+            if (!blogExists) {
+                response(res, 404, "Blog not found", null, "BLOG_NOT_FOUND");
+                return;
+            }
             const deletedBlog = await BlogModel.deleteBlog(id);
             if (!deletedBlog) {
-                res.status(404).send('Blog not found');
+                res.status(404).send('Blog is not deleted yet');
                 return;
             }
             res.json(deletedBlog);
@@ -128,6 +160,46 @@ class BlogController {
             res.status(500).json({ message: 'Internal server error' });
         }
     }
+
+    public async likeBlog(req: CustomeRequest, res: Response): Promise<void> {
+        try {
+          const { blogId } = req.params;
+          const blogObjectId = new Types.ObjectId(blogId);
+          const userId = req.user?.id as string;
+          const user = await SubscriberModel.findSubscriberById(userId);
+        if (!user) {
+            response(res, 404, "You need to Subscriber to Like this blog", null, "USER_NOT_FOUND");
+            return;
+        }
+        if ((user.likedBlogs ?? []).includes(blogObjectId.toString())) {
+            response(
+                res,
+                400,
+                "You have already liked this blog",
+                null,
+                "ALREADY_LIKED"
+            );
+            return;
+        }
+        const likedBlog = await BlogModel.incrementLikes(blogId);
+            if (!likedBlog) {
+                response(res, 404, "Blog not found", null, "NOT_FOUND");
+                return;
+            }
+            user.likedBlogs = user.likedBlogs ?? [];
+            user.likedBlogs.push(blogObjectId.toString()); 
+            await user.save();
+            response(res, 200, "Blog liked successfully", likedBlog);
+        } catch (error) {
+          response(
+            res,
+            500,
+            (error as Error).message || "Internal Server Error",
+            null,
+            "SERVER_ERROR"
+          );
+        }
+      }
 }
 
 export default new BlogController();

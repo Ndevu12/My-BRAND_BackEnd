@@ -9,6 +9,7 @@ export interface ISubscriber extends Document {
     location: string;
     preference: string;
     subscribe_at: Date;
+    likedBlogs?: string[];
 }
 
 /**
@@ -40,6 +41,13 @@ class SubscriberModel {
                 type: Date,
                 default: Date.now,
             },
+
+            likedBlogs: {
+                type: Schema.Types.ObjectId, 
+                ref: "blog", 
+                required: true,
+                default: [],
+            }
         });
         this.model = mongoose.model<ISubscriber>('Subscriber', SubscriberSchema);
     }

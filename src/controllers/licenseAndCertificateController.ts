@@ -2,7 +2,7 @@
  * Controller for handling License and Certificate-related operations.
  */
 import { Request, Response } from 'express';
-import LicenseCertificateModel, { ILicenseAndCertificate } from '../models/lisenceAndCertificate';
+import LicenseCertificateModel, { ILicenseAndCertificate } from '../models/lisenceAndCertificate.ts';
 
 class LicenseCertificateController {
         /**

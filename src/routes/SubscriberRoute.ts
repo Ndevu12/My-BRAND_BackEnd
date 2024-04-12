@@ -1,16 +1,17 @@
 // const necessary modules
 import express from 'express';
 import SubscriberController from '../controllers/subscriberController.js';
+import { isAdmin } from '../middlewares/auth.ts';
 
 // Create a router instance
 const router = express.Router();
 
 // Define routes
-router.post('/Subscriber/:id/createSubscriber', SubscriberController.createSubscriber);
-router.put('/Subscriber/:id/updateSubscriber', SubscriberController.updateSubscriber);
-router.get('/Subscriber/:id/getSubscriberById', SubscriberController.getSubscriberById);
-router.get('/Subscriber/:id/getAllSubscribers', SubscriberController.getAllSubscribers);
-router.delete('/Subscriber/:id/deleteSubscriber', SubscriberController.deleteSubscriber);
+router.post('/create', isAdmin, SubscriberController.createSubscriber);
+router.put('/update/:id', isAdmin, SubscriberController.updateSubscriber);
+router.get('/:id', isAdmin, SubscriberController.getSubscriberById);
+router.get('/All', isAdmin, SubscriberController.getAllSubscribers);
+router.delete('/delete/:id', isAdmin, SubscriberController.deleteSubscriber);
 
 // hijokl
 // Export the router
