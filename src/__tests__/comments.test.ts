@@ -1,6 +1,8 @@
 import supertest from "supertest";
 import { app } from "../app";
-import CommentModel from "../models/comments.ts";
+import { commentModel } from "../models/comments.ts";
+
+const CommentModel = new commentModel();
 
 export const request = supertest(app);
 

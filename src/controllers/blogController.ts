@@ -1,16 +1,18 @@
 import { Request, Response } from 'express';
-import BlogModel, { IBlog } from '../models/Blog.ts';
-import subscriberService from '../services/subscriberService.ts';
+import { BlogModel, IBlog } from '../models/Blog.ts';
+import { subscriberService } from '../services/subscriberService.ts';
 import response from '../helpers/response.ts';
 import cloudinary from '../helpers/cloudinary.ts';
-import SubscriberModel from '../models/Subscriber.ts';
+import { subscriberModel} from '../models/Subscriber.ts';
 import { Types } from 'mongoose';
 import { CustomeRequest } from '../middlewares/auth.ts';
 
+const SubscriberModel = new subscriberModel();
+const SubscriberService =  new subscriberService();
 /**
  * Controller class responsible for handling blog-related requests.
  */
-class BlogController {
+class blogController {
 
         /**
      * Creates a new blog post.
@@ -49,7 +51,7 @@ class BlogController {
             /**
              * Notify subscribers about the  new updates
              */
-            await subscriberService.notifyAllSubscribersAboutUpdates(title, "New blog is available now on NdevuSpace.com");
+            await SubscriberService.notifyAllSubscribersAboutUpdates(title, "New blog is available now on NdevuSpace.com");
             res.status(201).json(newBlog);
         } catch (error) {
             console.error('Error creating blog:', error);
@@ -97,7 +99,7 @@ class BlogController {
             /**
              * Notify subscribers about the  new updates
              */
-            await subscriberService.notifyAllSubscribersAboutUpdates(title, "Blog has been updated");
+            await SubscriberService.notifyAllSubscribersAboutUpdates(title, "Blog has been updated");
             res.json(updatedBlog);
 
         } catch (error) {
@@ -202,4 +204,4 @@ class BlogController {
       }
 }
 
-export default new BlogController();
+export { blogController };

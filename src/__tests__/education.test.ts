@@ -1,7 +1,8 @@
 import supertest from "supertest";
 import { app } from "../app";
-import EducationModel from "../models/education.ts";
+import {educationModel} from "../models/education.ts";
 
+const EducationModel = new educationModel();
 export const request = supertest(app);
 
 const user = {

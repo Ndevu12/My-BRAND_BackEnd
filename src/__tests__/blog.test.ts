@@ -1,6 +1,8 @@
 import supertest from "supertest";
 import { app } from "../app";
-import BlogModel  from "../models/Blog.ts";
+import { BlogModel }  from "../models/Blog.ts";
+
+// const blogModel = new BlogModel();
 
 export const request = supertest(app);
 

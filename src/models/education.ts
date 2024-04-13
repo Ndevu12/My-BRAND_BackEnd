@@ -18,7 +18,7 @@ export interface IEducation extends Document {
 /**
  * Class representing the education model.
  */
-class EducationModel {
+class educationModel {
     private readonly model: mongoose.Model<IEducation>;
 
     constructor() {
@@ -95,4 +95,4 @@ class EducationModel {
     }
 }
 
-export default new EducationModel();
+export {educationModel};

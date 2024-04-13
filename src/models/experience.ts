@@ -21,7 +21,7 @@ export interface IExperience extends Document {
 /**
  * Class representing the Experience model.
  */
-class ExperienceModel {
+class experienceModel {
     private readonly model: mongoose.Model<IExperience>;
 
     constructor() {
@@ -109,4 +109,4 @@ class ExperienceModel {
     }
 }
 
-export default new ExperienceModel();
+export { experienceModel };

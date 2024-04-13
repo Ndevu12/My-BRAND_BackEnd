@@ -19,7 +19,7 @@ export interface ILicenseAndCertificate extends Document {
 /**
  * Class representing the LicenseAndCertificate model.
  */
-class LicenseAndCertificateModel {
+class licenseAndCertificateModel {
     readonly model: mongoose.Model<ILicenseAndCertificate>;
 
     constructor(){
@@ -100,4 +100,4 @@ class LicenseAndCertificateModel {
    }
 }
 
-export default new LicenseAndCertificateModel();
+export { licenseAndCertificateModel };

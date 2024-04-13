@@ -2,9 +2,10 @@
  * Controller for handling Internship-related operations.
  */
 import { Request, Response } from 'express';
-import InternshipModel, { IInternship } from '../models/Internship';
+import {internshipModel,  IInternship } from '../models/internship.ts';
 
-class InternshipController {
+const InternshipModel =  new internshipModel();
+class internshipController {
     /**
      * Method to create a new internship entry.
      * @param req Request object containing internship data.
@@ -98,4 +99,4 @@ class InternshipController {
     }
 }
 
-export default new InternshipController();
+export { internshipController };

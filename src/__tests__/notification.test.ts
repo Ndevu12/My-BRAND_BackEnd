@@ -1,7 +1,9 @@
 
 import supertest from "supertest";
 import { app } from "../app";
-import  notificationModel from "../models/notification.ts";
+import  {notificationModel } from "../models/notification.ts";
+
+const NotificationModel = new notificationModel();
 
 export const request = supertest(app);
 
@@ -19,7 +21,7 @@ let userId: string;
 let LicenseID: string;
 
 beforeAll(async () => {
-  await  notificationModel.deletemany();
+  await  NotificationModel.deletemany();
 });
 
 // Test signup feature/functionality
@@ -65,7 +67,7 @@ describe("GET /api/notification/:LicenseID", () => {
             title: 'Software Engineering rty8u9i09o--pghjnk and web Dev',
             description: 'Software Engineering and soft',
         };
-        await  notificationModel.createNotification(notificationModeldata);
+        await  NotificationModel.createNotification(notificationModeldata);
         const res = await request.get(`/api/notification/${LicenseID}`);
         expect(res.statusCode).toBe(200);
         expect(res.body.message).toBe(" notificationModel retrieved successfully");

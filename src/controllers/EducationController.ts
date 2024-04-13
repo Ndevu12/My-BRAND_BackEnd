@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
-import EducationModel, { IEducation } from '../models/education.ts';
+import {educationModel,  IEducation } from '../models/education.ts';
 
-class EducationController {
+const EducationModel = new educationModel();
+class educationController {
     /**
      * Method to fetch all education records.
      * @param req Request object.
@@ -95,4 +96,4 @@ class EducationController {
     }
 }
 
-export default new EducationController();
+export {educationController};

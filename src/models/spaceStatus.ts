@@ -17,7 +17,7 @@ export interface ISpaceStatus extends Document {
     totalSubscription: number;
 }
 
-class SpaceStatusModel{
+class spaceStatusModel{
     private readonly model: mongoose.Model<ISpaceStatus>;
 
     constructor(){
@@ -88,4 +88,4 @@ public deleteSpaceStatus(id: string): Promise<ISpaceStatus | null> {
 }
 
 // Create and export Space Status model
-export default new  SpaceStatusModel();
+export { spaceStatusModel };

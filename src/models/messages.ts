@@ -18,7 +18,7 @@ export interface IMessage extends Document {
 /**
  * Class representing the Message model.
  */
-class MessageModel {
+class messageModel {
     private readonly model: mongoose.Model<IMessage>;
 
     constructor() {
@@ -91,4 +91,4 @@ class MessageModel {
     }
 }
 
-export default new MessageModel();
+export { messageModel};

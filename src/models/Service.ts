@@ -20,7 +20,7 @@ export interface IService extends Document {
 /**
  * Class representing the Service model.
  */
-class ServiceModel {
+class serviceModel {
     private readonly model: mongoose.Model<IService>;
 
     constructor() {
@@ -105,4 +105,4 @@ class ServiceModel {
     }
 }
 
-export default new ServiceModel();
+export { serviceModel };

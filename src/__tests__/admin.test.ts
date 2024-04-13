@@ -2,7 +2,7 @@ import supertest from "supertest";
 import { app} from "../app.ts";
 import { AdminModel } from "../models/adminModel.ts";
 
-const User = new AdminModel();
+
 export const request = supertest(app);
 
 const user = {
@@ -20,7 +20,7 @@ const loginUser = {
 };
 
 beforeAll(async () => {
-  await User.deleteMany();
+  await AdminModel.deleteMany();
 });
 
 describe("POST /api/user/signup", () => {

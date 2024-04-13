@@ -23,7 +23,7 @@ export interface IInternship extends Document {
  * Class representing the Internship model.
  */
 
-class InternshipModel {
+class internshipModel {
     private readonly model: mongoose.Model<IInternship>;
 
     constructor(){
@@ -106,4 +106,4 @@ class InternshipModel {
    
 }
 
-export default new InternshipModel();
+export {internshipModel};

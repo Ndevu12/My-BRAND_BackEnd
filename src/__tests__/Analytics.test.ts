@@ -1,6 +1,8 @@
 import supertest from "supertest";
 import { app } from "../app";
-import Analytics from "../models/Analytics.ts";
+import  { Analytics } from "../models/Analytics.ts";
+
+const analytics = new Analytics();
 
 export const request = supertest(app);
 
@@ -28,7 +30,7 @@ let userId: string;
 let AnalyticsID: string;
 
 beforeAll(async () => {
-  await Analytics.deletemany();
+  await analytics.deletemany();
 });
 
 // Test signup feature/functionality
@@ -85,7 +87,7 @@ describe("GET /api/Analytics/:AnalyticsID", () => {
             spaceStatus: 'active',
             dateRange: '7 days',
         };
-        await Analytics.createAnalytics(newAnalyticsdata);
+        await analytics.createAnalytics(newAnalyticsdata);
         const res = await request.get(`/api/Analytics/${AnalyticsID}`);
         expect(res.statusCode).toBe(200);
         expect(res.body.message).toBe("Analytics retrieved successfully");

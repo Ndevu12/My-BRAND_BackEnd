@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, Model } from 'mongoose';
 
 /**
  * Interface representing the structure of an admin document.
@@ -47,7 +47,10 @@ adminSchema.statics.deletemany = function (): Promise<void | any> {
     return this.deleteMany().exec();
 };
 
-//export the Admin model
-const AdminModel = mongoose.model<IAdmin>('Admin', adminSchema);
+interface IAdminModel extends Model<IAdmin> {
+    deletemany(): Promise<void | any>;
+}
 
-export { AdminModel };
+const AdminModel: IAdminModel = mongoose.model<IAdmin, IAdminModel>('Admin', adminSchema);
+
+export { AdminModel, IAdminModel };

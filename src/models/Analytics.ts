@@ -93,4 +93,4 @@ public deleteAnalytics(id: string): Promise<IAnalytics | null> {
 }
 
 // Create and export Analytics model
-export default new Analytics();
+export { Analytics };

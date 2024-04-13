@@ -1,8 +1,9 @@
 
 import supertest from "supertest";
 import { app } from "../app";
-import InternshipModel from "../models/Internship.ts";
+import{ internshipModel} from "../models/internship.ts";
 
+const  InternshipModel = new internshipModel();
 export const request = supertest(app);
 
 const user = {

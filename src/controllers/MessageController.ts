@@ -2,9 +2,10 @@
  * Controller for handling Message-related operations.
  */
 import { Request, Response } from 'express';
-import MessageModel, { IMessage } from '../models/messages.ts';
+import { messageModel,  IMessage } from '../models/messages.ts';
 
-class MessageController {
+const MessageModel = new messageModel();
+class messageController {
     /**
      * Method to create a new message.
      * @param req Request object containing message data.
@@ -98,4 +99,4 @@ class MessageController {
     }
 }
 
-export default new MessageController();
+export { messageController};

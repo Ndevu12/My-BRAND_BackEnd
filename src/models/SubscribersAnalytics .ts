@@ -17,7 +17,7 @@ export interface ISubscribersAnalytics extends Document {
 /**
  * Mongoose schema for the Subscribers Analytics collection.
  */
-const subscribersAnalyticsSchema = new Schema<ISubscribersAnalytics>({
+const SubscribersAnalyticsSchema = new Schema<ISubscribersAnalytics>({
     dateRange: {
         type: String,
         required: true,
@@ -37,5 +37,5 @@ const subscribersAnalyticsSchema = new Schema<ISubscribersAnalytics>({
 });
 
 // Create and export Subscribers Analytics model
-const SubscribersAnalytics = mongoose.model<ISubscribersAnalytics>('SubscribersAnalytics', subscribersAnalyticsSchema);
-export default SubscribersAnalytics;
+const SubscribersAnalytics = mongoose.model<ISubscribersAnalytics>('SubscribersAnalytics', SubscribersAnalyticsSchema);
+export { SubscribersAnalytics };

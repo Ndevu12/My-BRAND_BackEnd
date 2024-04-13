@@ -14,7 +14,7 @@ export interface IVisitorsAnalytics extends Document {
 /**
  * Class representing the Visitors Analytics model.
  */
-class VisitorAnalyticsModel {
+class visitorAnalyticsModel {
     private readonly model: mongoose.Model<IVisitorsAnalytics>;
 
     constructor() {
@@ -90,4 +90,4 @@ class VisitorAnalyticsModel {
 }
 
 // Create and export Visitors Analytics model
-export default new VisitorAnalyticsModel();
+export { visitorAnalyticsModel };

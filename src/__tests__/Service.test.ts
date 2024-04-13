@@ -1,7 +1,9 @@
 
 import supertest from "supertest";
 import { app } from "../app";
-import  ServiceModel from "../models/Service.ts";
+import  {serviceModel} from "../models/Service.ts";
+
+const ServiceModel = new serviceModel();
 
 export const request = supertest(app);
 

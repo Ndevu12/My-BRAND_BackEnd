@@ -1,5 +1,6 @@
-import blogCategory from '../models/blogCategories';
+import { BlogCategory } from '../models/blogCategories';
 
+const blogCategory = new BlogCategory();
 // Function to seed categories into the database
 const seedCategories = async () => {
     try {

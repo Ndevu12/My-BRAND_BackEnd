@@ -1,18 +1,17 @@
 // const necessary modules
-import express from 'express';
-import InternshipController from '../controllers/InternshipController.js';
+import { Router} from 'express';
+import { internshipController } from '../controllers/InternshipController.ts';
 import { isAdmin } from '../middlewares/auth.ts';
 
+const InternshipController = new internshipController();
 // Create a router instance
-const router = express.Router();
+const internshipRoutes: Router = Router();
 
 // Define routes
-router.patch('/create', isAdmin, InternshipController.createInternship);
-router.patch('/update/:id', isAdmin, InternshipController.updateInternship);
-router.get('/:id', InternshipController.getInternshipById)
-router.get('/All', InternshipController.getAllInternships);;
-router.delete('/delete/:id', isAdmin, InternshipController.deleteInternship);
+internshipRoutes.patch('/create', isAdmin, InternshipController.createInternship);
+internshipRoutes.patch('/update/:id', isAdmin, InternshipController.updateInternship);
+internshipRoutes.get('/:id', InternshipController.getInternshipById)
+internshipRoutes.get('/All', InternshipController.getAllInternships);;
+internshipRoutes.delete('/delete/:id', isAdmin, InternshipController.deleteInternship);
 
-// hijokl
-// Export the router
-export default router;
+export {internshipRoutes};

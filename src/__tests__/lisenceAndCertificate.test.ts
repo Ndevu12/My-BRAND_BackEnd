@@ -1,8 +1,9 @@
 
 import supertest from "supertest";
 import { app } from "../app";
-import  LicenseModel from "../models/lisenceAndCertificate.ts";
+import { licenseAndCertificateModel } from "../models/lisenceAndCertificate.ts";
 
+const LicenseModel = new licenseAndCertificateModel();
 export const request = supertest(app);
 
 const user = {

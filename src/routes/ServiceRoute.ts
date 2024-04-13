@@ -1,18 +1,19 @@
 // Import necessary modules
 import { Router } from 'express';
-import ServiceController from '../controllers/ServiceController.js';
+import { serviceController } from '../controllers/ServiceController.ts';
 import { isAdmin } from '../middlewares/auth.ts';
 
+const ServiceController = new serviceController();
 // Create a router instance
-const router = Router();
+const serviceRoutes: Router = Router();
 
 // Define routes
-router.patch('/create', isAdmin, ServiceController.createService);
-router.patch('/update/:id', isAdmin, ServiceController.updateService);
-router.get('/:id', ServiceController.getServiceById);
-router.get('/All', ServiceController.getAllServices);
-router.delete('/delete/:id', isAdmin, ServiceController.deleteService);
+serviceRoutes.patch('/create', isAdmin, ServiceController.createService);
+serviceRoutes.patch('/update/:id', isAdmin, ServiceController.updateService);
+serviceRoutes.get('/:id', ServiceController.getServiceById);
+serviceRoutes.get('/All', ServiceController.getAllServices);
+serviceRoutes.delete('/delete/:id', isAdmin, ServiceController.deleteService);
 
 // hijokl
 // Export the router
-export default router;
+export { serviceRoutes };

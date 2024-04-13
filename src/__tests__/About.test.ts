@@ -1,10 +1,10 @@
 import supertest from "supertest";
 import { app} from "../app.ts";
-import {AboutModel} from "../models/About.ts";
+import {aboutModel} from "../models/About.ts";
 
 export const request = supertest(app);
 
-const aboutModel = new AboutModel();
+const AboutModel = new aboutModel();
 
 const user = {
     fullname: "Test User",
@@ -26,7 +26,7 @@ const loginabout = {
 };
 
 beforeAll(async () => {
-  await aboutModel.deleteAllabouts();
+  await AboutModel.deleteAllabouts();
 });
 // Test signup feature/functionality
 describe("POST /api/about", () => {
@@ -87,7 +87,7 @@ describe("POST /api/about", () => {
         internship: [],
         licenseAndCertificate: [],
       };
-      await aboutModel.createAbout(newaboutdata);
+      await AboutModel.createAbout(newaboutdata);
       const res = await request.get(`/api/about/${aboutID}`);
       expect(res.statusCode).toBe(200);
       expect(res.body.message).toBe("AboutModel retrieved successfully");
