@@ -7,11 +7,11 @@ import { isAdmin } from '../middlewares/auth.ts';
 const router = express.Router();
 
 // Define routes
-router.patch('/Category/create', isAdmin, BlogCategoryController.createBlogCategory);
-router.get('/Category/:id/', BlogCategoryController.getBlogCategoryById);
-router.patch('/Category/update/:id', isAdmin, BlogCategoryController.updateBlogCategory);
-router.delete('/Category/delete/:id',isAdmin, BlogCategoryController.deleteBlogCategory);
-router.get('/Category/All', BlogCategoryController.getAllBlogCategories);
+router.patch('/create', isAdmin, BlogCategoryController.createBlogCategory);
+router.get('/:id/', BlogCategoryController.getBlogCategoryById);
+router.patch('/update/:id', isAdmin, BlogCategoryController.updateBlogCategory);
+router.delete('/delete/:id',isAdmin, BlogCategoryController.deleteBlogCategory);
+router.get('/All', BlogCategoryController.getAllBlogCategories);
 
 // hijokl
 // Export the router

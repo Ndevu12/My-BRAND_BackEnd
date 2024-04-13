@@ -12,7 +12,7 @@ export interface IEducation extends Document {
     school: string;
     startDate: Date;
     compilationDate: Date;
-    certificate: string;
+    certificate: any;
 }
 
 /**
@@ -40,8 +40,9 @@ class EducationModel {
                 required: true,
             },
             certificate: {
-                type: String,
-                required: true,
+                type: Schema.Types.ObjectId,
+                default: [],
+                required: false,
             },
         });
 
@@ -88,7 +89,10 @@ class EducationModel {
     public getAllEducation(): Promise<IEducation[]> {
         return this.model.find().exec();
     }
-    
+
+    public deletemany(): Promise<IEducation | any> {
+        return this.model.deleteMany().exec();
+    }
 }
 
 export default new EducationModel();

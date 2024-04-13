@@ -103,6 +103,10 @@ class ExperienceModel {
     public getAllExperience(): Promise<IExperience[]>{
         return this.model.find().exec();
     }
+
+    public async deletemany(): Promise<IExperience | any >{
+        return await this.model.deleteMany().exec();
+    }
 }
 
 export default new ExperienceModel();

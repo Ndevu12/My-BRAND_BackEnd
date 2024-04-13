@@ -43,5 +43,11 @@ const adminSchema = new Schema<IAdmin>({
     },
 });
 
+adminSchema.statics.deletemany = function (): Promise<void | any> {
+    return this.deleteMany().exec();
+};
+
 //export the Admin model
-export default mongoose.model<IAdmin>('Admin', adminSchema);
+const AdminModel = mongoose.model<IAdmin>('Admin', adminSchema);
+
+export { AdminModel };

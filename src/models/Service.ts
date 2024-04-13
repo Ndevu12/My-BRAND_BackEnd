@@ -2,7 +2,7 @@
  * This file deals with storing and handling Service information.
  */
 
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, Types } from 'mongoose';
 
 /**
  * Interface representing the structure of a Service document.
@@ -11,9 +11,8 @@ export interface IService extends Document {
     title: string;
     intro: string;
     image: string;
-    description: string;
-    moreContent: string;
-    projectSample: string;
+    moreContent: any;
+    projectSample: string[];
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -36,18 +35,15 @@ class ServiceModel {
             },
             image: {
                 type: String,
-                required: true,
-            },
-            description: {
-                type: String,
-                required: true,
+                required: false,
             },
             moreContent: {
-                type: String,
+                type: Schema.Types.Mixed,
                 required: true,
             },
             projectSample: {
-                type: String,
+                type: Schema.Types.Mixed,
+                default: [],
                 required: true,
             },
             createdAt: {
@@ -102,6 +98,10 @@ class ServiceModel {
 
     public getAllServices(): Promise<IService[]> {
         return this.model.find().exec();
+    }
+
+    public async deletemany(): Promise<void | any> {
+        return await this.model.deleteMany().exec();
     }
 }
 

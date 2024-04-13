@@ -8,7 +8,6 @@ import mongoose, { Schema, Document } from 'mongoose';
  * Interface representing the structure of a Notification document.
  */
 export interface INotification extends Document {
-    notificationId: string;
     title: string;
     description: string;
     sendAt: Date;
@@ -22,10 +21,6 @@ class NotificationModel {
 
     constructor() {
         const notificationSchema = new Schema<INotification>({
-            notificationId: {
-                type: String,
-                required: true,
-            },
             title: {
                 type: String,
                 required: true,
@@ -36,6 +31,7 @@ class NotificationModel {
             },
             sendAt: {
                 type: Date,
+                default: Date.now(),
                 required: true,
             },
         });
@@ -82,6 +78,10 @@ class NotificationModel {
 
     public getAllNotifications(): Promise<INotification[]> {
         return this.model.find().exec();
+    }
+
+    public async deletemany(): Promise<void | any>{
+        return await this.model.deleteMany().exec();
     }
 }
 

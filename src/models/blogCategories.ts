@@ -4,7 +4,7 @@ import mongoose, { Document, Schema } from 'mongoose';
  * Interface representing the structure of a category document.
  */
 export interface ICategory extends Document {
-    name: string; // The name of the category
+    name: string; 
 }
 
 class blogCategory {
@@ -30,8 +30,8 @@ class blogCategory {
      * @param data Partial Category data to create.
      * @returns Promise resolving to the created Category document.
      */
-    public createBlogCategory(data: Partial<ICategory>): Promise<ICategory> {
-        return this.model.create(data);
+    public async createBlogCategory(data: Partial<ICategory>): Promise<ICategory> {
+        return await this.model.create(data);
     }
 
     /**
@@ -39,8 +39,8 @@ class blogCategory {
      * @param id Category ID.
      * @returns Promise resolving to the found Category document, or null if not found.
      */
-    public findBlogCategoryById(id: string): Promise<ICategory | null> {
-        return this.model.findById(id).exec();
+    public async findBlogCategoryById(id: string): Promise<ICategory | null> {
+        return await this.model.findById(id).exec();
     }
 
     /**
@@ -49,8 +49,8 @@ class blogCategory {
      * @param data Partial Category data to update.
      * @returns Promise resolving to the updated Category document, or null if not found.
      */
-    public updateBlogCategory(id: string, data: Partial<ICategory>): Promise<ICategory | null> {
-        return this.model.findByIdAndUpdate(id, data, { new: true }).exec();
+    public async updateBlogCategory(id: string, data: Partial<ICategory>): Promise<ICategory | null> {
+        return await this.model.findByIdAndUpdate(id, data, { new: true }).exec();
     }
 
     /**
@@ -58,14 +58,17 @@ class blogCategory {
      * @param id Category ID to delete.
      * @returns Promise resolving to the deleted Category document, or null if not found.
      */
-    public deleteBlogCategory(id: string): Promise<ICategory | null> {
-        return this.model.findByIdAndDelete(id).exec();
+    public async deleteBlogCategory(id: string): Promise<ICategory | null> {
+        return await this.model.findByIdAndDelete(id).exec();
     }
 
-    public getAllBlogCategories(): Promise<ICategory[]>{
-        return this.model.find().exec();
+    public async getAllBlogCategories(): Promise<ICategory[]>{
+        return await this.model.find().exec();
     }
 
+    public async deletemany(): Promise<ICategory | any>{
+        return await this.model.deleteMany().exec();
+    }
 }
 /**
  * Category Model.

@@ -15,7 +15,7 @@ export interface IInternship extends Document {
     company: string;
     duration: string;
     compilationDate: Date;
-    certificate: string;
+    certificate: any;
 }
 
 
@@ -50,7 +50,8 @@ class InternshipModel {
                 required: true,
             },
             certificate: {
-                type: String,
+                type: Schema.Types.ObjectId,
+                default: [],
                 required: true,
             },
         });
@@ -63,8 +64,8 @@ class InternshipModel {
      * @param data Partial Internship data to create.
      * @returns Promise resolving to the created Internship document.
      */
-    public createInternship(data: Partial<IInternship>): Promise<IInternship>{
-        return this.model.create(data);
+    public async createInternship(data: Partial<IInternship>): Promise<IInternship | any>{
+        return await this.model.create(data);
     }
 
     /**
@@ -72,8 +73,8 @@ class InternshipModel {
      * @param id Internship ID.
      * @returns Promise resolving to the found Internship document, or null if not found.
      */
-    public findInternshipById(id: string): Promise<IInternship | null>{
-        return this.model.findById(id).exec();
+    public async  findInternshipById(id: string): Promise<IInternship | null>{
+        return await this.model.findById(id).exec();
     }
 
      /**
@@ -82,8 +83,8 @@ class InternshipModel {
      * @param data Partial Internship data to update.
      * @returns Promise resolving to the updated Internship document, or null if not found.
      */
-    public updateInternship(id: string, data: Partial<IInternship>): Promise<IInternship | null>{
-        return this.model.findByIdAndUpdate(id, data, {new: true}).exec();
+    public async  updateInternship(id: string, data: Partial<IInternship>): Promise<IInternship | null>{
+        return  await this.model.findByIdAndUpdate(id, data, {new: true}).exec();
     }
 
       /**
@@ -91,14 +92,17 @@ class InternshipModel {
      * @param id Internship ID to delete.
      * @returns Promise resolving to the deleted Internship document, or null if not found.
      */
-    public deleteInternship(id: string): Promise<IInternship | null>{
-        return this.model.findByIdAndDelete(id).exec();
+    public async deleteInternship(id: string): Promise<IInternship | null>{
+        return await this.model.findByIdAndDelete(id).exec();
     }
 
-    public getAllInternships(): Promise<IInternship[]>{
-        return this.model.find().exec();
+    public async getAllInternships(): Promise<IInternship[]>{
+        return await this.model.find().exec();
     }
 
+    public async deletemany(): Promise<IInternship | any >{
+        return await this.model.deleteMany().exec();
+    }
    
 }
 

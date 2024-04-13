@@ -33,6 +33,7 @@ class MessageModel {
             },
             sendAt: {
                 type: Date,
+                default: Date.now(),
                 required: true,
             },
             notifyMe: {

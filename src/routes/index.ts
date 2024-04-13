@@ -1,6 +1,7 @@
 
 import express from 'express';
 import aboutRoutes from './aboutRoutes.ts';
+import AnalyticsRoutes from './AnalyticsRoute.ts';
 import authorRoutes from './AuthorRoute.ts';
 import blogRoutes from './BlogRouter.ts';
 import blogCategoryRoutes from './blogCategoryRoute.ts';
@@ -23,9 +24,10 @@ import adminRoutes from './adminRoutes.ts';
 const route = express.Router();
 
 route.use('/about', aboutRoutes);
+route.use('/analytics', AnalyticsRoutes);
 route.use('/author', authorRoutes);
 route.use('/blog', blogRoutes);
-route.use('/blogcategory', blogCategoryRoutes);
+route.use('/blog/category', blogCategoryRoutes);
 route.use('/comment', commentRoutes);
 route.use('/education', educationRoutes);
 route.use('/experience', experienceRoutes);
