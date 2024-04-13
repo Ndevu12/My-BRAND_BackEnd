@@ -7,7 +7,7 @@ export interface ICategory extends Document {
     name: string; 
 }
 
-class blogCategory {
+class BlogCategory {
     private readonly model: mongoose.Model<ICategory>;
 
     constructor(){
@@ -76,4 +76,4 @@ class blogCategory {
  */
 
 
-export default new blogCategory();
+export { BlogCategory };

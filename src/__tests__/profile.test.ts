@@ -1,7 +1,9 @@
 
 import supertest from "supertest";
 import { app } from "../app";
-import  ProfileModel from "../models/profile.ts";
+import  {profileModel} from "../models/profile.ts";
+
+const ProfileModel = new profileModel();
 
 export const request = supertest(app);
 

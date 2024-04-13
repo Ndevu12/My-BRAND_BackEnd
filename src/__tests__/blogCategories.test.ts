@@ -1,6 +1,8 @@
 import supertest from "supertest";
 import { app } from "../app";
-import blogCategory from "../models/blogCategories.ts";
+import { BlogCategory } from "../models/blogCategories.ts";
+
+const blogCategory = new BlogCategory();
 
 export const request = supertest(app);
 

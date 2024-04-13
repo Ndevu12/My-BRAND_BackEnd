@@ -1,8 +1,10 @@
 import { Request, Response } from 'express';
-import subscriberService from '../services/subscriberService.ts';
-import SubscriberModel, { ISubscriber } from '../models/Subscriber.ts';
+import {subscriberService} from '../services/subscriberService.ts';
+import { subscriberModel,  ISubscriber } from '../models/Subscriber.ts';
 
-class SubscriberController {
+const SubscriberModel = new subscriberModel();
+const SubscriberService =  new subscriberService();
+class subscriberController {
     /**
      * Method to create a new subscriber.
      * @param req Request object containing subscriber data.
@@ -27,7 +29,7 @@ class SubscriberController {
            /**
              * Notify subscribers
              */
-            await subscriberService.notifySubscriberOnSubscription(email); 
+            await SubscriberService.notifySubscriberOnSubscription(email); 
             res.status(201).json(newSubscriber); 
 
         } catch (error) {
@@ -113,4 +115,4 @@ class SubscriberController {
     }
 }
 
-export default new SubscriberController();
+export { subscriberController };

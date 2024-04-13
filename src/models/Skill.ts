@@ -18,7 +18,7 @@ export interface ISkill extends Document {
 /**
  * Class representing the Skill model.
  */
-class SkillModel {
+class skillModel {
     private readonly model: mongoose.Model<ISkill>;
 
     constructor() {
@@ -90,4 +90,4 @@ class SkillModel {
     }
 }
 
-export default new SkillModel();
+export { skillModel };

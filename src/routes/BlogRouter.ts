@@ -1,21 +1,22 @@
 // const necessary modules
 import { Router } from 'express';
-import BlogController from '../controllers/blogController.js';
+import { blogController } from '../controllers/blogController.ts';
 import { isAdmin } from '../middlewares/auth.ts';
 
-// Create a router instance
-const router = Router();
+const BlogController = new blogController();
 
-// Define routes
-router.patch('/create', isAdmin, BlogController.createBlog);
-router.patch('/update/:id', isAdmin, BlogController.updateBlog);
-router.delete('/delete/:id', isAdmin, BlogController.deleteBlog);
-router.get('/:id', BlogController.getBlogById);
-router.get('/category', BlogController.getBlogsByCategory);
-router.get('/All', BlogController.getAllBlogs);
-router.get('/like/:id', BlogController.likeBlog);
+
+const blogRoutes: Router = Router();
+
+blogRoutes.patch('/create', isAdmin, BlogController.createBlog);
+blogRoutes.patch('/update/:id', isAdmin, BlogController.updateBlog);
+blogRoutes.delete('/delete/:id', isAdmin, BlogController.deleteBlog);
+blogRoutes.get('/:id', BlogController.getBlogById);
+blogRoutes.get('/category', BlogController.getBlogsByCategory);
+blogRoutes.get('/All', BlogController.getAllBlogs);
+blogRoutes.get('/like/:id', BlogController.likeBlog);
 
 
 // hijokl
 // Export the router
-export default router;
+export { blogRoutes };

@@ -2,9 +2,10 @@
  * Controller for handling Comment-related operations.
  */
 import { Request, Response } from 'express';
-import CommentModel, { IComment } from '../models/comments.js';
+import {commentModel,  IComment } from '../models/comments.js';
 
-class CommentController {
+const CommentModel = new commentModel();
+class commentController {
     /**
      * Method to create a new comment.
      * @param req Request object containing comment data.
@@ -119,4 +120,4 @@ class CommentController {
     }
 }
 
-export default new CommentController();
+export {commentController};

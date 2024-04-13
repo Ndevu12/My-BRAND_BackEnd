@@ -4,7 +4,7 @@ import { isAdmin } from '../middlewares/auth.ts';
 
 const aboutRouter: Router = express.Router();
 const aboutController = new AboutController();
-// Route to create a new about
+
 aboutRouter.patch('/create', isAdmin, aboutController.createAbouting);
 
 // Route to get all about entries
@@ -19,4 +19,4 @@ aboutRouter.patch('/update/:id', isAdmin, aboutController.updateAbout);
 // Route to delete an existing about entry
 aboutRouter.delete('/delete/:id', isAdmin, aboutController.deleteAbout);
 
-export default aboutRouter;
+export {aboutRouter};

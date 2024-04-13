@@ -1,7 +1,9 @@
 
 import supertest from "supertest";
 import { app } from "../app";
-import  SubscriberModel from "../models/Subscriber.ts";
+import  {subscriberModel} from "../models/Subscriber.ts";
+
+const SubscriberModel = new subscriberModel();
 
 export const request = supertest(app);
 

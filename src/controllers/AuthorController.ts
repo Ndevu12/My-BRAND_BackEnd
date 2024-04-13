@@ -2,9 +2,10 @@
  * Controller for handling Author-related operations.
  */
 import { Request, Response } from 'express';
-import AuthorModel, { IAuthor } from '../models/author';
+import { authorModel,  IAuthor } from '../models/author';
 
-class AuthorController {
+const AuthorModel = new authorModel();
+class authorController {
     /**
      * Method to create a new author.
      * @param req Request object containing author data.
@@ -98,4 +99,4 @@ class AuthorController {
     }
 }
 
-export default new AuthorController();
+export { authorController };

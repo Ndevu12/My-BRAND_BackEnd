@@ -147,4 +147,4 @@ public static async createBlog(data: Partial<IBlog>): Promise<IBlog | string> {
       }
 }
 
-export default BlogModel;
+export { BlogModel };

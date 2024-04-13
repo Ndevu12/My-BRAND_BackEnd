@@ -17,7 +17,7 @@ export interface IComment extends Document {
 /**
  * Class representing the Comment model.
  */
-class CommentModel {
+class commentModel {
     private readonly model: mongoose.Model<IComment>;
 
     constructor() {
@@ -79,4 +79,4 @@ class CommentModel {
 
 }
 
-export default new CommentModel();
+export { commentModel };

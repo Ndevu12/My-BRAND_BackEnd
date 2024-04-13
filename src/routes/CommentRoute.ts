@@ -1,17 +1,17 @@
 // const necessary modules
-import express from 'express';
-import CommentController from '../controllers/CommentController.js';
+import { Router } from 'express';
+import {commentController} from '../controllers/CommentController.ts';
 
-// Create a router instance
-const router = express.Router();
+const CommentController = new commentController();
+const  commentRoutes: Router = Router();
 
 // Define routes
-router.patch('/add', CommentController.createComment);
-router.patch('/update/:id', CommentController.updateComment);
-router.get('/:id', CommentController.getCommentById);
-router.get('/All', CommentController.getAllComments);
-router.delete('/delete/:id', CommentController.deleteComment);
+ commentRoutes.patch('/add', CommentController.createComment);
+ commentRoutes.patch('/update/:id', CommentController.updateComment);
+ commentRoutes.get('/:id', CommentController.getCommentById);
+ commentRoutes.get('/All', CommentController.getAllComments);
+ commentRoutes.delete('/delete/:id', CommentController.deleteComment);
 
 // hijokl
 // Export the router
-export default router;
+export { commentRoutes};

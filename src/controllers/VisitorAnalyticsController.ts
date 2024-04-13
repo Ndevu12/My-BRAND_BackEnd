@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
-import VisitorAnalyticsModel, { IVisitorsAnalytics } from '../models/vistorsAnalytics.ts';
+import { visitorAnalyticsModel,  IVisitorsAnalytics } from '../models/vistorsAnalytics.ts';
 
-class VisitorAnalyticsController {
+const VisitorAnalyticsModel = new visitorAnalyticsModel();
+class visitorAnalyticsController {
     /**
      * Method to fetch all visitor analytics data.
      * @param req Request object.
@@ -120,4 +121,4 @@ class VisitorAnalyticsController {
     }
 }
 
-export default new VisitorAnalyticsController();
+export { visitorAnalyticsController };

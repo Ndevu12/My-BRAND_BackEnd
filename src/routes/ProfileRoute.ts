@@ -1,18 +1,19 @@
 // const necessary modules
 import { Router } from 'express';
-import ProfileController from '../controllers/ProfileController.js';
+import { profileController } from '../controllers/ProfileController.ts';
 import { isAdmin } from '../middlewares/auth.ts';
 
-// Create a router instance
-const router = Router();
+const ProfileController = new profileController();
 
-// Define routes
-router.post('/create', isAdmin, ProfileController.createProfile);
-router.put('/update/:id', isAdmin, ProfileController.updateProfile);
-router.get('/:id', ProfileController.getProfileById);
-router.get('/All', ProfileController.getAllProfiles);
-router.delete('/delete/:id', isAdmin, ProfileController.deleteProfile);
+const profileRoutes: Router = Router();
+
+
+profileRoutes.post('/create', isAdmin, ProfileController.createProfile);
+profileRoutes.put('/update/:id', isAdmin, ProfileController.updateProfile);
+profileRoutes.get('/:id', ProfileController.getProfileById);
+profileRoutes.get('/All', ProfileController.getAllProfiles);
+profileRoutes.delete('/delete/:id', isAdmin, ProfileController.deleteProfile);
 
 
 // Export the router
-export default router;
+export { profileRoutes };

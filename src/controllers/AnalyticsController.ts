@@ -2,8 +2,9 @@
  * Controller for handling Analytics-related operations.
  */
 import { Request, Response } from 'express';
-import Analytics, { IAnalytics } from '../models/Analytics.ts';
+import { Analytics,  IAnalytics } from '../models/Analytics.ts';
 
+const analytics = new Analytics();
 class AnalyticsController {
     /**
      * Method to create a new analytics model.
@@ -13,7 +14,7 @@ class AnalyticsController {
     public async createAnalytics(req: Request, res: Response): Promise<void> {
         try {
             const AnalyticsData: Partial<IAnalytics> = req.body;
-            const newAnalytics = await Analytics.createAnalytics(AnalyticsData);
+            const newAnalytics = await analytics.createAnalytics(AnalyticsData);
             res.status(201).json(newAnalytics);
         } catch (error) {
             console.error('Error creating analytics model:', error);
@@ -28,7 +29,7 @@ class AnalyticsController {
      */
     public async getAllAnalyticss(req: Request, res: Response): Promise<void> {
         try {
-            const Analyticss = await Analytics.getAllAnalyticss();
+            const Analyticss = await analytics.getAllAnalyticss();
             res.status(200).json(Analyticss);
         } catch (error) {
             console.error('Error fetching analytics models:', error);
@@ -44,7 +45,7 @@ class AnalyticsController {
     public async getAnalyticsById(req: Request, res: Response): Promise<void> {
         try {
             const { id } = req.params;
-            const newAnalytics = await Analytics.findAnalyticsById(id);
+            const newAnalytics = await analytics.findAnalyticsById(id);
             if (newAnalytics) {
                 res.status(200).json(newAnalytics);
             } else {
@@ -65,7 +66,7 @@ class AnalyticsController {
         try {
             const { id } = req.params;
             const updatedAnalyticsData = req.body;
-            const updatedAnalytics = await Analytics.updateAnalytics(id, updatedAnalyticsData);
+            const updatedAnalytics = await analytics.updateAnalytics(id, updatedAnalyticsData);
             if (updatedAnalytics) {
                 res.status(200).json(updatedAnalytics);
             } else {
@@ -85,7 +86,7 @@ class AnalyticsController {
     public async deleteAnalytics(req: Request, res: Response): Promise<void> {
         try {
             const { id } = req.params;
-            const deletedAnalytics = await Analytics.deleteAnalytics(id);
+            const deletedAnalytics = await analytics.deleteAnalytics(id);
             if (deletedAnalytics) {
                 res.status(200).json({ message: 'Analytics model deleted successfully' });
             } else {
@@ -98,4 +99,4 @@ class AnalyticsController {
     }
 }
 
-export default new AnalyticsController();
+export { AnalyticsController };

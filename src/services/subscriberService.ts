@@ -1,10 +1,11 @@
 // subscriberServices.ts
 
 import { sendNotificationByEmail } from '../utils/notificationUtility.ts'; // Import the Notification Utility
-import SubscriberModel from '../models/Subscriber.ts';
+import { subscriberModel } from '../models/Subscriber.ts';
 
+const SubscriberModel = new subscriberModel();
 // Service to handle subscriber operations
-class SubscriberServices {
+class subscriberService {
     public async notifySubscriberOnSubscription(subscriberEmail: string): Promise<void> {
         try {
             const message = 'You have subscribed NdevuSpace.com successfully! Thank you for subscribing.'; 
@@ -28,4 +29,4 @@ class SubscriberServices {
     }
 }
 
-export default new SubscriberServices();
+export { subscriberService };

@@ -16,7 +16,7 @@ export interface INotification extends Document {
 /**
  * Class representing the Notification model.
  */
-class NotificationModel {
+class notificationModel {
     private readonly model: mongoose.Model<INotification>;
 
     constructor() {
@@ -85,4 +85,4 @@ class NotificationModel {
     }
 }
 
-export default new NotificationModel();
+export{ notificationModel };

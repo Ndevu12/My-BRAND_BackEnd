@@ -1,17 +1,17 @@
 // Import necessary modules
-import express from 'express';
-import ProjectController from '../controllers/ProjectController.js';
+import { Router} from 'express';
+import { projectController } from '../controllers/ProjectController.ts';
 import { isAdmin } from '../middlewares/auth.ts';
 
-// Create a router instance
-const router = express.Router();
+const ProjectController= new projectController();
+const projectRoutes: Router = Router();
 
 // Define routes
-router.post('/create', isAdmin, ProjectController.createProject);
-router.put('/update/:id', isAdmin, ProjectController.updateProject);
-router.get('/:id', ProjectController.getProjectById);
-router.get('/All', ProjectController.getAllProjects);
-router.delete('/delete/:id', isAdmin, ProjectController.deleteProject);
+projectRoutes.post('/create', isAdmin, ProjectController.createProject);
+projectRoutes.put('/update/:id', isAdmin, ProjectController.updateProject);
+projectRoutes.get('/:id', ProjectController.getProjectById);
+projectRoutes.get('/All', ProjectController.getAllProjects);
+projectRoutes.delete('/delete/:id', isAdmin, ProjectController.deleteProject);
 // hijokl
 // Export the router
-export default router;
+export {projectRoutes};

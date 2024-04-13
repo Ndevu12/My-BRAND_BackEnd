@@ -1,6 +1,8 @@
 import supertest from "supertest";
 import { app } from "../app";
-import ExperienceModel from "../models/experience.ts";
+import {experienceModel} from "../models/experience.ts";
+
+const ExperienceModel = new experienceModel();
 
 export const request = supertest(app);
 

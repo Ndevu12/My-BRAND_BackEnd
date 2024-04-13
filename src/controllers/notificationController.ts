@@ -2,9 +2,10 @@
  * Controller for handling Notification-related operations.
  */
 import { Request, Response } from 'express';
-import NotificationModel, { INotification } from '../models/notification.ts';
+import { notificationModel,  INotification } from '../models/notification.ts';
 
-class NotificationController {
+const NotificationModel = new notificationModel();
+class notificationController {
     /**
      * Method to create a new notification.
      * @param req Request object containing notification data.
@@ -98,4 +99,4 @@ class NotificationController {
     }
 }
 
-export default new NotificationController();
+export { notificationController };

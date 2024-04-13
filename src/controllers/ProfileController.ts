@@ -2,9 +2,10 @@
  * Controller for handling Profile-related operations.
  */
 import { Request, Response } from 'express';
-import ProfileModel, { IProfile } from '../models/profile.ts';
+import {profileModel,  IProfile } from '../models/profile.ts';
 
-class ProfileController {
+const ProfileModel = new profileModel();
+class profileController {
     /**
      * Method to create a new profile.
      * @param req Request object containing profile data.
@@ -98,4 +99,4 @@ class ProfileController {
     }
 }
 
-export default new ProfileController();
+export { profileController };

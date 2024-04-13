@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import AdminModel, { IAdmin } from '../models/adminModel.ts';
+import {AdminModel,  IAdmin } from '../models/adminModel.ts';
 import jwt from 'jsonwebtoken';
 import { sendAuthorizationCodeByEmailAndPhone } from '../utils/authorizationUtils.ts';
 

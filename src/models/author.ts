@@ -16,7 +16,7 @@ export interface IAuthor extends Document {
 /**
  * Class representing the Author model.
  */
-class AuthorModel {
+class authorModel {
     private readonly model: mongoose.Model<IAuthor>;
 
     constructor() {
@@ -78,4 +78,4 @@ class AuthorModel {
    
 }
 
-export default new AuthorModel();
+export { authorModel};

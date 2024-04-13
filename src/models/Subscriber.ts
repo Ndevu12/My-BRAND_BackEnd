@@ -15,7 +15,7 @@ export interface ISubscriber extends Document {
 /**
  *  Define the Subscriber schema using a class
  */
-class SubscriberModel {
+class subscriberModel {
     private readonly model: mongoose.Model<ISubscriber>;
 
     constructor() {
@@ -110,4 +110,4 @@ class SubscriberModel {
 // Create the Subscriber model
 // const SubscriberModel = mongoose.model<ISubscriber>('Subscriber', new SubscriberSchema());
 
-export default new SubscriberModel();
+export { subscriberModel};

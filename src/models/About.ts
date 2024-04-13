@@ -22,7 +22,7 @@ export interface IAbout extends Document {
 /**
  * Class representing the About model.
  */
-class AboutModel {
+class aboutModel {
     private readonly model: mongoose.Model<IAbout>;
 
     constructor() {
@@ -116,4 +116,4 @@ class AboutModel {
     }
 }
 
-export { AboutModel };
+export { aboutModel };

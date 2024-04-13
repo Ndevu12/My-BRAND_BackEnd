@@ -21,7 +21,7 @@ export interface IProfile extends Document {
 /**
  * Class representing the Profile model.
  */
-class ProfileModel {
+class profileModel {
     private readonly model: mongoose.Model<IProfile>;
 
     constructor() {
@@ -109,4 +109,4 @@ class ProfileModel {
     }
 }
 
-export default new ProfileModel();
+export { profileModel };

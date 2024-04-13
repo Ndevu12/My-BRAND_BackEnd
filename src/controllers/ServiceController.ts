@@ -2,9 +2,10 @@
  * Controller for handling Service-related operations.
  */
 import { Request, Response } from 'express';
-import ServiceModel, { IService } from '../models/Service.ts';
+import { serviceModel,  IService } from '../models/Service.ts';
 
-class ServiceController {
+const ServiceModel = new serviceModel();
+class serviceController {
     /**
      * Method to create a new service.
      * @param req Request object containing service data.
@@ -98,4 +99,4 @@ class ServiceController {
     }
 }
 
-export default new ServiceController();
+export { serviceController };

@@ -2,9 +2,10 @@
  * Controller for handling Space Status-related operations.
  */
 import { Request, Response } from 'express';
-import SpaceStatusModel, { ISpaceStatus } from '../models/spaceStatus.ts';
+import { spaceStatusModel,  ISpaceStatus } from '../models/spaceStatus.ts';
 
-class SpaceStatusController {
+const SpaceStatusModel = new spaceStatusModel();
+class spaceStatusController {
     /**
      * Method to create a new space status.
      * @param req Request object containing space status data.
@@ -98,4 +99,4 @@ class SpaceStatusController {
     }
 }
 
-export default new SpaceStatusController();
+export { spaceStatusController };

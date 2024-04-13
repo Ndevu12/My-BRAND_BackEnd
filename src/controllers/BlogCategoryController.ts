@@ -2,9 +2,10 @@
  * Controller for handling Blog Category-related operations.
  */
 import { Request, Response } from 'express';
-import blogCategory, { ICategory } from '../models/blogCategories';
+import { BlogCategory, ICategory } from '../models/blogCategories';
 
-class BlogCategoryController {
+const blogCategory = new BlogCategory();
+class blogCategoryController {
     /**
      * Method to create a new blog category.
      * @param req Request object containing blog category data.
@@ -98,4 +99,4 @@ class BlogCategoryController {
     }
 }
 
-export default new BlogCategoryController();
+export {blogCategoryController};

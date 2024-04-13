@@ -2,9 +2,10 @@
  * Controller for handling Experience-related operations.
  */
 import { Request, Response } from 'express';
-import ExperienceModel, { IExperience } from '../models/experience';
+import {experienceModel,  IExperience } from '../models/experience';
 
-class ExperienceController {
+const ExperienceModel = new experienceModel();
+class experienceController {
     /**
      * Method to create a new experience entry.
      * @param req Request object containing experience data.
@@ -98,4 +99,4 @@ class ExperienceController {
     }
 }
 
-export default new ExperienceController();
+export { experienceController };

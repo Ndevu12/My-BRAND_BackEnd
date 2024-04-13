@@ -2,8 +2,9 @@
  * Controller for handling Skill-related operations.
  */
 import { Request, Response } from 'express';
-import SkillModel, { ISkill } from '../models/Skill.ts';
+import { skillModel,  ISkill } from '../models/Skill.ts';
 
+const SkillModel = new skillModel();
 class SkillController {
     /**
      * Method to create a new skill.
@@ -121,4 +122,4 @@ class SkillController {
     }
 }
 
-export default new SkillController();
+export { SkillController };

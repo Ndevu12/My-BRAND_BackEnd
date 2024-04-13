@@ -1,18 +1,19 @@
 // const necessary modules
 import { Router } from 'express';
-import notificationController from '../controllers/notificationController.js';
+import {notificationController} from '../controllers/notificationController.ts';
 import { isAdmin } from '../middlewares/auth.ts';
 
-// Create a router instance
-const router = Router();
+const NotificationController = new notificationController();
+
+const  notificationRoutes: Router = Router();
 
 // Define routes
-router.patch('/create', notificationController.createNotification);
-router.patch('/update/:id', isAdmin, notificationController.updateNotification);
-router.get('/:id', isAdmin, notificationController.getNotificationById);
-router.get('/All', notificationController.getAllNotifications);
-router.delete('/delete/:id', isAdmin, notificationController.deleteNotification);
+ notificationRoutes.patch('/create', NotificationController.createNotification);
+ notificationRoutes.patch('/update/:id', isAdmin, NotificationController.updateNotification);
+ notificationRoutes.get('/:id', isAdmin, NotificationController.getNotificationById);
+ notificationRoutes.get('/All', NotificationController.getAllNotifications);
+ notificationRoutes.delete('/delete/:id', isAdmin, NotificationController.deleteNotification);
 
 
 // Export the router
-export default router;
+export  {notificationRoutes};

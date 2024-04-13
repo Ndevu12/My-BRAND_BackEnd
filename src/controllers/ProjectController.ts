@@ -2,9 +2,10 @@
  * Controller for handling Project-related operations.
  */
 import { Request, Response } from 'express';
-import ProjectModel, { IProject } from '../models/project.ts';
+import {projectModel,  IProject } from '../models/project.ts';
 
-class ProjectController {
+const ProjectModel = new projectModel();
+class projectController {
     /**
      * Method to create a new project.
      * @param req Request object containing project data.
@@ -98,4 +99,4 @@ class ProjectController {
     }
 }
 
-export default new ProjectController();
+export  { projectController };

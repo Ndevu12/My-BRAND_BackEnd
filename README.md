@@ -26,6 +26,12 @@ My-BRAND_BackEnd serves as the backend infrastructure for the My-BRAND project, 
 - ****Authentication/Authorization:****  JWT
 - ****Other Dependencies:**** nodemailer, cors, twililo .....
 new
+
+# Testing Technologies Used
+
+- ****unit testing:****  Jest
+- ****Integrate testing:**** Jest
+
 # License
  MIT License
 

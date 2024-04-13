@@ -20,7 +20,7 @@ export interface IProject extends Document {
 /**
  * Class representing the Project model.
  */
-class ProjectModel {
+class projectModel {
     private readonly model: mongoose.Model<IProject>;
 
     constructor() {
@@ -100,4 +100,4 @@ class ProjectModel {
     }
 }
 
-export default new ProjectModel();
+export { projectModel };
