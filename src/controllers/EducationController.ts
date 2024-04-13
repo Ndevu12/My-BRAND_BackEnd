@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import EducationModel, { IEducation } from '../models/Education';
+import EducationModel, { IEducation } from '../models/education.ts';
 
 class EducationController {
     /**

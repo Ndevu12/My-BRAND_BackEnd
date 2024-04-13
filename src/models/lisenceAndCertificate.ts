@@ -13,7 +13,7 @@ export interface ILicenseAndCertificate extends Document {
     school: string;
     duration: string;
     compilationDate: Date;
-    certificate: string;
+    certificate: any;
 }
 
 /**
@@ -93,6 +93,10 @@ class LicenseAndCertificateModel {
 
    public getAllLicenseAndCertificate(): Promise<ILicenseAndCertificate[]>{
     return this.model.find().exec();
+   }
+
+   public async deletemany(): Promise<void | any>{
+    return await this.model.deleteMany().exec();
    }
 }
 

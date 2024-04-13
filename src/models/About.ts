@@ -13,7 +13,7 @@ export interface IAbout extends Document {
     mission: string;
     educationIds: string[];
     experienceIds: string[];
-    internship: string;
+    internship: string[];
     licenseAndCertificate: string[];
     createdAt?: Date;
     updatedAt?: Date;
@@ -48,7 +48,8 @@ class AboutModel {
                 default: [],
             },
             internship: {
-                type: String,
+                type: [String],
+                default: [],
                 required: true,
             },
             licenseAndCertificate: {
@@ -108,6 +109,11 @@ class AboutModel {
     public getAllAbout(): Promise<IAbout[]> {
         return this.model.find().exec();
     }
+
+        // Method to delete all about document
+    public async deleteAllabouts(): Promise<any> {
+        return await this.model.deleteMany().exec();
+    }
 }
 
-export default new AboutModel();
+export { AboutModel };

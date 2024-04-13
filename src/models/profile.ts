@@ -28,7 +28,7 @@ class ProfileModel {
         const profileSchema = new Schema<IProfile>({
             profileImage: {
                 type: String,
-                required: true,
+                required: false,
             },
             name: {
                 type: String,
@@ -68,7 +68,7 @@ class ProfileModel {
      * @param data Partial Profile data to create.
      * @returns Promise resolving to the created Profile document.
      */
-    public createProfile(data: Partial<IProfile>): Promise<IProfile> {
+    public createProfile(data: Partial<IProfile>): Promise<IProfile | any> {
         return this.model.create(data);
     }
 
@@ -102,6 +102,10 @@ class ProfileModel {
 
     public getAllProfiles(): Promise<IProfile[]> {
         return this.model.find().exec();
+    }
+
+    public async deletemany(): Promise<void | any>{
+        return await this.model.deleteMany().exec();
     }
 }
 

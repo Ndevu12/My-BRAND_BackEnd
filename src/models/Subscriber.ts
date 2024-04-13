@@ -35,7 +35,7 @@ class SubscriberModel {
             },
             preference: {
                 type: String,
-                required: true,
+                required: false,
             },
             subscribe_at: {
                 type: Date,
@@ -43,7 +43,7 @@ class SubscriberModel {
             },
 
             likedBlogs: {
-                type: Schema.Types.ObjectId, 
+                type: [Schema.Types.ObjectId], 
                 ref: "blog", 
                 required: true,
                 default: [],
@@ -102,6 +102,9 @@ class SubscriberModel {
             return this.model.find().exec();
         }
 
+        public async deletemany(): Promise<void | any> {
+            return await this.model.deleteMany().exec();
+        }
 }
 
 // Create the Subscriber model

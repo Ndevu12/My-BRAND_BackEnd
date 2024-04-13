@@ -2,13 +2,13 @@
  * This file handles the Comments collection.
  */
 
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, Types } from 'mongoose';
 
 /**
  * Interface representing the structure of a comment document.
  */
 export interface IComment extends Document {
-    post_ID: string; 
+    post_ID: any; 
     commenterName: undefined;
     comment: string;
     createdAt?: Date;
@@ -23,7 +23,7 @@ class CommentModel {
     constructor() {
         const commentSchema = new Schema<IComment>({
             post_ID: {
-                type: String,
+                type: Schema.Types.ObjectId,
                 required: true,
             },
             commenterName: {
@@ -44,7 +44,8 @@ class CommentModel {
     }
 
     // Method to create a new comment
-    public async createComment(data: Partial<IComment>): Promise<IComment> {
+    public async createComment(data: Partial<IComment | any>): Promise<IComment> {
+        console.log('Comment created at `${createdAt}`');
         return await (await this.model.create(data)).save();
     }
 
@@ -71,6 +72,10 @@ class CommentModel {
     public getAllComments(): Promise<IComment[]> {
         return this.model.find().exec();
     }
+
+    public async deletemany(): Promise<any> {
+        return await this.model.deleteMany().exec();
+     }
 
 }
 

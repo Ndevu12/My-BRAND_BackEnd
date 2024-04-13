@@ -2,8 +2,9 @@
  * Controller for handling About-related operations.
  */
 import { Request, Response } from 'express';
-import AboutModel, { IAbout } from '../models/About.ts';
+import {AboutModel, IAbout } from '../models/About.ts';
 
+const aboutModel = new AboutModel();
 class AboutController {
     /**
      * Method to create a new about section.
@@ -13,7 +14,7 @@ class AboutController {
     public async createAbouting(req: Request, res: Response): Promise<void> {
         try {
             const aboutData: Partial<IAbout> = req.body;
-            const newAbout = await AboutModel.createAbout(aboutData);
+            const newAbout = await aboutModel.createAbout(aboutData);
             res.status(201).json(newAbout);
         } catch (error) {
             console.error('Error creating about section:', error);
@@ -28,7 +29,7 @@ class AboutController {
      */
     public async getAllAbout(req: Request, res: Response): Promise<void> {
         try {
-            const aboutSections = await AboutModel.getAllAbout();
+            const aboutSections = await aboutModel.getAllAbout();
             res.status(200).json(aboutSections);
         } catch (error) {
             console.error('Error fetching about sections:', error);
@@ -44,7 +45,7 @@ class AboutController {
     public async getAboutById(req: Request, res: Response): Promise<void> {
         try {
             const { id } = req.params;
-            const aboutSection = await AboutModel.findAboutById(id);
+            const aboutSection = await aboutModel.findAboutById(id);
             if (aboutSection) {
                 res.status(200).json(aboutSection);
             } else {
@@ -65,7 +66,7 @@ class AboutController {
         try {
             const { id } = req.params;
             const updatedAboutData = req.body;
-            const updatedAboutSection = await AboutModel.updateAbout(id, updatedAboutData);
+            const updatedAboutSection = await aboutModel.updateAbout(id, updatedAboutData);
             if (updatedAboutSection) {
                 res.status(200).json(updatedAboutSection);
             } else {
@@ -85,7 +86,7 @@ class AboutController {
     public async deleteAbout(req: Request, res: Response): Promise<void> {
         try {
             const { id } = req.params;
-            const deletedAboutSection = await AboutModel.deleteAbout(id);
+            const deletedAboutSection = await aboutModel.deleteAbout(id);
             if (deletedAboutSection) {
                 res.status(200).json({ message: 'About section deleted successfully' });
             } else {
@@ -98,4 +99,4 @@ class AboutController {
     }
 }
 
-export default new AboutController();
+export { AboutController};
