@@ -1,14 +1,14 @@
 import { Request, Response } from 'express';
-import { BlogModel, IBlog } from '../models/Blog.ts';
-import { subscriberService } from '../services/subscriberService.ts';
+import { IBlog } from '../models/Blog.ts';
+import BlogServices from '../services/blogService.ts';
+import subscriberUtils  from '../utils/subscriberUtilities.ts';
 import response from '../helpers/response.ts';
 import cloudinary from '../helpers/cloudinary.ts';
-import { subscriberModel} from '../models/Subscriber.ts';
+import SubscriberService from '../services/SubscriberService.ts';
 import { Types } from 'mongoose';
 import { CustomeRequest } from '../middlewares/auth.ts';
 
-const SubscriberModel = new subscriberModel();
-const SubscriberService =  new subscriberService();
+
 /**
  * Controller class responsible for handling blog-related requests.
  */
@@ -19,7 +19,7 @@ class blogController {
      * @param req The request object.
      * @param res The response object.
      */
-    public async createBlog(req: Request, res: Response): Promise<void> {
+    static async createBlog(req: Request, res: Response): Promise<void> {
         try {
             let imageURL: string | undefined;
             if (req.file !== undefined) {
@@ -29,7 +29,7 @@ class blogController {
               }
 
             const { title, content } = req.body;
-            const blogExists = await BlogModel.getBlogByTitle(title);
+            const blogExists = await BlogServices.getBlogByTitle(title);
             if (blogExists) {
                 response(res, 409, "Blog already exists", null, "BLOG_EXISTS");
                 return;
@@ -39,19 +39,20 @@ class blogController {
             const authorId = (req as CustomeRequest).user?.id as string;
             const blogData = {
                 title,
+                description: '', 
                 content,
-                imageUrl: imageURL,
+                imageURL: imageURL || '', 
                 tags: tags,
                 category: category, 
                 author: authorId,
             }
 
-            const newBlog = await BlogModel.createBlog(blogData);
+            const newBlog = await BlogServices.createBlog(blogData);
 
             /**
              * Notify subscribers about the  new updates
              */
-            await SubscriberService.notifyAllSubscribersAboutUpdates(title, "New blog is available now on NdevuSpace.com");
+            await subscriberUtils.notifyAllSubscribersAboutUpdates(title, "New blog is available now on NdevuSpace.com");
             res.status(201).json(newBlog);
         } catch (error) {
             console.error('Error creating blog:', error);
@@ -64,10 +65,10 @@ class blogController {
      * @param req The request object.
      * @param res The response object.
      */
-    public async getBlogById(req: Request, res: Response): Promise<void> {
+    static async getBlogById(req: Request, res: Response): Promise<void> {
         try {
             const { id } = req.params;
-            const blog = await BlogModel.findBlogById(id);
+            const blog = await BlogServices.findBlogById(id);
             if (!blog) {
                 res.status(404).send('Blog not found');
                 return;
@@ -84,12 +85,12 @@ class blogController {
      * @param req The request object.
      * @param res The response object.
      */
-    public async updateBlog(req: Request, res: Response): Promise<void> {
+    static async updateBlog(req: Request, res: Response): Promise<void> {
         try {
             const { id } = req.params;
             const {title} = req.body;
             const updatedBlogData: Partial<IBlog> = req.body;
-            const updatedBlog = await BlogModel.updateBlog(id, updatedBlogData);
+            const updatedBlog = await BlogServices.updateBlog(id, updatedBlogData);
             if (!updatedBlog) {
                 res.status(404).send('Blog not found');
                 return;
@@ -99,7 +100,7 @@ class blogController {
             /**
              * Notify subscribers about the  new updates
              */
-            await SubscriberService.notifyAllSubscribersAboutUpdates(title, "Blog has been updated");
+            await subscriberUtils.notifyAllSubscribersAboutUpdates(title, "Blog has been updated");
             res.json(updatedBlog);
 
         } catch (error) {
@@ -113,15 +114,15 @@ class blogController {
      * @param req The request object.
      * @param res The response object.
      */
-    public async deleteBlog(req: Request, res: Response): Promise<void> {
+    static async deleteBlog(req: Request, res: Response): Promise<void> {
         try {
             const { id } = req.params;
-            const blogExists = await BlogModel.findBlogById(id);
+            const blogExists = await BlogServices.findBlogById(id);
             if (!blogExists) {
                 response(res, 404, "Blog not found", null, "BLOG_NOT_FOUND");
                 return;
             }
-            const deletedBlog = await BlogModel.deleteBlog(id);
+            const deletedBlog = await BlogServices.deleteBlog(id);
             if (!deletedBlog) {
                 res.status(404).send('Blog is not deleted yet');
                 return;
@@ -139,10 +140,10 @@ class blogController {
      * @returns Promise resolving to an array of blog documents matching the category.
      */
 
-    public async getBlogsByCategory(req: Request, res: Response): Promise<void> {
+    static async getBlogsByCategory(req: Request, res: Response): Promise<void> {
         try {
             const { category } = req.params;
-            const blogs = await BlogModel.findBlogsByCategory(category);
+            const blogs = await BlogServices.findBlogsByCategory(category);
             res.json(blogs);
         } catch (error) {
             console.error('Error fetching blogs by category:', error);
@@ -154,21 +155,21 @@ class blogController {
      * Method to find all blog documents.
      * @returns Promise resolving to an array of all blog documents.
      */
-    public async getAllBlogs(req: Request, res: Response): Promise<void> {
+    static async getAllBlogs(req: Request, res: Response): Promise<void> {
         try {
-            const blogs = await BlogModel.findAllBlogs(); // Call the findAllBlogs method
+            const blogs = await BlogServices.findAllBlogs(); // Call the findAllBlogs method
             res.status(200).json(blogs);
         } catch (error) {
             res.status(500).json({ message: 'Internal server error' });
         }
     }
 
-    public async likeBlog(req: CustomeRequest, res: Response): Promise<void> {
+    static async likeBlog(req: CustomeRequest, res: Response): Promise<void> {
         try {
           const { blogId } = req.params;
           const blogObjectId = new Types.ObjectId(blogId);
           const userId = req.user?.id as string;
-          const user = await SubscriberModel.findSubscriberById(userId);
+          const user = await SubscriberService.findSubscriberById(userId);
         if (!user) {
             response(res, 404, "You need to Subscriber to Like this blog", null, "USER_NOT_FOUND");
             return;
@@ -183,7 +184,7 @@ class blogController {
             );
             return;
         }
-        const likedBlog = await BlogModel.incrementLikes(blogId);
+        const likedBlog = await BlogServices.incrementLikes(blogId);
             if (!likedBlog) {
                 response(res, 404, "Blog not found", null, "NOT_FOUND");
                 return;
@@ -204,4 +205,4 @@ class blogController {
       }
 }
 
-export { blogController };
+export default blogController;

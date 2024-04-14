@@ -20,7 +20,7 @@ app.use('/api', Route);
 connectDb();
 
 // Start the server
-const PORT: number = Number(process.env.PORT) || 7080;
+const PORT: number = Number(process.env.PORT) || 6080;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

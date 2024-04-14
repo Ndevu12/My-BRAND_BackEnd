@@ -1,9 +1,8 @@
 // const necessary modules
 import { Router} from 'express';
-import { subscriberController } from '../controllers/subscriberController.js';
+import SubscriberController  from '../controllers/subscriberController.ts';
 import { isAdmin } from '../middlewares/auth.ts';
 
-const SubscriberController = new subscriberController();
 const subscriberRoutes: Router = Router();
 
 subscriberRoutes.post('/create', isAdmin, SubscriberController.createSubscriber);
@@ -12,4 +11,4 @@ subscriberRoutes.get('/:id', isAdmin, SubscriberController.getSubscriberById);
 subscriberRoutes.get('/All', isAdmin, SubscriberController.getAllSubscribers);
 subscriberRoutes.delete('/delete/:id', isAdmin, SubscriberController.deleteSubscriber);
 
-export { subscriberRoutes };
+export default subscriberRoutes;

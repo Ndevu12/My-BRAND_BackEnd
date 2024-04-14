@@ -1,8 +1,7 @@
 // const necessary modules
 import { Router } from 'express';
-import {commentController} from '../controllers/CommentController.ts';
+import CommentController from '../controllers/CommentController.ts';
 
-const CommentController = new commentController();
 const  commentRoutes: Router = Router();
 
 // Define routes
@@ -14,4 +13,4 @@ const  commentRoutes: Router = Router();
 
 // hijokl
 // Export the router
-export { commentRoutes};
+export default commentRoutes;

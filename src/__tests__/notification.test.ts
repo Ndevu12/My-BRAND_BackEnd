@@ -1,9 +1,9 @@
 
 import supertest from "supertest";
 import { app } from "../app";
-import  {notificationModel } from "../models/notification.ts";
+import  NotificationService  from "../services/notificationService.ts";
 
-const NotificationModel = new notificationModel();
+
 
 export const request = supertest(app);
 
@@ -21,8 +21,8 @@ let userId: string;
 let LicenseID: string;
 
 beforeAll(async () => {
-  await  NotificationModel.deletemany();
-});
+  await  NotificationService.deletemany();
+},  100000);
 
 // Test signup feature/functionality
 describe("POST /api/notification", () => {
@@ -35,7 +35,7 @@ describe("POST /api/notification", () => {
         expect(res.body.data).toBeDefined();
     });
 
-    test("create a new  notificationModel post", async () => {
+    test("create a new  NotificationService post", async () => {
         const res = await request
             .post("/api/notification/create")
             .set("Authorization", `Bearer ${token}`)
@@ -44,7 +44,7 @@ describe("POST /api/notification", () => {
                 description: 'Software Engineering',
             });
         expect(res.statusCode).toBe(201);
-        expect(res.body.message).toBe(" notificationModel created");
+        expect(res.body.message).toBe(" NotificationService created");
         expect(res.body.data).toBeDefined();
         LicenseID = res.body.data._id;
     });
@@ -57,26 +57,26 @@ describe("POST /api/notification", () => {
                 description: 'Software Engineering',
             });
         expect(res.statusCode).toBe(409);
-        expect(res.body.message).toBe(" notificationModel already exists");
+        expect(res.body.message).toBe(" NotificationService already exists");
     });
 });
 
 describe("GET /api/notification/:LicenseID", () => {
     test("should retrieve a single notification ", async () => {
-        const notificationModeldata = {
+        const NotificationServicedata = {
             title: 'Software Engineering rty8u9i09o--pghjnk and web Dev',
             description: 'Software Engineering and soft',
         };
-        await  NotificationModel.createNotification(notificationModeldata);
+        await  NotificationService.createNotification(NotificationServicedata);
         const res = await request.get(`/api/notification/${LicenseID}`);
         expect(res.statusCode).toBe(200);
-        expect(res.body.message).toBe(" notificationModel retrieved successfully");
+        expect(res.body.message).toBe(" NotificationService retrieved successfully");
         expect(res.body.data).toBeDefined();
     });
-    test("should return  notificationModel not found , notificationModel id doesn't exist", async () => {
+    test("should return  NotificationService not found , NotificationService id doesn't exist", async () => {
         const res = await request.get(`/api/notification/65f3134a494934b10177c062`);
         expect(res.statusCode).toBe(404);
-        expect(res.body.message).toBe(" notificationModel not found");
+        expect(res.body.message).toBe(" NotificationService not found");
     });
 });
 
@@ -84,12 +84,12 @@ describe("GET /api/notification/all", () => {
   test("should retrieve all license Categorys", async () => {
     const res = await request.get("/api/notification/all");
     expect(res.statusCode).toBe(200);
-    expect(res.body.message).toBe("All  notificationModels retrieved!");
+    expect(res.body.message).toBe("All  NotificationServices retrieved!");
     expect(res.body.data).toBeDefined();
   });
 });
 describe("PATCH /api/notification/update/:LicenseID", () => {
-  test("should update the  notificationModel", async () => {
+  test("should update the  NotificationService", async () => {
     const res = await request
       .patch(`/api/notification/update/${LicenseID}`)
       .set("Authorization", `Bearer ${token}`)
@@ -98,10 +98,10 @@ describe("PATCH /api/notification/update/:LicenseID", () => {
         description: 'Software Engineering and soft....',
       });
     expect(res.statusCode).toBe(200);
-    expect(res.body.message).toBe(" notificationModel updated successfully");
+    expect(res.body.message).toBe(" NotificationService updated successfully");
     expect(res.body.data).toBeDefined();
   });
-  test("should not update a non-existing  notificationModel", async () => {
+  test("should not update a non-existing  NotificationService", async () => {
     const res = await request
       .patch(`/api/notification/update/65f3134a494934b10177c062`)
       .set("Authorization", `Bearer ${token}`)
@@ -116,19 +116,19 @@ describe("PATCH /api/notification/update/:LicenseID", () => {
 });
 
 describe("DELETE /api/notification/delete/:LicenseID", () => {
-  test("should delete to a  notificationModel", async () => {
+  test("should delete to a  NotificationService", async () => {
     const res = await request
       .delete(`/api/notification/delete/${LicenseID}`)
       .set("Authorization", `Bearer ${token}`);
     expect(res.statusCode).toBe(200);
-    expect(res.body.message).toBe(" notificationModel deleted successfully");
+    expect(res.body.message).toBe(" NotificationService deleted successfully");
     expect(res.body.data).toBeDefined();
   });
-  test("should not delete a non-existing  notificationModel", async () => {
+  test("should not delete a non-existing  NotificationService", async () => {
     const res = await request
       .delete(`/api/notification/delete/${LicenseID}`)
       .set("Authorization", `Bearer ${token}`);
     expect(res.statusCode).toBe(404);
-    expect(res.body.message).toBe(" notificationModel not found");
+    expect(res.body.message).toBe(" NotificationService not found");
   });
 });

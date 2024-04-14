@@ -15,15 +15,13 @@ export interface IComment extends Document {
 }
 
 /**
- * Class representing the Comment model.
+ * schema representing the Comment model.
  */
-class commentModel {
-    private readonly model: mongoose.Model<IComment>;
 
-    constructor() {
         const commentSchema = new Schema<IComment>({
             post_ID: {
-                type: Schema.Types.ObjectId,
+                type: [Schema.Types.ObjectId],
+                ref: "Blog",
                 required: true,
             },
             commenterName: {
@@ -40,43 +38,7 @@ class commentModel {
             },
         });
 
-        this.model = mongoose.model<IComment>('Comment', commentSchema);
-    }
-
-    // Method to create a new comment
-    public async createComment(data: Partial<IComment | any>): Promise<IComment> {
-        console.log('Comment created at `${createdAt}`');
-        return await (await this.model.create(data)).save();
-    }
-
-    // Method to find a comment by ID
-    public findCommentById(id: string): Promise<IComment | null> {
-        return this.model.findById(id).exec();
-    }
-
-    public findCommentByPostID(id: string): Promise<IComment | null> {
-        return this.model.findById(id).exec();
-    }
+      const  Comment = mongoose.model<IComment>('Comment', commentSchema);
 
 
-    // Method to update a comment
-    public updateComment(id: string, data: Partial<IComment>): Promise<IComment | null> {
-        return this.model.findByIdAndUpdate(id, data, { new: true }).exec();
-    }
-
-    // Method to delete a comment by ID
-    public deleteComment(id: string): Promise<IComment | null> {
-        return this.model.findByIdAndDelete(id).exec();
-    }
-
-    public getAllComments(): Promise<IComment[]> {
-        return this.model.find().exec();
-    }
-
-    public async deletemany(): Promise<any> {
-        return await this.model.deleteMany().exec();
-     }
-
-}
-
-export { commentModel };
+export {  Comment };

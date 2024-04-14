@@ -1,22 +1,21 @@
 import { Request, Response } from 'express';
-import {subscriberService} from '../services/subscriberService.ts';
-import { subscriberModel,  ISubscriber } from '../models/Subscriber.ts';
+import subscriberUtils from '../utils/subscriberUtilities.ts';
+import {  ISubscriber } from '../models/Subscriber.ts';
+import SubscriberService from '../services/SubscriberService.ts';
 
-const SubscriberModel = new subscriberModel();
-const SubscriberService =  new subscriberService();
 class subscriberController {
     /**
      * Method to create a new subscriber.
      * @param req Request object containing subscriber data.
      * @param res Response object to send the result.
      */
-    public async createSubscriber(req: Request, res: Response): Promise<void> {
+    static async createSubscriber(req: Request, res: Response): Promise<void> {
         try {
-            const subscriberData: Partial<ISubscriber> = req.body;
+            const subscriberData: ISubscriber = req.body;
             const { email } = req.body;
 
                 // Check if subscriber with the same email already exists
-            const existingSubscriber = await SubscriberModel.findSubscriberByEmail({ email });
+            const existingSubscriber = await SubscriberService.findSubscriberByEmail(subscriberData);
             if (existingSubscriber) {
                 res.status(400).json({ message: 'Subscriber with this email already exists' });
                 console.error('Error fetching subscribers: /already subscribed');
@@ -24,12 +23,12 @@ class subscriberController {
             }
 
 
-            const newSubscriber = await SubscriberModel.createSubscriber(subscriberData);
+            const newSubscriber = await SubscriberService.createSubscriber(subscriberData);
             
            /**
              * Notify subscribers
              */
-            await SubscriberService.notifySubscriberOnSubscription(email); 
+            await subscriberUtils.notifySubscriberOnSubscription(email); 
             res.status(201).json(newSubscriber); 
 
         } catch (error) {
@@ -43,9 +42,9 @@ class subscriberController {
      * @param req Request object.
      * @param res Response object to send the subscribers.
      */
-    public async getAllSubscribers(req: Request, res: Response): Promise<void> {
+    static async getAllSubscribers(req: Request, res: Response): Promise<void> {
         try {
-            const subscribers = await SubscriberModel.getAllSubscribers();
+            const subscribers = await SubscriberService.getAllSubscribers();
             res.status(200).json(subscribers);
         } catch (error) {
             console.error('Error fetching subscribers:', error);
@@ -58,10 +57,10 @@ class subscriberController {
      * @param req Request object containing the subscriber ID.
      * @param res Response object to send the subscriber.
      */
-    public async getSubscriberById(req: Request, res: Response): Promise<void> {
+    static async getSubscriberById(req: Request, res: Response): Promise<void> {
         try {
             const { id } = req.params;
-            const subscriber = await SubscriberModel.findSubscriberById(id);
+            const subscriber = await SubscriberService.findSubscriberById(id);
             if (subscriber) {
                 res.status(200).json(subscriber);
             } else {
@@ -78,11 +77,11 @@ class subscriberController {
      * @param req Request object containing the subscriber ID and updated data.
      * @param res Response object to send the updated subscriber.
      */
-    public async updateSubscriber(req: Request, res: Response): Promise<void> {
+    static async updateSubscriber(req: Request, res: Response): Promise<void> {
         try {
             const { id } = req.params;
             const updatedSubscriberData = req.body;
-            const updatedSubscriber = await SubscriberModel.updateSubscriber(id, updatedSubscriberData);
+            const updatedSubscriber = await SubscriberService.updateSubscriber(id, updatedSubscriberData);
             if (updatedSubscriber) {
                 res.status(200).json(updatedSubscriber);
             } else {
@@ -99,10 +98,10 @@ class subscriberController {
      * @param req Request object containing the subscriber ID.
      * @param res Response object to send the result.
      */
-    public async deleteSubscriber(req: Request, res: Response): Promise<void> {
+    static async deleteSubscriber(req: Request, res: Response): Promise<void> {
         try {
             const { id } = req.params;
-            const deletedSubscriber = await SubscriberModel.deleteSubscriber(id);
+            const deletedSubscriber = await SubscriberService.deleteSubscriber(id);
             if (deletedSubscriber) {
                 res.status(200).send('Subscriber deleted successfully');
             } else {
@@ -115,4 +114,4 @@ class subscriberController {
     }
 }
 
-export { subscriberController };
+export default subscriberController;

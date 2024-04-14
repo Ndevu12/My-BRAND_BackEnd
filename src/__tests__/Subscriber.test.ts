@@ -1,9 +1,9 @@
 
 import supertest from "supertest";
 import { app } from "../app";
-import  {subscriberModel} from "../models/Subscriber.ts";
+import  SubscriberService from "../services/SubscriberService.ts";
+import { Subscriber } from "../models/Subscriber.ts";
 
-const SubscriberModel = new subscriberModel();
 
 export const request = supertest(app);
 
@@ -22,20 +22,17 @@ let BlogID3= '32';
 let BlogID4= '43';
 let BlogID5= '54';
 
-let MostShared = [BlogID1, BlogID2, BlogID3, BlogID4, BlogID5];
 let MostLiked = [BlogID1, BlogID2, BlogID3, BlogID4];
-let MostViewed = [BlogID1, BlogID2, BlogID3];
 
-let project1 = 432;
-let project2 = 87;
 
 let token: string;
 let userId: string;
 let LicenseID: string;
 
 beforeAll(async () => {
-  await  SubscriberModel.deletemany();
-});
+  await  SubscriberService.deletemany();
+}, 100000);
+
 
 // Test signup feature/functionality
 describe("POST /api/subscriber", () => {
@@ -48,7 +45,7 @@ describe("POST /api/subscriber", () => {
         expect(res.body.data).toBeDefined();
     });
 
-    test("create a new  SubscriberModel post", async () => {
+    test("create a new  SubscriberService post", async () => {
         const res = await request
             .post("/api/subscriber/create")
             .set("Authorization", `Bearer ${token}`)
@@ -59,7 +56,7 @@ describe("POST /api/subscriber", () => {
                 likedBlogs: MostLiked,
             });
         expect(res.statusCode).toBe(201);
-        expect(res.body.message).toBe(" SubscriberModel created");
+        expect(res.body.message).toBe(" SubscriberService created");
         expect(res.body.data).toBeDefined();
         LicenseID = res.body.data._id;
     });
@@ -74,28 +71,29 @@ describe("POST /api/subscriber", () => {
                 likedBlogs: MostLiked,
             });
         expect(res.statusCode).toBe(409);
-        expect(res.body.message).toBe(" SubscriberModel already exists");
+        expect(res.body.message).toBe(" SubscriberService already exists");
     });
 });
 
 describe("GET /api/subscriber/:LicenseID", () => {
     test("should retrieve a single subscriber ", async () => {
-        const SubscriberModeldata = {
+        const SubscriberServicedata = {
             full_name: "Ndayenicaye Ndevu_n1",
             email: 'jeanpaulelisan1@gmail.com',
             location: 'Kigali-Rwanda',
             likedBlogs: MostLiked,
         };
-        await  SubscriberModel.createSubscriber(SubscriberModeldata);
+        await  Subscriber.insertMany(SubscriberServicedata);
+        
         const res = await request.get(`/api/subscriber/${LicenseID}`);
         expect(res.statusCode).toBe(200);
-        expect(res.body.message).toBe(" SubscriberModel retrieved successfully");
+        expect(res.body.message).toBe(" SubscriberService retrieved successfully");
         expect(res.body.data).toBeDefined();
     });
-    test("should return  SubscriberModel not found , SubscriberModel id doesn't exist", async () => {
+    test("should return  SubscriberService not found , SubscriberService id doesn't exist", async () => {
         const res = await request.get(`/api/subscriber/65f3134a494934b10177c062`);
         expect(res.statusCode).toBe(404);
-        expect(res.body.message).toBe(" SubscriberModel not found");
+        expect(res.body.message).toBe(" SubscriberService not found");
     });
 });
 
@@ -103,12 +101,12 @@ describe("GET /api/subscriber/all", () => {
   test("should retrieve all license Categorys", async () => {
     const res = await request.get("/api/subscriber/all");
     expect(res.statusCode).toBe(200);
-    expect(res.body.message).toBe("All  SubscriberModels retrieved!");
+    expect(res.body.message).toBe("All  SubscriberServices retrieved!");
     expect(res.body.data).toBeDefined();
   });
 });
 describe("PATCH /api/subscriber/update/:LicenseID", () => {
-  test("should update the  SubscriberModel", async () => {
+  test("should update the  SubscriberService", async () => {
     const res = await request
       .patch(`/api/subscriber/update/${LicenseID}`)
       .set("Authorization", `Bearer ${token}`)
@@ -119,10 +117,10 @@ describe("PATCH /api/subscriber/update/:LicenseID", () => {
         likedBlogs: MostLiked,
       });
     expect(res.statusCode).toBe(200);
-    expect(res.body.message).toBe(" SubscriberModel updated successfully");
+    expect(res.body.message).toBe(" SubscriberService updated successfully");
     expect(res.body.data).toBeDefined();
   });
-  test("should not update a non-existing  SubscriberModel", async () => {
+  test("should not update a non-existing  SubscriberService", async () => {
     const res = await request
       .patch(`/api/subscriber/update/65f3134a494934b10177c062`)
       .set("Authorization", `Bearer ${token}`)
@@ -139,19 +137,19 @@ describe("PATCH /api/subscriber/update/:LicenseID", () => {
 });
 
 describe("DELETE /api/subscriber/delete/:LicenseID", () => {
-  test("should delete to a  SubscriberModel", async () => {
+  test("should delete to a  SubscriberService", async () => {
     const res = await request
       .delete(`/api/subscriber/delete/${LicenseID}`)
       .set("Authorization", `Bearer ${token}`);
     expect(res.statusCode).toBe(200);
-    expect(res.body.message).toBe(" SubscriberModel deleted successfully");
+    expect(res.body.message).toBe(" SubscriberService deleted successfully");
     expect(res.body.data).toBeDefined();
   });
-  test("should not delete a non-existing  SubscriberModel", async () => {
+  test("should not delete a non-existing  SubscriberService", async () => {
     const res = await request
       .delete(`/api/subscriber/delete/${LicenseID}`)
       .set("Authorization", `Bearer ${token}`);
     expect(res.statusCode).toBe(404);
-    expect(res.body.message).toBe(" SubscriberModel not found");
+    expect(res.body.message).toBe(" SubscriberService not found");
   });
 });

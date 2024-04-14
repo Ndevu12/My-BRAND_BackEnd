@@ -1,5 +1,6 @@
 import supertest from "supertest";
 import { app } from "../app.ts";
+import CommentServices from "../services/commentService.ts";
 
 export const request = supertest(app);
 
@@ -13,6 +14,10 @@ const user = {
 };
 
 let token: string;
+
+beforeAll(async () => {
+  await CommentServices.deletemany();
+},  100000);
 
 describe("Message Tests", () => {
   let messageId: string;

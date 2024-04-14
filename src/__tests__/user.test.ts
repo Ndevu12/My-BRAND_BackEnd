@@ -1,6 +1,7 @@
 import supertest from "supertest";
 import { app} from "../app.ts";
-import { AdminModel } from "../models/adminModel.ts";
+import {  User } from "../models/user.ts";
+import mongoose from "mongoose";
 
 
 export const request = supertest(app);
@@ -20,8 +21,10 @@ const loginUser = {
 };
 
 beforeAll(async () => {
-  await AdminModel.deleteMany();
-});
+  await  User.deleteMany();
+},  100000);
+
+
 
 describe("POST /api/user/signup", () => {
   test("should create user", async () => {
