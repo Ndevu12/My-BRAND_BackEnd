@@ -2,9 +2,13 @@
     "name": "my-brand_backend",
     "version": "1.0.0",
     "description": "Welcome to the My-BRAND_BackEnd repository! This repository contains the backend codebase for the My-BRAND project.",
-    "main": "app.js",
-    "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
+    "main": "index.js",
+    "scripts": { 
+        "test": "cross-env NODE_ENV=test jest",
+        "coverage": "jest --collect-coverage",
+        "dev": "nodemon --exec ts-node src/index.ts",
+        "start": "ts-node ./src/app.ts",
+        "build": "tsc"
     },
     "keywords": [],
     "author": "Ndevu12",

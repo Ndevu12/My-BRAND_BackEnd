@@ -1,9 +1,7 @@
 // Import necessary modules
 import { Router} from 'express';
-import { authorController } from '../controllers/AuthorController.ts';
+import  AuthorController  from '../controllers/AuthorController.ts';
 import { isAdmin } from '../middlewares/auth.ts';
-
-const AuthorController = new authorController();
 
 const authorRouter: Router = Router();
 
@@ -15,5 +13,5 @@ authorRouter.get('/all', isAdmin, AuthorController.getAllAuthors);
 authorRouter.delete('/delete/:id', isAdmin, AuthorController.deleteAuthor);
 
 // Export the router
-export { authorRouter };
+export default authorRouter;
 

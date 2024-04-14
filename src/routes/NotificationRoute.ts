@@ -1,9 +1,8 @@
 // const necessary modules
 import { Router } from 'express';
-import {notificationController} from '../controllers/notificationController.ts';
+import NotificationController from '../controllers/notificationController.ts';
 import { isAdmin } from '../middlewares/auth.ts';
 
-const NotificationController = new notificationController();
 
 const  notificationRoutes: Router = Router();
 
@@ -16,4 +15,4 @@ const  notificationRoutes: Router = Router();
 
 
 // Export the router
-export  {notificationRoutes};
+export  default notificationRoutes;

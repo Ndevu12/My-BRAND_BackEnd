@@ -1,9 +1,8 @@
 // const necessary modules
 import { Router } from 'express';
-import {messageController} from '../controllers/MessageController.ts';
+import MessageController from '../controllers/MessageController.ts';
 import { isAdmin } from '../middlewares/auth.ts';
 
-const MessageController = new messageController();
 
 const messageRoutes: Router = Router();
 
@@ -15,4 +14,4 @@ messageRoutes.delete('/delete',isAdmin, MessageController.deleteMessage);
 
 // hijokl
 // Export the router
-export  {messageRoutes};
+export  default messageRoutes;

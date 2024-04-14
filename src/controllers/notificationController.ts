@@ -2,19 +2,19 @@
  * Controller for handling Notification-related operations.
  */
 import { Request, Response } from 'express';
-import { notificationModel,  INotification } from '../models/notification.ts';
+import { INotification } from '../models/notification.ts';
+import NotificationService from '../services/notificationService.ts';
 
-const NotificationModel = new notificationModel();
 class notificationController {
     /**
      * Method to create a new notification.
      * @param req Request object containing notification data.
      * @param res Response object to send the result.
      */
-    public async createNotification(req: Request, res: Response): Promise<void> {
+   static async createNotification(req: Request, res: Response): Promise<void> {
         try {
             const notificationData: Partial<INotification> = req.body;
-            const newNotification = await NotificationModel.createNotification(notificationData);
+            const newNotification = await NotificationService.createNotification(notificationData);
             res.status(201).json(newNotification);
         } catch (error) {
             console.error('Error creating notification:', error);
@@ -27,9 +27,9 @@ class notificationController {
      * @param req Request object.
      * @param res Response object to send the notifications.
      */
-    public async getAllNotifications(req: Request, res: Response): Promise<void> {
+   static async getAllNotifications(req: Request, res: Response): Promise<void> {
         try {
-            const notifications = await NotificationModel.getAllNotifications();
+            const notifications = await NotificationService.getAllNotifications();
             res.status(200).json(notifications);
         } catch (error) {
             console.error('Error fetching notifications:', error);
@@ -42,10 +42,10 @@ class notificationController {
      * @param req Request object containing the notification ID.
      * @param res Response object to send the notification.
      */
-    public async getNotificationById(req: Request, res: Response): Promise<void> {
+   static async getNotificationById(req: Request, res: Response): Promise<void> {
         try {
             const { id } = req.params;
-            const notification = await NotificationModel.findNotificationById(id);
+            const notification = await NotificationService.findNotificationById(id);
             if (notification) {
                 res.status(200).json(notification);
             } else {
@@ -62,11 +62,11 @@ class notificationController {
      * @param req Request object containing the notification ID and updated data.
      * @param res Response object to send the updated notification.
      */
-    public async updateNotification(req: Request, res: Response): Promise<void> {
+   static async updateNotification(req: Request, res: Response): Promise<void> {
         try {
             const { id } = req.params;
             const updatedNotificationData = req.body;
-            const updatedNotification = await NotificationModel.updateNotification(id, updatedNotificationData);
+            const updatedNotification = await NotificationService.updateNotification(id, updatedNotificationData);
             if (updatedNotification) {
                 res.status(200).json(updatedNotification);
             } else {
@@ -83,10 +83,10 @@ class notificationController {
      * @param req Request object containing the notification ID.
      * @param res Response object to send the result.
      */
-    public async deleteNotification(req: Request, res: Response): Promise<void> {
+   static async deleteNotification(req: Request, res: Response): Promise<void> {
         try {
             const { id } = req.params;
-            const deletedNotification = await NotificationModel.deleteNotification(id);
+            const deletedNotification = await NotificationService.deleteNotification(id);
             if (deletedNotification) {
                 res.status(200).json({ message: 'Notification deleted successfully' });
             } else {
@@ -99,4 +99,4 @@ class notificationController {
     }
 }
 
-export { notificationController };
+export default notificationController ;

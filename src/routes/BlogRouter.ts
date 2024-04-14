@@ -1,9 +1,8 @@
 // const necessary modules
 import { Router } from 'express';
-import { blogController } from '../controllers/blogController.ts';
+import BlogController from '../controllers/blogController.ts';
 import { isAdmin } from '../middlewares/auth.ts';
 
-const BlogController = new blogController();
 
 
 const blogRoutes: Router = Router();
@@ -19,4 +18,4 @@ blogRoutes.get('/like/:id', BlogController.likeBlog);
 
 // hijokl
 // Export the router
-export { blogRoutes };
+export default blogRoutes;

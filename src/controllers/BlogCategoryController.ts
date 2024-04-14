@@ -2,19 +2,18 @@
  * Controller for handling Blog Category-related operations.
  */
 import { Request, Response } from 'express';
-import { BlogCategory, ICategory } from '../models/blogCategories';
-
-const blogCategory = new BlogCategory();
-class blogCategoryController {
+import  CategoryServices from '../services/blogCategoryService.ts';
+import {ICategory} from '../models/blogCategories.ts';
+class CategoryController {
     /**
-     * Method to create a new blog category.
+     * Method to create a new blog CategoryServices.
      * @param req Request object containing blog category data.
      * @param res Response object to send the result.
      */
-    public async createBlogCategory(req: Request, res: Response): Promise<void> {
+    static async createCategory(req: Request, res: Response): Promise<void> {
         try {
-            const categoryData: Partial<ICategory> = req.body;
-            const newCategory = await blogCategory.createBlogCategory(categoryData);
+            const categoryData: ICategory = req.body;
+            const newCategory = await CategoryServices.createCategory(categoryData);
             res.status(201).json(newCategory);
         } catch (error) {
             console.error('Error creating blog category:', error);
@@ -27,9 +26,9 @@ class blogCategoryController {
      * @param req Request object.
      * @param res Response object to send the blog categories.
      */
-    public async getAllBlogCategories(req: Request, res: Response): Promise<void> {
+    static async getAllBlogCategories(req: Request, res: Response): Promise<void> {
         try {
-            const categories = await blogCategory.getAllBlogCategories();
+            const categories = await CategoryServices.getAllBlogCategories();
             res.status(200).json(categories);
         } catch (error) {
             console.error('Error fetching blog categories:', error);
@@ -40,12 +39,12 @@ class blogCategoryController {
     /**
      * Method to retrieve a blog category by its ID.
      * @param req Request object containing the category ID.
-     * @param res Response object to send the category.
+     * @param res Response object to send the CategoryServices.
      */
-    public async getBlogCategoryById(req: Request, res: Response): Promise<void> {
+    static async getCategoryById(req: Request, res: Response): Promise<void> {
         try {
             const { id } = req.params;
-            const category = await blogCategory.findBlogCategoryById(id);
+            const category = await CategoryServices.findBlogCategoryById(id);
             if (category) {
                 res.status(200).json(category);
             } else {
@@ -60,13 +59,13 @@ class blogCategoryController {
     /**
      * Method to update a blog category by its ID.
      * @param req Request object containing the category ID and updated data.
-     * @param res Response object to send the updated category.
+     * @param res Response object to send the updated CategoryServices.
      */
-    public async updateBlogCategory(req: Request, res: Response): Promise<void> {
+    static async updateCategory(req: Request, res: Response): Promise<void> {
         try {
             const { id } = req.params;
             const updatedCategoryData = req.body;
-            const updatedCategory = await blogCategory.updateBlogCategory(id, updatedCategoryData);
+            const updatedCategory = await CategoryServices.updateBlogCategory(id, updatedCategoryData);
             if (updatedCategory) {
                 res.status(200).json(updatedCategory);
             } else {
@@ -83,10 +82,10 @@ class blogCategoryController {
      * @param req Request object containing the category ID.
      * @param res Response object to send the result.
      */
-    public async deleteBlogCategory(req: Request, res: Response): Promise<void> {
+    static async deleteCategory(req: Request, res: Response): Promise<void> {
         try {
             const { id } = req.params;
-            const deletedCategory = await blogCategory.deleteBlogCategory(id);
+            const deletedCategory = await CategoryServices.deleteBlogCategory(id);
             if (deletedCategory) {
                 res.status(200).json({ message: 'Blog category deleted successfully' });
             } else {
@@ -99,4 +98,4 @@ class blogCategoryController {
     }
 }
 
-export {blogCategoryController};
+export default CategoryController;

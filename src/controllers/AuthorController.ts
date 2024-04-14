@@ -2,19 +2,20 @@
  * Controller for handling Author-related operations.
  */
 import { Request, Response } from 'express';
-import { authorModel,  IAuthor } from '../models/author';
+import AuthorService  from '../services/authorSrvice.ts';
+import {IAuthor } from '../models/author.ts';
 
-const AuthorModel = new authorModel();
+
 class authorController {
     /**
      * Method to create a new author.
      * @param req Request object containing author data.
      * @param res Response object to send the result.
      */
-    public async createAuthor(req: Request, res: Response): Promise<void> {
+   static async createAuthor(req: Request, res: Response): Promise<void> {
         try {
-            const authorData: Partial<IAuthor> = req.body;
-            const newAuthor = await AuthorModel.createAuthor(authorData);
+            const authorData: IAuthor = req.body;
+            const newAuthor = await AuthorService.createAuthor(authorData);
             res.status(201).json(newAuthor);
         } catch (error) {
             console.error('Error creating author:', error);
@@ -27,9 +28,9 @@ class authorController {
      * @param req Request object.
      * @param res Response object to send the authors.
      */
-    public async getAllAuthors(req: Request, res: Response): Promise<void> {
+   static async getAllAuthors(req: Request, res: Response): Promise<void> {
         try {
-            const authors = await AuthorModel.getAllAuthors();
+            const authors = await AuthorService.getAllAuthors();
             res.status(200).json(authors);
         } catch (error) {
             console.error('Error fetching authors:', error);
@@ -42,10 +43,10 @@ class authorController {
      * @param req Request object containing the author ID.
      * @param res Response object to send the author.
      */
-    public async getAuthorById(req: Request, res: Response): Promise<void> {
+   static async getAuthorById(req: Request, res: Response): Promise<void> {
         try {
             const { id } = req.params;
-            const author = await AuthorModel.findAuthorById(id);
+            const author = await AuthorService.findAuthorById(id);
             if (author) {
                 res.status(200).json(author);
             } else {
@@ -62,11 +63,11 @@ class authorController {
      * @param req Request object containing the author ID and updated data.
      * @param res Response object to send the updated author.
      */
-    public async updateAuthor(req: Request, res: Response): Promise<void> {
+   static async updateAuthor(req: Request, res: Response): Promise<void> {
         try {
             const { id } = req.params;
             const updatedAuthorData = req.body;
-            const updatedAuthor = await AuthorModel.updateAuthor(id, updatedAuthorData);
+            const updatedAuthor = await AuthorService.updateAuthor(id, updatedAuthorData);
             if (updatedAuthor) {
                 res.status(200).json(updatedAuthor);
             } else {
@@ -83,10 +84,10 @@ class authorController {
      * @param req Request object containing the author ID.
      * @param res Response object to send the result.
      */
-    public async deleteAuthor(req: Request, res: Response): Promise<void> {
+   static async deleteAuthor(req: Request, res: Response): Promise<void> {
         try {
             const { id } = req.params;
-            const deletedAuthor = await AuthorModel.deleteAuthor(id);
+            const deletedAuthor = await AuthorService.deleteAuthor(id);
             if (deletedAuthor) {
                 res.status(200).json({ message: 'Author deleted successfully' });
             } else {
@@ -99,4 +100,4 @@ class authorController {
     }
 }
 
-export { authorController };
+export default authorController;

@@ -1,16 +1,16 @@
 // Import necessary modules
 import { Router} from 'express';
-import { blogCategoryController } from '../controllers/BlogCategoryController.ts';
+import  CategoryController  from '../controllers/BlogCategoryController.ts';
 import { isAdmin } from '../middlewares/auth.ts';
 
-const BlogCategoryController = new blogCategoryController();
+
 const blogCategoryRoutes: Router = Router();
 
 // Define routes
-blogCategoryRoutes.patch('/create', isAdmin, BlogCategoryController.createBlogCategory);
-blogCategoryRoutes.get('/:id/', BlogCategoryController.getBlogCategoryById);
-blogCategoryRoutes.patch('/update/:id', isAdmin, BlogCategoryController.updateBlogCategory);
-blogCategoryRoutes.delete('/delete/:id',isAdmin, BlogCategoryController.deleteBlogCategory);
-blogCategoryRoutes.get('/All', BlogCategoryController.getAllBlogCategories);
+blogCategoryRoutes.patch('/create', isAdmin,  CategoryController.createCategory);
+blogCategoryRoutes.get('/:id/',  CategoryController.getCategoryById);
+blogCategoryRoutes.patch('/update/:id', isAdmin,  CategoryController.updateCategory);
+blogCategoryRoutes.delete('/delete/:id',isAdmin,  CategoryController.deleteCategory);
+blogCategoryRoutes.get('/All',  CategoryController.getAllBlogCategories);
 
-export { blogCategoryRoutes };
+export default blogCategoryRoutes;
