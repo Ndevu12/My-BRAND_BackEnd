@@ -106,8 +106,7 @@ describe("PATCH /api/notification/update/:LicenseID", () => {
       .patch(`/api/notification/update/65f3134a494934b10177c062`)
       .set("Authorization", `Bearer ${token}`)
       .send({
-        post_ID: '65f3134a494934b10177c062',
-        title: 'Software Engineering rty8u9i09o--pghjnk and web Dev',
+        title: 'Software Engineering huuijhj rty8u9i09o--pghjnk and web Dev',
         description: 'Software Engineering and soft....',
       });
     expect(res.statusCode).toBe(404);

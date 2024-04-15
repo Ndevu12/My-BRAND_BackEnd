@@ -1,0 +1,33 @@
+# Testing using REST client with VS Code
+
+@baseUrl = http://localhost:6090/api
+
+
+###
+post {{baseUrl}}/user/create
+
+Content-Type: application/json
+{
+  "fullname": "Ndevu User",
+  "username": "Ndevu",
+  "email": "ndevulion@gmail.com",
+  "password": "@K1234passkey",
+  "phoneNumber": 0735044398,
+  "role": "admin"
+}
+
+###
+get {{baseUrl}}/api/blog/catecory/all
+
+###
+post {{baseUrl}}/api/blog/create
+
+Content-Type: application/json
+{
+  "title": "My first blog post on Programming",
+  "content": "This is my first blog post so, Button and add a name to your test, 123",
+  "description": "button and add a name to your test. You will be redirected to the page from where you can create the tests. Select an endpoint that",
+  "category": "General",
+  "likes": 12,
+  "tags": ["Science", "Technology", "Social Life"]
+}

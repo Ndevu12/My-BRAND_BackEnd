@@ -11,6 +11,6 @@ blogCategoryRoutes.patch('/create', isAdmin,  CategoryController.createCategory)
 blogCategoryRoutes.get('/:id/',  CategoryController.getCategoryById);
 blogCategoryRoutes.patch('/update/:id', isAdmin,  CategoryController.updateCategory);
 blogCategoryRoutes.delete('/delete/:id',isAdmin,  CategoryController.deleteCategory);
-blogCategoryRoutes.get('/All',  CategoryController.getAllBlogCategories);
+blogCategoryRoutes.get('/all',  CategoryController.getAllBlogCategories);
 
 export default blogCategoryRoutes;
