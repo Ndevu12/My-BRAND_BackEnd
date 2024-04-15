@@ -31,7 +31,7 @@ export interface IBlog extends Document {
             },
 
             content: {
-            type: Schema.Types.Mixed,
+            type: String,
             required: true,
             },
             
@@ -45,7 +45,7 @@ export interface IBlog extends Document {
                 required: false,
             },
             author: {
-                type: [Schema.Types.ObjectId],
+                type: [Types.ObjectId],
                 required: false,
                 ref: 'Author',
             },
@@ -58,13 +58,15 @@ export interface IBlog extends Document {
                 default: Date.now,
             },
             comments: {
-                type: [Schema.Types.ObjectId],
+                type: [Types.ObjectId],
                 ref: 'Comment', 
                 required: false,
+                default:[],
             },
             category: {
                 type: [String],
                 required: false,
+                default:[],
             },
             tags:{
                 type: [String],
@@ -72,7 +74,8 @@ export interface IBlog extends Document {
                 default: [],
             },
             likes: {
-                type: Schema.Types.Mixed,
+                type: Number,
+                default: 0,
             },
         });
 

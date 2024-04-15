@@ -1,5 +1,5 @@
 import express, { Application } from 'express';
-import bodyParser from 'body-parser';
+// import bodyParser from 'body-parser';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { connectDb } from "./OnStart/connectdb.ts";
@@ -19,7 +19,7 @@ dotenv.config();
 const app: Application = express();
 
 // Middleware
-app.use(bodyParser.json());
+app.use(express.json());
 app.use(cors());
 
 app.use('/api', Route);
@@ -31,12 +31,12 @@ connectDb();
 
 // Seeds
 // seedCategories();
-seedBlog ();
+// seedBlog ();
 // seedAuthor();
-seedUser();
+// seedUser();
 // seedComment();
-seedMessage();
-seedNotification();
+// seedMessage();
+// seedNotification();
 // seedSubscriber();
 
 // Start the server

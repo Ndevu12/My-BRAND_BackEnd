@@ -8,7 +8,7 @@ import mongoose, { Schema, Document, Types } from 'mongoose';
  * Interface representing the structure of a comment document.
  */
 export interface IComment extends Document {
-    post_ID: any; 
+    postID: any; 
     commenterName: undefined;
     comment: string;
     createdAt?: Date;
@@ -19,7 +19,7 @@ export interface IComment extends Document {
  */
 
         const commentSchema = new Schema<IComment>({
-            post_ID: {
+            postID: {
                 type: [Schema.Types.ObjectId],
                 ref: "Blog",
                 required: true,

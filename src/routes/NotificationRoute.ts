@@ -10,7 +10,7 @@ const  notificationRoutes: Router = Router();
  notificationRoutes.patch('/create', NotificationController.createNotification);
  notificationRoutes.patch('/update/:id', isAdmin, NotificationController.updateNotification);
  notificationRoutes.get('/:id', isAdmin, NotificationController.getNotificationById);
- notificationRoutes.get('/All', NotificationController.getAllNotifications);
+ notificationRoutes.get('/all', NotificationController.getAllNotifications);
  notificationRoutes.delete('/delete/:id', isAdmin, NotificationController.deleteNotification);
 
 

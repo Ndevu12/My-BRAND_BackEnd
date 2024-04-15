@@ -10,7 +10,8 @@ class AuthorService{
      * @returns Promise resolving to the created author document.
      */
    static async createAuthor(data: IAuthor): Promise<IAuthor> {
-        return await Author.create(data);
+        const createAutho = await Author.create(data);
+        return createAutho;
     }
 
     /**
@@ -19,11 +20,13 @@ class AuthorService{
      * @returns Promise resolving to the found author document or null if not found.
      */
    static async findAuthorById(id: string): Promise<IAuthor | null> {
-        return await Author.findById(id).exec();
+        const AuthorById = await Author.findById(id).exec();
+        return AuthorById;
     }
 
    static async updateAuthor(id: string, data: IAuthor): Promise<IAuthor | null> {
-        return await Author.findByIdAndUpdate(id, data, { new: true }).exec();
+        const update = await Author.findByIdAndUpdate(id, data, { new: true }).exec();
+        return update;
     }
 
     /**
@@ -32,11 +35,13 @@ class AuthorService{
      * @returns Promise resolving to the deleted Author document, or null if not found.
      */
    static async deleteAuthor(id: string): Promise<IAuthor | null> {
-        return await Author.findByIdAndDelete(id).exec();
+        const deletedData = await Author.findByIdAndDelete(id).exec();
+        return deletedData;
     }
 
    static async getAllAuthors(): Promise<IAuthor[]> {
-        return await Author.find().exec();
+       const allAuthor = await Author.find().exec();
+        return allAuthor;
     }
 
 }

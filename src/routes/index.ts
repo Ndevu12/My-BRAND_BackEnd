@@ -13,7 +13,7 @@ const route = express.Router();
 
 route.use('/author', authorRouter);
 route.use('/blog', blogRoutes);
-route.use('/blog/category', blogCategoryRoutes);
+route.use('/blogCategory', blogCategoryRoutes);
 route.use('/comment', commentRoutes);
 route.use('/message', messageRoutes);
 route.use('/notification', notificationRoutes);

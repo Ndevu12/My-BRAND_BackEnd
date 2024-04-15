@@ -1,6 +1,6 @@
 import { IUser, User } from "../models/user";
 
-type QueryType = { $or: [{ username: string }, { email: string }] };
+type QueryType = { $or: [{ username: string }, { passward: string }] };
 
 class UserServices {
   static async getSingleUser(query: QueryType): Promise<IUser | null> {

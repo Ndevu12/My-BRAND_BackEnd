@@ -4,7 +4,7 @@ import mongoose, { Schema, Document } from 'mongoose';
  *  Define the interface for the Subscriber document
  */
 export interface ISubscriber extends Document {
-    full_name: string;
+    fullname: string;
     email: string;
     location: string;
     preference: string;
@@ -16,7 +16,7 @@ export interface ISubscriber extends Document {
  *  Define the Subscriber schema using a class
  */
        const SubscriberSchema = new  Schema<ISubscriber>({
-            full_name: {
+            fullname: {
                 type: String,
                 required: true,
             },
@@ -40,7 +40,7 @@ export interface ISubscriber extends Document {
 
             likedBlogs: {
                 type: [Schema.Types.ObjectId], 
-                ref: "blog", 
+                ref: "Blog", 
                 required: true,
                 default: [],
             }

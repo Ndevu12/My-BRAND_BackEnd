@@ -15,19 +15,25 @@ Content-Type: application/json
   "phoneNumber": 0735044398,
   "role": "admin"
 }
+###
+get {{baseUrl}}/author/661cf15c82b208b5abf3da07
+###
+get {{baseUrl}}/blog/all
+###
+get {{baseUrl}}/api/blogCategory/all
 
 ###
-get {{baseUrl}}/api/blog/catecory/all
-
+get {{baseUrl}}/api/blogCatecory/661cd4e528e17db0050a873e
+# post {{{baseUrl}}}/api/blog/
 ###
-post {{baseUrl}}/api/blog/create
+patch  {{baseUrl}}/api/blog/update
 
 Content-Type: application/json
 {
-  "title": "My first blog post on Programming",
+  "title": "My first blog yugijokotyuiop",
   "content": "This is my first blog post so, Button and add a name to your test, 123",
-  "description": "button and add a name to your test. You will be redirected to the page from where you can create the tests. Select an endpoint that",
-  "category": "General",
-  "likes": 12,
+  "description": "button and add afcgvhbjnkml;fgvbhjnm name to your test. You will be redirected to the page from where you can create the tests. Select an endpoint that",
+  "category": "661bc8ff537e31bb91cacc7d",
   "tags": ["Science", "Technology", "Social Life"]
 }
+
