@@ -1,1 +1,48 @@
-{"name":"my-brand_backend","version":"1.0.0","type":"module","description":"Welcome to the My-BRAND_BackEnd repository! This repository contains the backend codebase for the My-BRAND project.","main":"app.js","scripts":{"test":"echo \"Error: no test specified\" && exit 1"},"keywords":[],"author":"Ndevu12","license":"ISC","dependencies":{"bcrypt":"^5.1.1","express":"^4.19.2","jsonwebtoken":"^9.0.2","mongoose":"^8.3.1","nodemailer":"^6.9.13","start":"^5.1.0","twilio":"^5.0.3"},"devDependencies":{"@jest/globals":"^29.7.0","@types/cors":"^2.8.17","@types/express":"^4.17.21","@types/jest":"^29.5.12","@types/jsonwebtoken":"^9.0.6","@types/node":"^20.12.6","@types/nodemailer":"^6.4.14","cors":"^2.8.5","dotenv":"^16.4.5","jest":"^29.7.0","nodemon":"^3.1.0","ts-jest":"^29.1.2","ts-node":"^10.9.2","typescript":"^5.4.5"}}
+{
+    "name": "my-brand_backend",
+    "version": "1.0.0",
+    "description": "Welcome to the My-BRAND_BackEnd repository! This repository contains the backend codebase for the My-BRAND project.",
+    "main": "index.js",
+    "scripts": { 
+        "test": "cross-env NODE_ENV=test jest",
+        "coverage": "jest --collect-coverage",
+        "dev": "nodemon --exec ts-node src/index.ts",
+        "start": "ts-node ./src/app.ts",
+        "build": "tsc"
+    },
+    "keywords": [],
+    "author": "Ndevu12",
+    "license": "ISC",
+    "dependencies": {
+        "bcrypt": "^5.1.1",
+        "cloudinary": "^2.1.0",
+        "crypto-js": "^4.2.0",
+        "express": "^4.19.2",
+        "joi": "^17.12.3",
+        "jsonwebtoken": "^9.0.2",
+        "mongoose": "^8.3.1",
+        "multer": "^1.4.5-lts.1",
+        "nodemailer": "^6.9.13",
+        "twilio": "^5.0.3"
+    },
+    "devDependencies": {
+        "@types/cors": "^2.8.17",
+        "@types/crypto-js": "^4.2.2",
+        "@types/express": "^4.17.21",
+        "@types/jest": "^29.5.12",
+        "@types/jsonwebtoken": "^9.0.6",
+        "@types/multer": "^1.4.11",
+        "@types/node": "^20.12.6",
+        "@types/nodemailer": "^6.4.14",
+        "@types/supertest": "^6.0.2",
+        "cors": "^2.8.5",
+        "dotenv": "^16.4.5",
+        "jest": "^29.7.0",
+        "supertest": "^6.3.4",
+        "ts-jest": "^29.1.2",
+        "ts-node": "^10.9.2",
+        "tsc-node": "^0.0.3",
+        "typeorm": "^0.3.20",
+        "typescript": "^5.4.5"
+    }
+}
