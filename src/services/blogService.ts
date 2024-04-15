@@ -8,8 +8,9 @@ class BlogServices {
          * @param category The category to filter blogs by.
          * @returns Promise resolving to an array of blog documents matching the category.
          */
-  static async findBlogsByCategory(category: string): Promise<IBlog[]> {
-    return (await Blog.find({ category }).exec());
+  static async findBlogsByCategory(query: string): Promise<IBlog[]> {
+    const findBlogByCategor =  await Blog.find({category: query }).exec();
+    return findBlogByCategor;
    }
 
 
@@ -20,7 +21,7 @@ class BlogServices {
 
   static async createBlog(blogData: { title: string; description: string; author: string; imageURL: string | undefined }): Promise<IBlog> {
     const blog = await Blog.create(blogData);
-    return blog;
+    return blog.save();
   }
 
   static async findBlogById(blogId: string): Promise<IBlog | null> {
@@ -30,16 +31,7 @@ class BlogServices {
 
 
   static async findAllBlogs() {
-    const blogs = await Blog.find()
-      .populate("author", "fullname email -_id")
-      .populate({
-        path: "comments",
-        populate: {
-          path: "user",
-          select: "fullname -_id",
-        },
-        select: "content",
-      });
+    const blogs = await Blog.find({}).exec();
     return blogs;
   }
 

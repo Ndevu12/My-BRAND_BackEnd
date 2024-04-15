@@ -5,12 +5,12 @@ import { Subscriber } from '../models/Subscriber.ts';
 
 const seedSubscriber = async () => {
     try {
-        const SubscriberData = [
-            { full_name: 'subscriptiongmail@gmail.com' },
-            { email: 'button and add a name to your test. You will be redirected to the page from where you can create the tests. Select an endpoint that' },
-            {location: 'Gikondo-Kigali'},
-            {likedBlogs: [122, 123]}
-        ];
+        const SubscriberData = {
+            fullname: 'subscriptiongmail1@gmail.com',
+            email: 'subscriber0@gmail.com' ,
+            location: 'Kimironko-Kigali',
+            likedBlogs: '661cd4e528e17db0050a873e',
+};
 
         await Subscriber.insertMany(SubscriberData);
 

@@ -29,6 +29,7 @@ class CategoryController {
     static async getAllBlogCategories(req: Request, res: Response): Promise<void> {
         try {
             const categories = await CategoryServices.getAllBlogCategories();
+            console.log(categories);
             res.status(200).json(categories);
         } catch (error) {
             console.error('Error fetching blog categories:', error);

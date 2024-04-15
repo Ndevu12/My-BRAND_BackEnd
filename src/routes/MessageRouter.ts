@@ -7,10 +7,10 @@ import { isAdmin } from '../middlewares/auth.ts';
 const messageRoutes: Router = Router();
 
 // Define routes
-messageRoutes.patch('/contact-me', MessageController.createMessage);
+messageRoutes.patch('/contactme', MessageController.createMessage);
 messageRoutes.get('/:id',isAdmin, MessageController.getMessageById);
-messageRoutes.get('/All', isAdmin, MessageController.getAllMessages);
-messageRoutes.delete('/delete',isAdmin, MessageController.deleteMessage);
+messageRoutes.get('/all', isAdmin, MessageController.getAllMessages);
+messageRoutes.delete('/delete/:id',isAdmin, MessageController.deleteMessage);
 
 // hijokl
 // Export the router

@@ -10,7 +10,9 @@ class CategoryService {
      * @returns Promise resolving to the created Category document.
      */
     static async createCategory(data: ICategory): Promise<ICategory> {
-        return (await Category.create(data)).save();
+       const category = await Category.create(data);
+       category.save();
+       return category;
     }
 
     /**
@@ -19,7 +21,8 @@ class CategoryService {
      * @returns Promise resolving to the found Category document, or null if not found.
      */
     static async findBlogCategoryById(id: string): Promise<ICategory | null> {
-        return await Category.findById(id).exec();
+        const CategoryById =  await Category.findById(id).exec();
+        return CategoryById;
     }
 
     /**
@@ -29,7 +32,8 @@ class CategoryService {
      * @returns Promise resolving to the updated Category document, or null if not found.
      */
     static async updateBlogCategory(id: string, data: Partial<ICategory>): Promise<ICategory | null> {
-        return await Category.findByIdAndUpdate(id, data, { new: true }).exec();
+        const BlogCategory = await Category.findByIdAndUpdate(id, data, { new: true }).exec();
+        return BlogCategory;
     }
 
     /**
@@ -38,15 +42,18 @@ class CategoryService {
      * @returns Promise resolving to the deleted Category document, or null if not found.
      */
     static async deleteBlogCategory(id: string): Promise<ICategory | null> {
-        return await Category.findByIdAndDelete(id).exec();
+        const deleteB =  await Category.findByIdAndDelete(id).exec();
+        return deleteB;
     }
 
     static async getAllBlogCategories(): Promise<ICategory[]>{
-        return await Category.find().exec();
+        const getAll = await Category.find({}).exec();
+        return getAll;
     }
 
     static async deletemany(): Promise<ICategory | any>{
-        return await Category.deleteMany().exec();
+        const deleteAll = await Category.deleteMany().exec();
+        return deleteAll;
     }
 }
 

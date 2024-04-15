@@ -8,7 +8,8 @@ class MessageService {
      * @returns Promise resolving to the created Message document.
      */
   static async createMessage(data: IMessage): Promise<IMessage> {
-    return (await Message.create(data)).save();
+    const messages =  await Message.create(data);
+    return messages.save();
 }
 
   static async getAllMessages(): Promise<IMessage[]> {
@@ -22,7 +23,8 @@ class MessageService {
  * @returns Promise resolving to the found Message document, or null if not found.
  */
 static async findMessageById(id: string): Promise<IMessage | null> {
-  return await Message.findById(id).exec();
+  const messages =  await Message.findById(id).exec();
+  return messages;
 }
 
 

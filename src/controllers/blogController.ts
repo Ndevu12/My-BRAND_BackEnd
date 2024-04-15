@@ -157,7 +157,7 @@ class blogController {
      */
     static async getAllBlogs(req: Request, res: Response): Promise<void> {
         try {
-            const blogs = await BlogServices.findAllBlogs(); // Call the findAllBlogs method
+            const blogs = await BlogServices.findAllBlogs(); 
             res.status(200).json(blogs);
         } catch (error) {
             res.status(500).json({ message: 'Internal server error' });

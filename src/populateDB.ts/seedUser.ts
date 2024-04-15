@@ -5,14 +5,14 @@ import { User } from '../models/user.ts';
 
 const seedUser = async () => {
     try {
-        const UserData = [
-            {fullname: "Ndevu User"},
-            {username: "Ndevu"},
-            {email: "ndevulion@gmail.com"},
-            {password: "@K1234passkey"},
-            {phoneNumber: "0785044398"},
-            {role: "admin"}
-        ];
+        const UserData = {
+            fullName: "Ndevu Not User",
+            username: "ndevu fake User",
+            email: "ndevulion1233@gmail.com",
+            password: "@K1234pas131nonomo",
+            phoneNumber: "0785044398",
+            role: "user"
+            };
 
         await User.insertMany(UserData);
 

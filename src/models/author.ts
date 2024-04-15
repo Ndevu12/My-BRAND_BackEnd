@@ -23,6 +23,7 @@ export interface IAuthor extends Document {
             },
             postId: {
                 type: [Schema.Types.ObjectId],
+                ref: 'Blog',
                 required: true,
                 unique: true,
             },

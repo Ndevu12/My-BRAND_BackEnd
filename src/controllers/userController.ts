@@ -10,7 +10,7 @@ import UserServices from '../services/userServices.ts';
 class UserController {
     static async registerAdmin(req: Request, res: Response): Promise<void> {
         try {
-            const { username, password, email, phoneNumber, fullName } = req.body;
+            const { username, password, email } = req.body;
             const existingAdmin = await User.findOne({ $or: [{ username }, { email }] });
             if (existingAdmin) {
                 res.status(400).json({ message: 'Username or email already exists' });
@@ -18,9 +18,13 @@ class UserController {
             }
 
           const hashedPassword = await generate(password);
+
           const newUser = { ...req.body, password: hashedPassword };
+
           const user = await UserServices.userSignup(newUser);
+
           user.password = undefined;
+          
           const accessToken = sign({
             id: user._id,
             username: user.username,
@@ -46,9 +50,9 @@ class UserController {
     // Method to login admin
     static async loginAdmin(req: Request, res: Response): Promise<void> {
         try {
-            const { account, password } = req.body;
+            const { username, password } = req.body;
             const user = await UserServices.getSingleUser({
-              $or: [{ username: account }, { email: account }],
+              $or: [{ username: username }, { passward: password }],
             });
       
 
@@ -58,7 +62,7 @@ class UserController {
             }
 
             if (!user.password) {
-                response(res, 401, "Password is not set for this account", null, "UNAUTHORIZED");
+                response(res, 401, "Password is not set for this username", null, "UNAUTHORIZED");
                 return;
             }
             // Generate JWT token
@@ -77,8 +81,10 @@ class UserController {
               userObject.accessToken = accessToken;
               delete userObject.password;
             if (isCodeSent) {
+              console.log("Authorization code sent successfully")
                 res.status(200).json({ token, message: 'Authorization code sent successfully' });
             } else {
+              console.log("Failed to send authorization")
                 res.status(500).json({ error: 'Failed to send authorization code' });
             }
         } catch (error) {
