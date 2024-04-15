@@ -9,7 +9,7 @@ import mongoose, { Schema, Document, Types } from 'mongoose';
  */
 export interface IBlog extends Document {
     title: string;
-    content: any;
+    content: string;
     description: string;
     imageUrl: string | undefined;
     author?: string[];
@@ -46,7 +46,7 @@ export interface IBlog extends Document {
             },
             author: {
                 type: [Schema.Types.ObjectId],
-                required: true,
+                required: false,
                 ref: 'Author',
             },
             createdAt: {

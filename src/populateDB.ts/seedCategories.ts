@@ -25,4 +25,4 @@ const seedCategories = async () => {
 };
 
 // Seed categories
-seedCategories();
+export { seedCategories };
