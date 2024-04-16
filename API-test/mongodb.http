@@ -4,7 +4,7 @@
 
 
 ###
-post {{baseUrl}}/user/create
+put {{baseUrl}}/user/create
 
 Content-Type: application/json
 {
@@ -15,6 +15,17 @@ Content-Type: application/json
   "phoneNumber": 0735044398,
   "role": "admin"
 }
+
+###
+get {{baseUrl}}/user/login
+Content-Type: application/json
+Authorization: Bearer {{'a7fd8b3f9c2e4579fbf43dc56e1e0e244d34d9c4b11d8b826c8398f9c6dc3ebf'}}
+
+{
+  "username": "Ndevu",
+  "password": "K1234pas131nonomo"
+}
+
 ###
 get {{baseUrl}}/author/661cf15c82b208b5abf3da07
 ###

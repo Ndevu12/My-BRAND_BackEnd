@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import subscriberUtils from '../utils/subscriberUtilities.ts';
 import {  ISubscriber } from '../models/Subscriber.ts';
-import SubscriberService from '../services/SubscriberService.ts';
+import SubscriberService from '../services/subscriberService.ts';
 
 class subscriberController {
     /**
@@ -28,7 +28,7 @@ class subscriberController {
            /**
              * Notify subscribers
              */
-            await subscriberUtils.notifySubscriberOnSubscription(email); 
+            // await subscriberUtils.notifySubscriberOnSubscription(email); 
             res.status(201).json(newSubscriber); 
 
         } catch (error) {

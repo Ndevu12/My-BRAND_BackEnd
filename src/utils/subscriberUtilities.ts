@@ -1,7 +1,7 @@
 // subscriberServices.ts
 
 import { sendNotificationByEmail } from './notificationUtility.ts'; // Import the Notification Utility
-import SubscriberService from '../services/SubscriberService.ts';
+import SubscriberService from '../services/subscriberService.ts';
 
 // Service to handle subscriber operations
 class subscriberUtils {

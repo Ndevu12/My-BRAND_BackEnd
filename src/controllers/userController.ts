@@ -62,14 +62,12 @@ class UserController {
             }
 
             if (!user.password) {
-                response(res, 401, "Password is not set for this username", null, "UNAUTHORIZED");
+                response(res, 401, "Password not set", null, "UNAUTHORIZED");
                 return;
             }
-            // Generate JWT token
-            const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || '', { expiresIn: '1h' });
 
             // Send authorization code via email and phone
-            const isCodeSent = await sendAuthorizationCodeByEmailAndPhone(user.email, user.phoneNumber);
+            // const isCodeSent = await sendAuthorizationCodeByEmailAndPhone(user.email, user.phoneNumber);
 
             const accessToken = sign({
                 id: user._id,
@@ -80,13 +78,18 @@ class UserController {
               const userObject = user.toObject();
               userObject.accessToken = accessToken;
               delete userObject.password;
-            if (isCodeSent) {
-              console.log("Authorization code sent successfully")
-                res.status(200).json({ token, message: 'Authorization code sent successfully' });
-            } else {
-              console.log("Failed to send authorization")
-                res.status(500).json({ error: 'Failed to send authorization code' });
-            }
+
+
+
+            // if (isCodeSent) {
+            //   console.log("Authorization code sent successfully")
+            //     res.status(200).json({ token, message: 'Authorization code sent successfully' });
+            // } else {
+            //   console.log("Failed to send authorization")
+            //     res.status(500).json({ error: 'Failed to send authorization code' });
+            // }
+
+           response(res, 200, "logedin successful", userObject);
         } catch (error) {
             console.error('Error logging in admin:', error);
             res.status(500).json({ error: 'Internal server error' });
