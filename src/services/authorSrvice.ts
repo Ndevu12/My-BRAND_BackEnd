@@ -40,7 +40,7 @@ class AuthorService{
     }
 
    static async getAllAuthors(): Promise<IAuthor[]> {
-       const allAuthor = await Author.find().exec();
+       const allAuthor = await Author.find({}).exec();
         return allAuthor;
     }
 

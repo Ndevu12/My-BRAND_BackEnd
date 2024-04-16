@@ -4,15 +4,31 @@ import BlogServices from '../services/blogService.ts';
 import subscriberUtils  from '../utils/subscriberUtilities.ts';
 import response from '../helpers/response.ts';
 import cloudinary from '../helpers/cloudinary.ts';
-import SubscriberService from '../services/SubscriberService.ts';
+import SubscriberService from '../services/subscriberService.ts';
 import { Types } from 'mongoose';
 import { CustomeRequest } from '../middlewares/auth.ts';
+import { Category } from '../models/blogCategories.ts';
 
 
 /**
  * Controller class responsible for handling blog-related requests.
  */
 class blogController {
+
+
+         /**
+     * Method to find all blog documents.
+     * @returns Promise resolving to an array of all blog documents.
+     */
+    static async retrieveAllBlogs(req: Request, res: Response): Promise<void> {
+        try {
+            const blogs = await BlogServices.findAllBlogs(); 
+            res.status(200).json(blogs);
+        } catch (error) {
+            console.error('Error fetching all blogs:', error);
+            res.status(500).json({ message: 'Internal server error' });
+        }
+    }
 
         /**
      * Creates a new blog post.
@@ -52,7 +68,8 @@ class blogController {
             /**
              * Notify subscribers about the  new updates
              */
-            await subscriberUtils.notifyAllSubscribersAboutUpdates(title, "New blog is available now on NdevuSpace.com");
+
+            // await subscriberUtils.notifyAllSubscribersAboutUpdates(title, "New blog is available now on NdevuSpace.com");
             res.status(201).json(newBlog);
         } catch (error) {
             console.error('Error creating blog:', error);
@@ -68,7 +85,7 @@ class blogController {
     static async getBlogById(req: Request, res: Response): Promise<void> {
         try {
             const { id } = req.params;
-            const blog = await BlogServices.findBlogById(id);
+            const blog = await BlogServices.getblogById(id);
             if (!blog) {
                 res.status(404).send('Blog not found');
                 return;
@@ -89,7 +106,7 @@ class blogController {
         try {
             const { id } = req.params;
             const {title} = req.body;
-            const updatedBlogData: Partial<IBlog> = req.body;
+            const updatedBlogData: IBlog = req.body;
             const updatedBlog = await BlogServices.updateBlog(id, updatedBlogData);
             if (!updatedBlog) {
                 res.status(404).send('Blog not found');
@@ -98,10 +115,10 @@ class blogController {
 
               
             /**
-             * Notify subscribers about the  new updates
+             * Notify subscribers about the  ssssssssssssnew updates
              */
-            await subscriberUtils.notifyAllSubscribersAboutUpdates(title, "Blog has been updated");
-            res.json(updatedBlog);
+            // await subscriberUtils.notifyAllSubscribersAboutUpdates(title, "Blog has been updated");
+            res.status(200).json(updatedBlog);
 
         } catch (error) {
             console.error('Error updating blog:', error);
@@ -117,7 +134,7 @@ class blogController {
     static async deleteBlog(req: Request, res: Response): Promise<void> {
         try {
             const { id } = req.params;
-            const blogExists = await BlogServices.findBlogById(id);
+            const blogExists = await BlogServices.getblogById(id);
             if (!blogExists) {
                 response(res, 404, "Blog not found", null, "BLOG_NOT_FOUND");
                 return;
@@ -127,7 +144,7 @@ class blogController {
                 res.status(404).send('Blog is not deleted yet');
                 return;
             }
-            res.json(deletedBlog);
+            res.status(200).json(deletedBlog);
         } catch (error) {
             console.error('Error deleting blog:', error);
             res.status(500).send('Internal Server Error');
@@ -142,27 +159,22 @@ class blogController {
 
     static async getBlogsByCategory(req: Request, res: Response): Promise<void> {
         try {
-            const { category } = req.params;
-            const blogs = await BlogServices.findBlogsByCategory(category);
-            res.json(blogs);
+            const { id } = req.params;
+            const blogs = await BlogServices.findBlogsByCategory(id);
+
+      if(!blogs  || blogs.length === 0){
+           console.log("No blogs found for this category");
+            res.status(404).send('No blogs found for this category');
+    } else{
+            res.status(200).json(blogs);
+    }
         } catch (error) {
             console.error('Error fetching blogs by category:', error);
             res.status(500).send('Internal Server Error');
         }
     }
 
-     /**
-     * Method to find all blog documents.
-     * @returns Promise resolving to an array of all blog documents.
-     */
-    static async getAllBlogs(req: Request, res: Response): Promise<void> {
-        try {
-            const blogs = await BlogServices.findAllBlogs(); 
-            res.status(200).json(blogs);
-        } catch (error) {
-            res.status(500).json({ message: 'Internal server error' });
-        }
-    }
+
 
     static async likeBlog(req: CustomeRequest, res: Response): Promise<void> {
         try {
@@ -170,28 +182,29 @@ class blogController {
           const blogObjectId = new Types.ObjectId(blogId);
           const userId = req.user?.id as string;
           const user = await SubscriberService.findSubscriberById(userId);
-        if (!user) {
-            response(res, 404, "You need to Subscriber to Like this blog", null, "USER_NOT_FOUND");
-            return;
-        }
-        if ((user.likedBlogs ?? []).includes(blogObjectId.toString())) {
-            response(
-                res,
-                400,
-                "You have already liked this blog",
-                null,
-                "ALREADY_LIKED"
-            );
-            return;
-        }
+        // if (!user) {
+        //     response(res, 404, "You need to Subscriber to Like this blog", null, "USER_NOT_FOUND");
+        //     return;
+        // }
+        // if ((user.likedBlogs ?? []).includes(blogObjectId.toString())) {
+        //     response(
+        //         res,
+        //         400,
+        //         "You have already liked this blog",
+        //         null,
+        //         "ALREADY_LIKED"
+        //     );
+        //     return;
+        // }
         const likedBlog = await BlogServices.incrementLikes(blogId);
             if (!likedBlog) {
-                response(res, 404, "Blog not found", null, "NOT_FOUND");
+                console.log(likedBlog);
+                response(res, 404, "Blog like not added", null, "Internal server error");
                 return;
             }
-            user.likedBlogs = user.likedBlogs ?? [];
-            user.likedBlogs.push(blogObjectId.toString()); 
-            await user.save();
+            // user.likedBlogs = user.likedBlogs ?? [];
+            // user.likedBlogs.push(blogObjectId.toString()); 
+            // await user.save();
             response(res, 200, "Blog liked successfully", likedBlog);
         } catch (error) {
           response(

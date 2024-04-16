@@ -38,4 +38,6 @@ new
 # Contact
 If you have any questions or issues regarding the My-BRAND_BackEnd project, please feel free to contact us at `niyokwizerwajeanpaulelisa@gmail.com`.
 
+### nodemon setup
 
+nodemon --watch server --ext ts --exec ts-node --ignore '*.test.ts' --delay 3 ./src/app.ts  

@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import { connectDb } from "./OnStart/connectdb.ts";
 
 import Route from './routes/index.ts';
+
 import { seedCategories } from './populateDB.ts/seedCategories.ts';
 import { seedBlog } from './populateDB.ts/seedBlog.ts';
 import { seedAuthor } from './populateDB.ts/seedAuthor.ts';

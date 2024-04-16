@@ -10,6 +10,7 @@ class UserServices {
 
   static async userSignup(userData: IUser): Promise<IUser> {
     const user = await User.create(userData);
+    user.save();
     return user;
   }
   static async getUserById(userId: string): Promise<IUser | null> {

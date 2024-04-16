@@ -23,20 +23,18 @@ class BlogServices {
     const blog = await Blog.create(blogData);
     return blog.save();
   }
-
-  static async findBlogById(blogId: string): Promise<IBlog | null> {
-    const blog = await Blog.findById(blogId);
-    return blog;
-  }
-
-
   static async findAllBlogs() {
     const blogs = await Blog.find({}).exec();
     return blogs;
   }
 
 
-  static async updateBlog(blogId: string, blogData: Partial<IBlog>): Promise<IBlog | null> {
+  static async getblogById(id: string): Promise<IBlog | null> {
+    const blog = await Blog.findById(id);
+    return blog;
+  }
+
+  static async updateBlog(blogId: string, blogData: IBlog): Promise<IBlog | null> {
     const blog = await Blog.findByIdAndUpdate(blogId, blogData, { new: true });
     return blog;
   }
@@ -68,7 +66,6 @@ class BlogServices {
    static async deleteAllBlogs(): Promise<any> {
       return await Blog.deleteMany().exec();
     }
-
 }
 
 

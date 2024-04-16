@@ -64,7 +64,7 @@ export interface IBlog extends Document {
                 default:[],
             },
             category: {
-                type: [String],
+                type: [Types.ObjectId],
                 required: false,
                 default:[],
             },

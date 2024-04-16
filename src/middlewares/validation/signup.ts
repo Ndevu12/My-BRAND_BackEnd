@@ -4,7 +4,7 @@ const passwordRegex =
   /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[^\w\s]).{8,}$/;
 
 const signupSchema = Joi.object({
-  fullname: Joi.string()
+  fullName: Joi.string()
     .min(4)
     .required()
     .messages({ 
@@ -20,7 +20,7 @@ const signupSchema = Joi.object({
       "string.min": "Username must be at least 4 characters long.",
       "any.required": "Username is required."
     }),
-  phone: Joi.string()
+  phoneNumber: Joi.string()
     .min(10)
     .messages({
       "string.base": "Phone number must be a string.",
@@ -44,7 +44,7 @@ const signupSchema = Joi.object({
       "string.pattern.base": "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.",
       "any.required": "Password is required."
     }),
-  role: Joi.string().max(8)
+  role: Joi.string().max(10)
     .messages({
       "string.base": "Role must be a string.",
       "string.max": "Role cannot be longer than 8 characters."
