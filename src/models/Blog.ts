@@ -42,11 +42,11 @@ export interface IBlog extends Document {
 
             description:{
                 type: String,
-                required: false,
+                required: true,
             },
             author: {
                 type: [Types.ObjectId],
-                required: false,
+                required: true,
                 ref: 'Author',
             },
             createdAt: {
@@ -65,17 +65,18 @@ export interface IBlog extends Document {
             },
             category: {
                 type: [Types.ObjectId],
-                required: false,
+                required: true,
                 default:[],
             },
             tags:{
                 type: [String],
-                rquired: false,
+                rquired: true,
                 default: [],
             },
             likes: {
                 type: Number,
                 default: 0,
+                required: false
             },
         });
 

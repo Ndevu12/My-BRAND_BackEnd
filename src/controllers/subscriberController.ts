@@ -2,6 +2,8 @@ import { Request, Response } from 'express';
 import subscriberUtils from '../utils/subscriberUtilities.ts';
 import {  ISubscriber } from '../models/Subscriber.ts';
 import SubscriberService from '../services/subscriberService.ts';
+import { sign } from "../helpers/jwt";
+import response from '../helpers/response.ts';
 
 class subscriberController {
     /**
@@ -23,13 +25,24 @@ class subscriberController {
             }
 
 
-            const newSubscriber = await SubscriberService.createSubscriber(subscriberData);
-            
+        const newSubscriber = await SubscriberService.createSubscriber(subscriberData);
+
+        const token = sign({ 
+          id: newSubscriber._id, 
+          email: newSubscriber.email, 
+          role: newSubscriber.role,
+        }); 
+            const userObject = newSubscriber.toObject();
+          userObject.accessToken = token;
+
+         res.cookie('token', token, { maxAge: 7 * 24 * 60 * 60 * 1000, httpOnly: true });
            /**
              * Notify subscribers
              */
             // await subscriberUtils.notifySubscriberOnSubscription(email); 
-            res.status(201).json(newSubscriber); 
+
+        response(res, 200, "Subscribed successful", userObject);
+
 
         } catch (error) {
             console.error('Error creating subscriber:', error);

@@ -22,18 +22,12 @@ export const isAdmin: RequestHandler = async (
 ): Promise<void> => {
   try {
     const authHeader = req.header("Authorization");
-    if (!authHeader) throw new Error("You don't have access to do that action");
+    if (!authHeader) throw new Error("Acess denied");
     const token = authHeader.replace("Bearer ", "");
     const user = verify(token) as DecodedUser;
 
     if (user.role !== "admin") {
-      response(
-        res,
-        403,
-        "You don't have access to do that action",
-        null,
-        "FORBIDDEN"
-      );
+      response(res, 403, "Acess denied", null, "FORBIDDEN");
       return;
     }
     req.user = user;

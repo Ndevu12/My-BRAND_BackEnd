@@ -34,6 +34,8 @@ class UserController {
     
           const userObject = user.toObject();
           userObject.accessToken = accessToken;
+
+         res.cookie('token', accessToken, { maxAge: 7 * 24 * 60 * 60 * 1000, httpOnly: true });
     
           response(res, 201, "Signup successful", userObject);
         } catch (error) {
@@ -94,6 +96,21 @@ class UserController {
             console.error('Error logging in admin:', error);
             res.status(500).json({ error: 'Internal server error' });
         }
+    }
+    static async deleteAllUser(req: Request, res: Response): Promise<void> {
+      try {
+        const deleteUsers = await UserServices.deleteAll();
+
+        if (deleteUsers){
+          console.log("All users deleted successfully");
+          res.status(200).json({ message: 'All users deleted successfully' });
+        } else {
+          console.log("Failed to delete all users");
+        }
+      } catch (err){
+        console.log("Error while deleting all users", err);
+        response(res, 500, "Failed to delete all users", null, "FAILED_TO_DELETE_ALL_USERS");
+      }
     }
 }
 

@@ -6,7 +6,7 @@ import response from '../helpers/response.ts';
 import cloudinary from '../helpers/cloudinary.ts';
 import SubscriberService from '../services/subscriberService.ts';
 import { Types } from 'mongoose';
-import { CustomeRequest } from '../middlewares/auth.ts';
+import { CustomeRequest } from '../middlewares/authentication.ts';
 import { Category } from '../models/blogCategories.ts';
 
 
@@ -144,7 +144,7 @@ class blogController {
                 res.status(404).send('Blog is not deleted yet');
                 return;
             }
-            res.status(200).json(deletedBlog);
+            res.status(200).json({ message: 'Blog deleted successfully' });
         } catch (error) {
             console.error('Error deleting blog:', error);
             res.status(500).send('Internal Server Error');
