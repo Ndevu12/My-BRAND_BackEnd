@@ -4,9 +4,10 @@ import mongoose, { Schema, Document } from 'mongoose';
  *  Define the interface for the Subscriber document
  */
 export interface ISubscriber extends Document {
-    fullname: string;
+    username: string;
     email: string;
     location: string;
+    role: string;
     preference: string;
     subscribe_at: Date;
     likedBlogs?: string[];
@@ -16,9 +17,9 @@ export interface ISubscriber extends Document {
  *  Define the Subscriber schema using a class
  */
        const SubscriberSchema = new  Schema<ISubscriber>({
-            fullname: {
+            username: {
                 type: String,
-                required: true,
+                required: false,
             },
             email: {
                 type: String,
@@ -27,6 +28,12 @@ export interface ISubscriber extends Document {
             },
             location: {
                 type: String,
+                required: false,
+            },
+            role: {
+                type: String,
+                enum: ['subscriber'], 
+                default: 'subscriber',
                 required: true,
             },
             preference: {
@@ -41,7 +48,7 @@ export interface ISubscriber extends Document {
             likedBlogs: {
                 type: [Schema.Types.ObjectId], 
                 ref: "Blog", 
-                required: true,
+                required: false,
                 default: [],
             }
         });

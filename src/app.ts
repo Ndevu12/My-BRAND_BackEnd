@@ -1,5 +1,6 @@
 import express, { Application } from 'express';
 // import bodyParser from 'body-parser';
+import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { connectDb } from "./OnStart/connectdb.ts";
@@ -22,6 +23,11 @@ const app: Application = express();
 // Middleware
 app.use(express.json());
 app.use(cors());
+
+
+// cookie-parser middleware
+app.use(cookieParser());
+
 
 app.use('/api', Route);
 

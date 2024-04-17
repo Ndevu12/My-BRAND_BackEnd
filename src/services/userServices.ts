@@ -17,6 +17,11 @@ class UserServices {
     const user = await User.findById(userId);
     return user;
   }
+
+  static async deleteAll(): Promise<any>{
+    const deleteThem = await User.deleteMany().exec();
+    return deleteThem;
+  }
 }
 
 export default UserServices;

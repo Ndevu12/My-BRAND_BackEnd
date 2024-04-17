@@ -21,7 +21,7 @@ export interface IComment extends Document {
         const commentSchema = new Schema<IComment>({
             postID: {
                 type: [Schema.Types.ObjectId],
-                ref: "Blog",
+                ref: "blogs",
                 required: true,
             },
             commenterName: {

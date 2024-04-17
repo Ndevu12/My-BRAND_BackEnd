@@ -44,7 +44,7 @@ const signupSchema = Joi.object({
       "string.pattern.base": "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.",
       "any.required": "Password is required."
     }),
-  role: Joi.string().max(10)
+  role: Joi.string().max(8)
     .messages({
       "string.base": "Role must be a string.",
       "string.max": "Role cannot be longer than 8 characters."
