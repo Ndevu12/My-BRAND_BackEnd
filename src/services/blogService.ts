@@ -13,13 +13,17 @@ class BlogServices {
     return findBlogByCategor;
    }
 
+   static async getAllBlogComment(id: string): Promise<IBlog | null> {
+    const comments  = await Blog.findById(id).populate("comments").exec();
+    return comments;
+   }
 
   static async getSingleBlog(query: string): Promise<IBlog | null> {
     const blog = await Blog.findOne({ title: query });
     return blog;
   }
 
-  static async createBlog(blogData: { title: string; description: string; author: string; imageURL: string | undefined }): Promise<IBlog> {
+  static async createBlog(blogData: string): Promise<IBlog> {
     const blog = await Blog.create(blogData);
     return blog.save();
   }
@@ -44,16 +48,23 @@ class BlogServices {
     return blog;
   }
 
-  static async addCommentToBlog(blogId: string, commentId: Types.ObjectId): Promise<void> {
+  static async addCommentToBlog(blogId: any, commentId: Types.ObjectId): Promise<void> {
+    const blog = await Blog.findById(blogId);
+    if (!blog) {
+      throw new Error("Failed to add comment on blog. Blog not found\nLocation: BlogServices\n");
+    }
+    blog.comments!.push(commentId);
+    await blog.save();
+  }
+
+  static async incrementLikes(blogId: string): Promise<IBlog | null> {
     const blog = await Blog.findById(blogId);
     if (!blog) {
       throw new Error("Blog not found");
     }
-    blog.comments!.push(commentId.toString());
+    // const like = blog.likes + 1;
+    blog.likes! = blog.likes! + 1;
     await blog.save();
-  }
-  static async incrementLikes(blogId: string): Promise<IBlog | null> {
-    const blog = await Blog.findByIdAndUpdate(blogId, { $inc: { likes: 1 } }, { new: true });
     return blog;
   }
 

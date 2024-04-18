@@ -1,9 +1,11 @@
 import { Request, Response, NextFunction, RequestHandler } from "express";
-import { verify } from "../helpers/jwt.ts";
+import { verify } from "../helpers/jwtToken.ts";
 import response from "../helpers/response.ts";
 
 // ...
 
+
+export const blackListedTokens = new Set<string>();
 export interface DecodedUser {
   role: string;
   id: string;
@@ -22,12 +24,23 @@ export const isAdmin: RequestHandler = async (
 ): Promise<void> => {
   try {
     const authHeader = req.header("Authorization");
-    if (!authHeader) throw new Error("Acess denied");
+    if (!authHeader){ 
+      console.log("Acess denied, You are not allowed to perform this action. Please")
+      throw new Error("Acess denied, You are not allowed to perform this action. Please ");
+    }
     const token = authHeader.replace("Bearer ", "");
+
+    if (blackListedTokens.has(token)) {
+      console.log("Token blacklisted");
+      res.status(403).json({ message: "Access denied. Your current TOKEN HAD BEEN blacklisted. Please log in again." });
+      return;
+    }
+
     const user = verify(token) as DecodedUser;
 
     if (user.role !== "admin") {
-      response(res, 403, "Acess denied", null, "FORBIDDEN");
+      console.log("Acess denied. You are not an ADMIN");
+      response(res, 403, "Acess denied. You are not an ADMIN", null, "FORBIDDEN");
       return;
     }
     req.user = user;
@@ -36,7 +49,7 @@ export const isAdmin: RequestHandler = async (
     response(
       res,
       401,
-      (error as Error).message || "Not Authorized",
+      (error as Error).message || "Not Authorized TO perform this action",
       null,
       "AUTHENTICATION_ERROR"
     );

@@ -4,6 +4,8 @@
 import { Request, Response } from 'express';
 import { IComment } from '../models/comments.ts';
 import Comment from '../services/commentService.ts';
+import { Blog } from '../models/Blog.ts';
+import BlogServices from '../services/blogService.ts';
 
 class commentController {
     /**
@@ -13,12 +15,20 @@ class commentController {
      */
    static async createComment(req: Request, res: Response): Promise<void> {
         try {
-            const commentData: Partial<IComment> = req.body;
+            const commentData: IComment = req.body;
+            const {post_ID} = req.body;
             const newComment = await Comment.createComment(commentData);
-            res.status(201).json(newComment);
+
+                if (!newComment) {
+                res.status(404).send('Comment not created');
+                return;
+            } 
+            // const addToBlog = await BlogServices.addCommentToBlog(post_ID, newComment._id);
+
+            res.status(201).json({Message: "Comment added successfuly", newComment});
         } catch (error) {
             console.error('Error creating comment:', error);
-            res.status(500).send('Internal Server Error');
+            res.status(500).send('Sorry, something went wrong');
         }
     }
 
@@ -33,7 +43,7 @@ class commentController {
             res.status(200).json(comments);
         } catch (error) {
             console.error('Error fetching comments:', error);
-            res.status(500).json({ error: 'Internal Server Error' });
+            res.status(500).json({ error: 'Sorry, something went wrong' });
         }
     }
 
@@ -54,7 +64,7 @@ class commentController {
             }
         } catch (error) {
             console.error('Error fetching comment by ID:', error);
-            res.status(500).json({ error: 'Internal Server Error' });
+            res.status(500).json({ error: 'Sorry, something went wrong' });
         }
     }
     
@@ -74,7 +84,7 @@ class commentController {
             }      
         }catch (error) {
             console.error('Error fetching comment by post ID:', error);
-            res.status(500).json({error: 'Internal server Error'});
+            res.status(500).json({error: 'Sorry, something went wrong'});
         }
     }
 
@@ -95,7 +105,7 @@ class commentController {
             }
         } catch (error) {
             console.error('Error updating comment:', error);
-            res.status(500).json({ error: 'Internal Server Error' });
+            res.status(500).json({ error: 'Sorry, something went wrong' });
         }
     }
 
@@ -115,7 +125,7 @@ class commentController {
             }
         } catch (error) {
             console.error('Error deleting comment:', error);
-            res.status(500).json({ error: 'Internal Server Error' });
+            res.status(500).json({ error: 'Sorry, something went wrong' });
         }
     }
 }

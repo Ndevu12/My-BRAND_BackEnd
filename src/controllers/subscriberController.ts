@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import subscriberUtils from '../utils/subscriberUtilities.ts';
 import {  ISubscriber } from '../models/Subscriber.ts';
 import SubscriberService from '../services/subscriberService.ts';
-import { sign } from "../helpers/jwt";
+import { sign } from "../helpers/jwtToken.ts";
 import response from '../helpers/response.ts';
 
 class subscriberController {

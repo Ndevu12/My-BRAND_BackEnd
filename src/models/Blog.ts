@@ -10,13 +10,13 @@ import mongoose, { Schema, Document, Types } from 'mongoose';
 export interface IBlog extends Document {
     title: string;
     content: string;
-    description: string;
+    Description: string;
     imageUrl: string | undefined;
-    author?: string[];
+    author?: Types.ObjectId[] | undefined;
     createdAt?: Date;
     updatedAt?: Date;
-    comments?: string[]; 
-    category: string[];
+    comments?: Types.ObjectId[]; 
+    category: Types.ObjectId[];
     likes: number;
     tags: string[]; 
 }
@@ -40,9 +40,9 @@ export interface IBlog extends Document {
                 required: false,
             },
 
-            description:{
+            Description:{
                 type: String,
-                required: true,
+                required: false,
             },
             author: {
                 type: [Types.ObjectId],

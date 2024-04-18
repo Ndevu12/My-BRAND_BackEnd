@@ -1,15 +1,15 @@
 import Joi from "joi";
 
-const subscribeSchema = Joi.object({
-  username: Joi.string()
+const createBlogSchema = Joi.object({
+  fullName: Joi.string()
     .min(4)
     .required()
     .messages({ 
-      "string.base": "username name must be a string.",
-      "string.min": "username name must be at least 4 characters long.",
-      "any.required": "username name is required."
+      "string.base": "Full name must be a string.",
+      "string.min": "Full name must be at least 4 characters long.",
+      "any.required": "Full name is required."
     }),
-    location: Joi.string()
+    username: Joi.string()
     .min(4)
     .required()
     .messages({ 
@@ -17,7 +17,12 @@ const subscribeSchema = Joi.object({
       "string.min": "Username must be at least 4 characters long.",
       "any.required": "Username is required."
     }),
-
+  phoneNumber: Joi.string()
+    .min(10)
+    .messages({
+      "string.base": "Phone number must be a string.",
+      "string.min": "Phone number must be at least 10 digits long."
+    }),
   email: Joi.string()
     .email({ tlds: { allow: false } })
     .required()
@@ -26,6 +31,8 @@ const subscribeSchema = Joi.object({
       "string.email": "Email must be a valid email.",
       "any.required": "Email is required."
     }),
+
+
 });
 
-export default subscribeSchema;
+export default createBlogSchema;

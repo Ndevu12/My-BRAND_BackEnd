@@ -10,7 +10,7 @@ if (!jwtSecretKey) {
 }
 
 export const sign = (payload: string | object | Buffer): string =>
-  jwt.sign(payload, jwtSecretKey, { expiresIn: "48h" });
+  jwt.sign(payload, jwtSecretKey, { expiresIn: "24h" });
 
 export const verify = (token: string): string | object =>
   jwt.verify(token, jwtSecretKey);

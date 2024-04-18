@@ -3,8 +3,7 @@ import { Comment, IComment } from "../models/comments.ts";
 class CommentServices {
   
       // Method to create a new comment
-      static async createComment(data: Partial<IComment | any>): Promise<IComment> {
-        console.log('Comment created at `${createdAt}`');
+      static async createComment(data: IComment | any): Promise<IComment> {
         const comment = await (await Comment.create(data)).save();
         return comment;
     }
