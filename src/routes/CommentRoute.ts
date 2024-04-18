@@ -12,7 +12,7 @@ const  commentRoutes: Router = Router();
  commentRoutes.get('/:id', CommentController.getCommentById);
  commentRoutes.get('/', CommentController.getAllComments);
  commentRoutes.delete('/delete/:id', isAdminOrSubscriber, CommentController.deleteComment);
-
+commentRoutes.get('/byblog/:id', CommentController.findCommentByPostID);
 // hijokl
 // Export the router
 export default commentRoutes;

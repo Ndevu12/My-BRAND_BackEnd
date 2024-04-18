@@ -1,0 +1,96 @@
+/subscriber:
+  post/{blogID}:
+    tags:
+      - subscriber
+    summary: Create a new title.
+    description: Creates a new title on the specified blog
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              title:
+                type: string
+                example: This is a sample blog and the first one!
+              description:
+                type: string
+                description: This is a sample notification and the first one!
+            required:
+              - title
+              - description
+    responses:
+      "201":
+        description: title posted successfully
+      "404":
+        description: Invalid blog ID, blog not found
+      "500":
+        description: something went wrong
+
+/subscriber/:
+  get/:
+    tags:
+      - title
+    summary: Retrieve all titles
+    description: Retrieve all titles from the database
+    responses:
+      "200":
+        description: Successful request
+      "500":
+        description: Sorry, something went wrong
+
+/subscriber/:
+  put/{id}:
+    tags:
+      - title
+    summary: Update a title by its id.
+    description: Updates a title with given id from params
+    parameters:
+      - id: id
+        in: path
+        required: true
+        description: title id
+        type: string
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              title:
+                type: string
+                example: This is a sample blog and the first one!
+              description:
+                type: string
+            required:
+              - title
+              - description
+    responses:
+      "200":
+        description: title updated successfully
+      "404":
+        description: title with the given ID was not found.
+      "500":
+        description: something goes wrong
+
+/subscriber/{id}:
+  delete:
+    tags:
+      - title
+    summary: Delete a title by its id.
+    description: Deletes a title with given id from params
+    parameters:
+      - id: id
+        in: path
+        required: true
+        description: title id
+        type: string
+    responses:
+      "200":
+        description: title deleted successfully
+      "404":
+        description: title with the given ID was not found.
+      "500":
+        description: something goes wrong

@@ -3,9 +3,10 @@ import {User,  IUser } from '../models/user.ts';
 import jwt from 'jsonwebtoken';
 import { sendAuthorizationCodeByEmailAndPhone } from '../utils/authorizationUtils.ts';
 import { generate, check } from "../helpers/cryptoJs";
-import { sign } from "../helpers/jwt";
+import { sign } from "../helpers/jwtToken.ts";
 import response from "../helpers/response";
 import UserServices from '../services/userServices.ts';
+import { blackListedTokens } from '../middlewares/authentication.ts';
 
 class UserController {
     static async registerAdmin(req: Request, res: Response): Promise<void> {
@@ -17,9 +18,9 @@ class UserController {
                 return;
             }
 
-          const hashedPassword = await generate(password);
+          const strongPassward = await generate(password);
 
-          const newUser = { ...req.body, password: hashedPassword };
+          const newUser = { ...req.body, password: strongPassward };
 
           const user = await UserServices.userSignup(newUser);
 
@@ -37,12 +38,12 @@ class UserController {
 
          res.cookie('token', accessToken, { maxAge: 7 * 24 * 60 * 60 * 1000, httpOnly: true });
     
-          response(res, 201, "Signup successful", userObject);
+          response(res, 201, "Signed up successful", userObject);
         } catch (error) {
           response(
             res,
             500,
-            (error as Error).message || "Internal Server Error",
+            (error as Error).message || "Soryy, something went wrong",
             null,
             "SERVER_ERROR"
           );
@@ -59,12 +60,7 @@ class UserController {
       
 
             if (!user) {
-                response(res, 404, "Invalid username or password", null, "USER_NOT_FOUND");
-                return;
-            }
-
-            if (!user.password) {
-                response(res, 401, "Password not set", null, "UNAUTHORIZED");
+                response(res, 401, "Invalid username or password", null, "USER_NOT_FOUND");
                 return;
             }
 
@@ -91,19 +87,38 @@ class UserController {
             //     res.status(500).json({ error: 'Failed to send authorization code' });
             // }
 
-           response(res, 200, "logedin successful", userObject);
+           response(res, 200, "logged in successful", userObject);
         } catch (error) {
             console.error('Error logging in admin:', error);
-            res.status(500).json({ error: 'Internal server error' });
+            res.status(500).json({ error: 'Sorry, Something went wrong' });
         }
     }
+    
+// logout method
+
+    static async logout (req: Request, res: Response): Promise<void> {
+        try {
+            const token = req.header("Authorization")?.replace("Bearer ", "");
+            if (!token) throw new Error("Access denied");
+
+          blackListedTokens.add(token);
+
+          res.status(200).json({ message: 'Logged out successfully' });
+        } catch (error) {
+          console.error('Error logging out:', error);
+          res.status(500).json({ error: 'Sorry, Token required.' });
+        }
+      }
+
+// delete all users when needed.
+
     static async deleteAllUser(req: Request, res: Response): Promise<void> {
       try {
         const deleteUsers = await UserServices.deleteAll();
 
         if (deleteUsers){
           console.log("All users deleted successfully");
-          res.status(200).json({ message: 'All users deleted successfully' });
+          res.status(200).json({ message: 'All users are deleted successfully' });
         } else {
           console.log("Failed to delete all users");
         }

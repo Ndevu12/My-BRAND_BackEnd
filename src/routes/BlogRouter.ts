@@ -14,7 +14,7 @@ blogRoutes.delete('/delete/:id',isAdmin, BlogController.deleteBlog);
 blogRoutes.get('/:id', BlogController.getBlogById);
 blogRoutes.get('/byCategory/:id', BlogController.getBlogsByCategory);
 blogRoutes.get("/", BlogController.retrieveAllBlogs);
-blogRoutes.post('/like/:id', isAdminOrSubscriber, BlogController.likeBlog);
+blogRoutes.put('/like/:id', isAdminOrSubscriber, BlogController.likeBlog);
 
 
 export default blogRoutes;

@@ -34,10 +34,10 @@ get {{baseUrl}}/blog/all
 get {{baseUrl}}/api/blogCategory/all
 
 ###
-get {{baseUrl}}/api/blogCatecory/661cd4e528e17db0050a873e
-# post {{{baseUrl}}}/api/blog/
+get {{baseUrl}}/blogCatecory/661cd4e528e17db0050a873e
+# post {{{baseUrl}}}/blog/
 ###
-patch  {{baseUrl}}/api/blog/update
+put  {{baseUrl}}/blog/update
 
 Content-Type: application/json
 {
@@ -48,3 +48,14 @@ Content-Type: application/json
   "tags": ["Science", "Technology", "Social Life"]
 }
 
+###
+post {{baseUrl}}/blog/create
+
+Content-Type: application/json
+{
+  "title": "My first blog yugijokotyuiop",
+  "content": "This is my first blog post so, Button and add a name to your test, 123",
+  "description": "button and add afcgvhbjnkml;fgvbhjnm name to your test. You will be redirected to the page from where you can create the tests. Select an endpoint that",
+  "category": "661bc8ff537e31bb91cacc7d",
+  "tags": ["Science", "Technology", "Social Life"]
+}

@@ -9,3 +9,8 @@ node_modules/
 
 # Ignore dist files
 /dist/
+
+# Ignore API-documentation
+src/APIs_Documentation/
+
+/API-test/
