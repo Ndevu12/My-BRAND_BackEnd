@@ -8,3 +8,7 @@ declare module "swagger-ui-express";
 declare module "jsonwebtoken";
 declare module "crypto-js";
 declare module "multer";
+declare module "node";
+declare module "jest";
+declare module "mongoose";
+declare module "bcrypt";
