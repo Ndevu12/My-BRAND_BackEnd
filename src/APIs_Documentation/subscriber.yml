@@ -1,9 +1,9 @@
-/subscriber:
-  post/{blogID}:
+/subscriber/create:
+  post:
     tags:
-      - subscriber
-    summary: Create a new title.
-    description: Creates a new title on the specified blog
+      - Subscriber
+    summary: Create a new subscribers.
+    description: Creates a new subscribers on the specified subscribers
     requestBody:
       required: true
       content:
@@ -11,46 +11,51 @@
           schema:
             type: object
             properties:
-              title:
+              username:
                 type: string
-                example: This is a sample blog and the first one!
-              description:
+                example: John
+              email:
+                type: email
+                description: johnmunene@gmail.com
+              location: 
                 type: string
-                description: This is a sample notification and the first one!
+                description: location of the subscriber
+                example: Nairobi
             required:
-              - title
-              - description
+              - username
+              - email
+              - location
     responses:
       "201":
-        description: title posted successfully
+        description: subscribers posted successfully
       "404":
-        description: Invalid blog ID, blog not found
+        description: Invalid subscribers ID, subscribers not found
       "500":
         description: something went wrong
 
 /subscriber/:
-  get/:
+  get:
     tags:
-      - title
-    summary: Retrieve all titles
-    description: Retrieve all titles from the database
+      - Subscriber
+    summary: Retrieve all subscribers
+    description: Retrieve all subscribers from the database
     responses:
       "200":
         description: Successful request
       "500":
         description: Sorry, something went wrong
 
-/subscriber/:
-  put/{id}:
+/subscriber/update/{id}:
+  put:
     tags:
-      - title
-    summary: Update a title by its id.
-    description: Updates a title with given id from params
+      - Subscriber
+    summary: Update a subscribers by his/her id.
+    description: Updates a subscribers with given id from params
     parameters:
       - id: id
         in: path
         required: true
-        description: title id
+        description: subscribers id
         type: string
     requestBody:
       required: true
@@ -59,38 +64,46 @@
           schema:
             type: object
             properties:
-              title:
+              username:
                 type: string
-                example: This is a sample blog and the first one!
-              description:
+                example: John
+              email:
+                type: email
+                description: johnmunene@gmail.com
+              location: 
                 type: string
+                description: location of the subscriber
+                example: Nairobi
             required:
-              - title
-              - description
+              - username
+              - email
+              - location
     responses:
       "200":
-        description: title updated successfully
+        description: subscribers updated successfully
       "404":
-        description: title with the given ID was not found.
+        description: subscribers with the given ID was not found.
       "500":
         description: something goes wrong
 
-/subscriber/{id}:
+/subscriber/delete/{id}:
   delete:
     tags:
-      - title
-    summary: Delete a title by its id.
-    description: Deletes a title with given id from params
+      - Subscriber
+    summary: Delete a subscribers by his/her id.
+    description: Deletes a subscribers with given id from params
+    security:
+      - bearerAuth: []
     parameters:
       - id: id
         in: path
         required: true
-        description: title id
+        description: subscribers id
         type: string
     responses:
       "200":
-        description: title deleted successfully
+        description: subscribers deleted successfully
       "404":
-        description: title with the given ID was not found.
+        description: subscribers with the given ID was not found.
       "500":
         description: something goes wrong

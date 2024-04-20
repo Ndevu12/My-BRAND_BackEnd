@@ -2,9 +2,9 @@
  * Controller for handling Blog Category-related operations.
  */
 import { Request, Response } from "express";
-import CategoryServices from "../services/blogCategoryService.ts";
-import { ICategory } from "../models/blogCategories.ts";
-import CategoryService from "../services/blogCategoryService.ts";
+import CategoryServices from "../services/blogCategoryService";
+import { ICategory } from "../models/blogCategories";
+import CategoryService from "../services/blogCategoryService";
 class CategoryController {
   /**
    * Method to create a new blog CategoryServices.

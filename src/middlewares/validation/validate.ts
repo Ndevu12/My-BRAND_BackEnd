@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
-import validation from "../../helpers/validator.ts";
-import signupSchema from "./signup.ts";
-import subscribeSchema from "./subscription.ts";
-import createBlogSchema from "./blog.ts";
+import validation from "../../helpers/validator";
+import signupSchema from "./signup";
+import subscribeSchema from "./subscription";
+import createBlogSchema from "./blog";
 
 class UserValidation {
   static signup(req: Request, res: Response, next: NextFunction) {

@@ -1,8 +1,8 @@
 import supertest from "supertest";
-import { app } from "../app.ts";
-import { User } from "../models/user.ts";
+import { app } from "../app";
+// import { User } from "../models/user";
 import mongoose from "mongoose";
-import reset from "../controllers/reset.ts";
+// import reset from "../controllers/reset";
 
 export const request = supertest(app);
 

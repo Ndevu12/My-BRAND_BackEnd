@@ -1,12 +1,12 @@
 import { Request, Response } from "express";
-import { User, IUser } from "../models/user.ts";
+import { User, IUser } from "../models/user";
 import jwt from "jsonwebtoken";
-import { sendAuthorizationCodeByEmailAndPhone } from "../utils/authorizationUtils.ts";
+import { sendAuthorizationCodeByEmailAndPhone } from "../utils/authorizationUtils";
 import { generate, check } from "../helpers/cryptoJs";
-import { sign } from "../helpers/jwtToken.ts";
+import { sign } from "../helpers/jwtToken";
 import response from "../helpers/response";
-import UserServices from "../services/userServices.ts";
-import { blackListedTokens } from "../middlewares/authentication.ts";
+import UserServices from "../services/userServices";
+import { blackListedTokens } from "../middlewares/authentication";
 
 class UserController {
   static async registerAdmin(req: Request, res: Response): Promise<void> {

@@ -1,9 +1,9 @@
 import supertest from "supertest";
 import { app } from "../app";
-import category from "../services/blogCategoryService.ts";
-import mongoose, { Schema } from "mongoose";
-import { Category } from "../models/blogCategories.ts";
-import reset from "../controllers/reset.ts";
+// import category from "../services/blogCategoryService";
+import mongoose from "mongoose";
+import { Category } from "../models/blogCategories";
+// import reset from "../controllers/reset";
 
 export const request = supertest(app);
 
@@ -12,10 +12,6 @@ const categoryData = {
 };
 
 let token: string;
-let userId: string;
-let authorId: string;
-let blogID: string;
-let id: string;
 
 describe("api/blogCategory", () => {
   beforeAll(async () => {

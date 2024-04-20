@@ -1,4 +1,4 @@
-import { IMessage, Message } from "../models/messages.ts";
+import { IMessage, Message } from "../models/messages";
 
 class MessageService {
   static async deletemany() {

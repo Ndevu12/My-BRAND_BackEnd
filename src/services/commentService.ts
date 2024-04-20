@@ -1,4 +1,4 @@
-import { Comment, IComment } from "../models/comments.ts";
+import { Comment, IComment } from "../models/comments";
 
 class CommentServices {
   

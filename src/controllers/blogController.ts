@@ -1,15 +1,15 @@
 import { Request, Response } from "express";
-import { Blog, IBlog } from "../models/Blog.ts";
-import BlogServices from "../services/blogService.ts";
-import subscriberUtils from "../utils/subscriberUtilities.ts";
-import response from "../helpers/response.ts";
-import cloudinary from "../helpers/cloudinary.ts";
-import SubscriberService from "../services/subscriberService.ts";
+import { Blog, IBlog } from "../models/Blog";
+import BlogServices from "../services/blogService";
+// import subscriberUtils from "../utils/subscriberUtilities";
+import response from "../helpers/response";
+import cloudinary from "../helpers/cloudinary";
+import SubscriberService from "../services/subscriberService";
 import { Types } from "mongoose";
-import { CustomeRequest } from "../middlewares/authentication.ts";
-import { Category } from "../models/blogCategories.ts";
-import { Message } from "../models/messages.ts";
-import { Comment } from "../models/comments.ts";
+import { CustomeRequest } from "../middlewares/authentication";
+// import { Category } from "../models/blogCategories";
+// import { Message } from "../models/messages";
+import { Comment } from "../models/comments";
 
 /**
  * Controller class responsible for handling blog-related requests.
@@ -29,16 +29,16 @@ class blogController {
         imageURL = link.secure_url;
       }
 
-      const { title, content } = req.body;
+      const { title } = req.body;
       const blogExists = await BlogServices.getBlogByTitle(title);
       if (blogExists) {
         response(res, 409, "Blog already exists", null, "BLOG_EXISTS");
         return;
       }
       // const tags = Array.isArray(req.query.tags) ? req.query.tags.map(String) : [String(req.query.tags)];
-      const category = Array.isArray(req.query.category)
-        ? req.query.category.map(String)
-        : [String(req.query.category)];
+      // const category = Array.isArray(req.query.category)
+      //   ? req.query.category.map(String)
+      //   : [String(req.query.category)];
 
       const blogData: any = {
         title: req.body.title,
@@ -107,6 +107,23 @@ class blogController {
       res.status(200).json({ message: "Blog deleted successfully" });
     } catch (error) {
       console.error("Error deleting blog:", error);
+      res.status(500).send("Sorry, something went wrong");
+    }
+  }
+
+
+  static async getBlogByTitle(req: Request, res: Response): Promise<void> {
+    try {
+      const { title } = req.params;
+      const blog = await BlogServices.getBlogByTitle(title);
+      if (!blog) {
+        console.log("Blog not found");
+        res.status(404).send("Blog not found");
+        return;
+      }
+      res.status(200).json(blog);
+    } catch (error) {
+      console.error("Error fetching blog by title:", error);
       res.status(500).send("Sorry, something went wrong");
     }
   }

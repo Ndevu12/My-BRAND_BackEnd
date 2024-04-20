@@ -2,8 +2,8 @@
  * Controller for handling Message-related operations.
  */
 import { Request, Response } from "express";
-import { IMessage } from "../models/messages.ts";
-import MessageService from "../services/messageService.ts";
+import { IMessage } from "../models/messages";
+import MessageService from "../services/messageService";
 
 class messageController {
   /**

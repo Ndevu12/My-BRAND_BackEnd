@@ -1,22 +1,22 @@
-import express, { Application } from 'express';
+import express, { Application } from "express";
 // import bodyParser from 'body-parser';
-import cookieParser from 'cookie-parser';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import { connectDb } from "./OnStart/connectdb.ts";
+import cookieParser from "cookie-parser";
+import cors from "cors";
+import dotenv from "dotenv";
+import { connectDb } from "./OnStart/connectdb";
 
-import Route from './routes/index.ts';
+import Route from "./routes/index";
 
-import { seedCategories } from './populateDB.ts/seedCategories.ts';
-import { seedBlog } from './populateDB.ts/seedBlog.ts';
-import { seedAuthor } from './populateDB.ts/seedAuthor.ts';
-import { seedUser } from './populateDB.ts/seedUser.ts';
-import { seedComment } from './populateDB.ts/seedComment.ts';
-import { seedMessage } from './populateDB.ts/seedMessage.ts';
-import { seedNotification } from './populateDB.ts/seedNotification.ts';
-import { seedSubscriber } from './populateDB.ts/seedSubscriber.ts';
+// import { seedCategories } from './populateDB/seedCategories';
+// import { seedBlog } from './populateDB/seedBlog';
+// import { seedAuthor } from './populateDB/seedAuthor';
+// import { seedUser } from './populateDB/seedUser';
+// import { seedComment } from './populateDB/seedComment';
+// import { seedMessage } from './populateDB/seedMessage';
+// import { seedNotification } from './populateDB/seedNotification';
+// import { seedSubscriber } from './populateDB/seedSubscriber';
 
-import { Documentation } from './OnStart/APIs-Docs.ts';
+import { Documentation } from "./OnStart/APIs-Docs";
 
 dotenv.config();
 
@@ -26,13 +26,10 @@ const app: Application = express();
 app.use(express.json());
 app.use(cors());
 
-
 // cookie-parser middleware
 app.use(cookieParser());
 
-
-app.use('/api', Route);
-
+app.use("/api", Route);
 
 // Set up mongoose connection
 connectDb();
@@ -57,4 +54,3 @@ app.listen(PORT, () => {
 });
 
 export { app };
- 

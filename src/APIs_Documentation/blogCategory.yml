@@ -1,4 +1,4 @@
-/blogCategory:
+/blogCategory/create:
   post:
     tags:
       - blogCategory
@@ -61,6 +61,8 @@
         description: required field error
       "500":
         description: Sorry, something went wrong
+        
+/blogCategory/:
   get:
     tags:
       - blogCategory
@@ -76,7 +78,7 @@
   get:
     tags:
       - blogCategory
-    summary: Retrieve single blogCategorys
+    summary: Retrieve single blogCategory
     description: Retrieve single blogCategorys from the database by id
     parameters:
       - name: id
@@ -91,7 +93,9 @@
         description: blogCategory not found.
       "500":
         description: something went wrong
-  put/{id}:
+
+/blogCategory/update/{id}:
+  put:
     tags:
       - blogCategory
     summary: update blogCategory
@@ -129,6 +133,8 @@
         description: blogCategory not found.
       "500":
         description: something went wrong
+
+/blogCategory/delete/{id}:
   delete:
     tags:
       - blogCategory
@@ -147,45 +153,5 @@
         description: blogCategory deleted successfully
       "404":
         description: blogCategory with the given ID was not found.
-      "500":
-        description: something went wrong
-
-/blogCategory/{id}:
-  put:
-    tags:
-      - blogCategory
-    summary: retrieve blogCategory by a category
-    description: retrieve all blogCategory of the same category
-    parameters:
-      - name: id
-        in: path
-        required: true
-        description: blogCategory id
-        type: string
-    responses:
-      "200":
-        description: blogCategory retrieved successfully"
-      "404":
-        description: blogCategorys not found.
-      "500":
-        description: something went wrong
-
-/blogCategory/{id}:
-  put:
-    tags:
-      - blogCategory
-    summary: comment on a blogCategory
-    description: increase comment number of a blogCategory
-    parameters:
-      - name: id
-        in: path
-        required: true
-        description: blogCategory id
-        type: string
-    responses:
-      "200":
-        description: blogCategory comment added successfully"
-      "404":
-        description: blogCategory not found.
       "500":
         description: something went wrong

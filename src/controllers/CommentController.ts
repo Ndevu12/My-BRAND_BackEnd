@@ -1,6 +1,6 @@
 import { type Request, type Response } from "express";
-import { Blog } from "../models/Blog.ts";
-import { Comment, validate } from "../models/comments.ts";
+import { Blog } from "../models/Blog";
+import { Comment, validate } from "../models/comments";
 import mongoose from "mongoose";
 
 class CommentController {
