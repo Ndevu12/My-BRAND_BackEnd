@@ -47,6 +47,14 @@ Documentation();
 // seedNotification();
 // seedSubscriber();
 
+app.get("/", (req, res) => {
+  res
+    .status(200)
+    .send(
+      "Welcome to MyBrand API.\n\nUse the following Endpoints to interact with the API:\n\n /api-docs, /api/blog/, /api/category/, /api/comment,\n /api/message, /api/notification, /api/subscriber/, /api/user"
+    );
+});
+
 // Start the server
 const PORT: number = Number(process.env.PORT) || 6090;
 app.listen(PORT, () => {
