@@ -1,26 +1,26 @@
 import swaggerjsdoc from "swagger-jsdoc";
 import dotenv from "dotenv";
-import { SwaggerServer } from "../OnStart/SwaggerServer.ts";
+import { SwaggerServer } from "../OnStart/SwaggerServer";
 
 dotenv.config();
 
-const swagerServer = SwaggerServer();
+const swaggerServer = SwaggerServer();
 
 const options: swaggerjsdoc.Options = {
   definition: {
     openapi: "3.0.2",
     info: {
-      title: "Portfolio Website API Documentation",
+      title: "Ndevu's portfolio Website API Documentation",
       version: "1.0.0",
       description:
         "MyBrand Website's Backend API documentation of how to use the API to perform various operations.",
       contact: {
-        name: "MyBrand Website",
+        name: "NdevuSpace",
         url: "https://ndevu12.github.io/My-BRAND/",
-        email: "ndevulion@mybrand.com",
+        email: "niyokwizerwajeanpaulelisa@gmail.com",
       },
     },
-    servers: [{ url: swagerServer }],
+    servers: [{ url: swaggerServer }],
     components: {
       securitySchemes: {
         bearerAuth: {

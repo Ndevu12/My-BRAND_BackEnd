@@ -1,5 +1,5 @@
-import { app } from "../app.ts";
-import swaggerDocs from "../API_config/swaggerOptions.ts";
+import { app } from "../app";
+import swaggerDocs from "../API_config/swaggerOptions";
 import swaggerUi from "swagger-ui-express";
 
 export const Documentation = (): void => {

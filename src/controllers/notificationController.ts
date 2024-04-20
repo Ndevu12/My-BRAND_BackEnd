@@ -2,8 +2,8 @@
  * Controller for handling Notification-related operations.
  */
 import { Request, Response } from 'express';
-import { INotification } from '../models/notification.ts';
-import NotificationService from '../services/notificationService.ts';
+import { INotification } from '../models/notification';
+import NotificationService from '../services/notificationService';
 
 class notificationController {
     /**

@@ -1,8 +1,8 @@
 import supertest from "supertest";
 import { app } from "../app";
-import CommentController from "../controllers/CommentController.ts";
+import CommentController from "../controllers/CommentController";
 import mongoose from "mongoose";
-import reset from "../controllers/reset.ts";
+// import reset from "../controllers/reset";
 
 export const request = supertest(app);
 

@@ -1,9 +1,8 @@
 import { Request, Response, NextFunction, RequestHandler } from "express";
-import { verify } from "../helpers/jwtToken.ts";
-import response from "../helpers/response.ts";
+import { verify } from "../helpers/jwtToken";
+import response from "../helpers/response";
 
 // ...
-
 
 export const blackListedTokens = new Set<string>();
 export interface DecodedUser {
@@ -24,15 +23,24 @@ export const isAdmin: RequestHandler = async (
 ): Promise<void> => {
   try {
     const authHeader = req.header("Authorization");
-    if (!authHeader){ 
-      console.log("Acess denied, You are not allowed to perform this action. Please")
-      throw new Error("Acess denied, You are not allowed to perform this action. Please ");
+    if (!authHeader) {
+      console.log(
+        "Acess denied, You are not allowed to perform this action. Please"
+      );
+      throw new Error(
+        "Acess denied, You are not allowed to perform this action. Please "
+      );
     }
     const token = authHeader.replace("Bearer ", "");
 
     if (blackListedTokens.has(token)) {
       console.log("Token blacklisted");
-      res.status(403).json({ message: "Access denied. Your current TOKEN HAD BEEN blacklisted. Please log in again." });
+      res
+        .status(403)
+        .json({
+          message:
+            "Access denied. Your current TOKEN HAD BEEN blacklisted. Please log in again.",
+        });
       return;
     }
 
@@ -40,7 +48,13 @@ export const isAdmin: RequestHandler = async (
 
     if (user.role !== "admin") {
       console.log("Acess denied. You are not an ADMIN");
-      response(res, 403, "Acess denied. You are not an ADMIN", null, "FORBIDDEN");
+      response(
+        res,
+        403,
+        "Acess denied. You are not an ADMIN",
+        null,
+        "FORBIDDEN"
+      );
       return;
     }
     req.user = user;

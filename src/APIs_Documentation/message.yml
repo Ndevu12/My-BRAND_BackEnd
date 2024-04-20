@@ -1,5 +1,5 @@
-/message:
-  post/{blogID}:
+/message/contactme:
+  post:
     tags:
       - message
     summary: Create a new message.
@@ -33,65 +33,29 @@
       "500":
         description: something went wrong
 
-/commnent/:
-  get/:
+/message/:
+  get:
     tags:
       - message
     summary: Retrieve all messages
     description: Retrieve all messages from the database
+    security:
+    - bearerAuth: []
     responses:
       "200":
         description: Successful request
       "500":
         description: Sorry, something went wrong
 
-/message/:
-  put/{id}:
-    tags:
-      - message
-    summary: Update a message by its id.
-    description: Updates a message with given id from params
-    parameters:
-      - id: id
-        in: path
-        required: true
-        description: message id
-        type: string
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              message:
-                type: string
-                example: This is a sample blog and the first one!
-              email:
-                type: string
-                format: email
-                example: gygsiugdhfg984y9883702gmail.com
-              avatarOrImage: 
-                type: string
-                description: avator of message sender
-                example: Munana
-            required:
-              - message
-              - email
-    responses:
-      "200":
-        description: message updated successfully
-      "404":
-        description: message with the given ID was not found.
-      "500":
-        description: something goes wrong
 
-/message/{id}:
+/message/delete/{id}:
   delete:
     tags:
       - message
     summary: Delete a message by its id.
     description: Deletes a message with given id from params
+    security:
+      - bearerAuth: []
     parameters:
       - id: id
         in: path

@@ -2,8 +2,8 @@
   post:
     tags:
       - Authentication
-    summary: signup will register a new user
-    description: signup. This will create a new account for the user in database
+    summary: signup will register a new Admin
+    description: signup. Will create a new account for the user in database. The number of Admins will be limited to only one admin.
     requestBody:
       required: true
       content:
@@ -20,11 +20,13 @@
                 example: muhimana@gmail.com
               password:
                 type: string
-                example: J#oKn@knight1234
+                example: Ndevuking6ht1234
             required:
               - fullName
               - email
               - password
+              - username
+              - phoneNumber
     responses:
       "201":
         description: Signed up successfully
@@ -52,7 +54,7 @@
                 example: muhimana@gmail.com
               password:
                 type: string
-                example: J#oKn@knight1234
+                example: Ndevuking6ht1234
             required:
               - email
               - password
@@ -69,7 +71,7 @@
     tags:
       - Authentication
     summary: logout
-    description: logout from server. Your TOKEN will be blacklisted
+    description: logout from server. Admin's TOKEN will be blacklisted
     requestBody:
       required: true
       content:

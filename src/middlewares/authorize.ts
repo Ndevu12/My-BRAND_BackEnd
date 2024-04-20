@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction, RequestHandler } from "express";
-import { verify } from "../helpers/jwtToken.ts";
-import response from "../helpers/response.ts";
-import { blackListedTokens } from "./authentication.ts";
+import { verify } from "../helpers/jwtToken";
+import response from "../helpers/response";
+import { blackListedTokens } from "./authentication";
 
 // ...
 
@@ -22,15 +22,20 @@ export const isAdminOrSubscriber: RequestHandler = async (
 ): Promise<void> => {
   try {
     const authHeader = req.header("Authorization");
-    if (!authHeader){ 
+    if (!authHeader) {
       console.log("Acess denied. Subscribe first to do this action");
       throw new Error("Acess denied. Subscribe/login first to do this action");
-      }
+    }
     const token = authHeader.replace("Bearer ", "");
 
     if (blackListedTokens.has(token)) {
       console.log("Token blacklisted");
-      res.status(403).json({ message: "Access denied. Your current TOKEN HAD BEEN blacklisted. Please log in again." });
+      res
+        .status(403)
+        .json({
+          message:
+            "Access denied. Your current TOKEN HAD BEEN blacklisted. Please log in again.",
+        });
       return;
     }
     const user = verify(token) as DecodedUser;
@@ -38,13 +43,23 @@ export const isAdminOrSubscriber: RequestHandler = async (
     if (user.role === "admin" || user.role === "subscriber") {
       req.user = user;
       return next();
-    }
-    else {
-      response(res, 403, "Please subscribe first. Access Denied", null, "FORBIDDEN");
+    } else {
+      response(
+        res,
+        403,
+        "Please subscribe first. Access Denied",
+        null,
+        "FORBIDDEN"
+      );
       return;
     }
   } catch (error) {
-    response(res, 401, (error as Error).message || "Not Authorized to perform this action", null, "AUTHENTICATION_ERROR"
+    response(
+      res,
+      401,
+      (error as Error).message || "Not Authorized to perform this action",
+      null,
+      "AUTHENTICATION_ERROR"
     );
     return;
   }

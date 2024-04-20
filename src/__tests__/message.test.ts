@@ -1,7 +1,7 @@
 import supertest from "supertest";
-import { app } from "../app.ts";
+import { app } from "../app";
 import mongoose from "mongoose";
-import reset from "../controllers/reset.ts";
+// import reset from "../controllers/reset.";
 
 export const request = supertest(app);
 
@@ -28,7 +28,7 @@ let token: string;
 // Startin gpoint
 describe("api/message", () => {
   beforeAll(async () => {
-    // reset.resetSetting();
+    // reset.reseetting();
     try {
       const res = await request.post("/api/user/create").send(user);
       if (res.statusCode !== 201) {

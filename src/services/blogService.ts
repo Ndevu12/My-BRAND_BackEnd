@@ -1,4 +1,4 @@
-import { IBlog, Blog } from "../models/Blog.ts";
+import { IBlog, Blog } from "../models/Blog";
 import { Types } from "mongoose";
 
 class BlogServices {

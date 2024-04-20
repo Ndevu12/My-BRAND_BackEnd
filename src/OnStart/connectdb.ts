@@ -2,14 +2,10 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 
 dotenv.config();
-// const dburl = process.env.DB_URL;
-// process.env.NODE_ENV === "test"
-// ? process.env.DB_URL_TEST || ""
-// : process.env.DB_URL || "";
 
 const connectDb = async (): Promise<void> => {
   try {
-    const dburl = String(process.env.KEEPING) || "";
+    const dburl = String(process.env.DB_URL) || "";
 
     await mongoose.connect(dburl);
     console.log(

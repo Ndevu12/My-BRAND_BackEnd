@@ -1,5 +1,5 @@
-/comment:
-  post/{blogID}:
+/comment/add:
+  post:
     tags:
       - Comment
     summary: Create a new comment.
@@ -34,66 +34,14 @@
       "500":
         description: something went wrong
 
-/commnent/:
-  get/:
-    tags:
-      - Comment
-    summary: Retrieve all comments
-    description: Retrieve all comments from the database
-    responses:
-      "200":
-        description: Successful request
-      "500":
-        description: Sorry, something went wrong
-
-/comment/:
-  put/{id}:
-    tags:
-      - Comment
-    summary: Update a comment by its id.
-    description: Updates a comment with given id from params
-    parameters:
-      - name: id
-        in: path
-        required: true
-        description: comment id
-        type: string
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              comment:
-                type: string
-                example: This is a sample blog and the first one!
-              postID:
-                type: string
-                description: blog id
-                example: 67gygsiugdhfg984y988370
-              commenterName: 
-                type: string
-                description: commenter name
-                example: Munana
-            required:
-              - comment
-              - postID
-              - commenterName
-    responses:
-      "200":
-        description: comment updated successfully
-      "404":
-        description: comment with the given ID was not found.
-      "500":
-        description: something goes wrong
-
 /comment/{id}:
   delete:
     tags:
       - Comment
     summary: Delete a comment by its id.
     description: Deletes a comment with given id from params
+    security:
+      - bearerAuth: []
     parameters:
       - name: id
         in: path
