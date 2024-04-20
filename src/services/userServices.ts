@@ -19,7 +19,7 @@ class UserServices {
   }
 
   static async deleteAll(): Promise<any>{
-    const deleteThem = await User.deleteMany().exec();
+    const deleteThem = await User.deleteMany();
     return deleteThem;
   }
 }

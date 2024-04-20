@@ -10,13 +10,13 @@ class CommentServices {
 
     // Method to find a comment by ID
     static findCommentById(id: string): Promise<IComment | null> {
-        const comment = Comment.findById(id).exec();
+        const comment = Comment.findById(id);
         return comment;
     }
 
-    static findCommentByPostID(id: string): Promise<IComment | null> {
-        const comment = Comment.findById(id).exec();
-        return comment;
+    static findCommentByPostID(id: string): Promise<IComment | any> {
+        const comments = Comment.find({postID: id});
+        return comments;
     }
 
 

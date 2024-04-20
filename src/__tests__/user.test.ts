@@ -1,73 +1,93 @@
 import supertest from "supertest";
-import { app} from "../app.ts";
-import {  User } from "../models/user.ts";
+import { app } from "../app.ts";
+import { User } from "../models/user.ts";
 import mongoose from "mongoose";
-
+import reset from "../controllers/reset.ts";
 
 export const request = supertest(app);
 
+let token: string;
+
 const user = {
-  fullname: "Test User",
+  fullName: "Test User",
   username: "test",
   email: "elisandevu@gmail.com",
-  password: "@K1234passkey",
+  password: "PassKey433Pass2345",
   phoneNumber: "0785044398",
   role: "admin",
 };
 
-const loginUser = {
-  email: "elisandevu@gmail.com",
-  password: "@K1234passkey",
+const user1 = {
+  username: "Ndevu12",
+  password: "hellojbcKN78",
+  fullName: "hello",
+  email: "jeanjdhfpaulm@gmail.com",
+  phoneNumber: "0785044398",
 };
 
-beforeAll(async () => {
-  await  User.deleteMany();
-},  100000);
+const loginUser = {
+  username: "test",
+  password: "PassKey433Pass2345",
+};
 
+// Startin gpoint
+describe("api/user", () => {
+  beforeAll(async () => {
+    // reset.resetSetting();
 
+    try {
+      const res = await request.post("/api/user/create").send(user);
+      if (res.statusCode !== 201) {
+        throw new Error("Failed to create user");
+      }
+      token = res.body.data.accessToken;
+    } catch (error: any) {
+      console.error(error);
+      throw error;
+    }
+  }, 200000);
 
-describe("POST /api/user/signup", () => {
-  test("should create user", async () => {
-    const res = await request.post("/api/user/signup").send(user);
-    expect(res.statusCode).toBe(201);
-    expect(res.body.message).toBe("Signup successful");
-    expect(res.body.data).toBeDefined();
+  afterAll(async () => {
+    await mongoose.disconnect();
   });
 
-  test("should not create duplicate users", async () => {
-    const res = await request.post("/api/user/signup").send(user);
-    expect(res.statusCode).toBe(409);
+  describe("POST /api/user/signup", () => {
+    test("should not create duplicate users", async () => {
+      const res = await request.post("/api/user/signup").send(user1);
+      expect(res.statusCode).toBe(400);
+      expect(res.body.message).toBe(
+        "Username, password or email already exists"
+      );
+    });
+  });
+
+  describe("POST /api/user/login", () => {
+    test("should not login user with incorrect username", async () => {
+      const res = await request
+        .post("/api/user/login")
+        .send({ username: "userName", password: "PassKey433Pass2345" });
+      expect(res.statusCode).toBe(400);
+    });
+
+    test("should not login user with incorrect password", async () => {
+      const res = await request
+        .post("/api/user/login")
+        .send({ username: "test", password: "@incorrectpassword1" });
+      expect(res.statusCode).toBe(400);
+    });
+
+    test("should return authentication token on successful login", async () => {
+      const res = await request.post("/api/user/login").send(loginUser);
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data.accessToken).toBeDefined();
+    });
+
+    test("should not login user with invalid formatted or empty email or password", async () => {
+      const res = await request
+        .post("/api/user/login")
+        .send({ username: "", password: "" });
+      expect(res.statusCode).toBe(404);
+    });
   });
 });
-
-describe("POST /api/user/login", () => {
-  test("should not login user with incorrect email", async () => {
-    const res = await request
-      .post("/api/user/login")
-      .send({ account: "incorrectemail@gmail.com", password: "@A1234pass" });
-    expect(res.statusCode).toBe(404);
-  });
-
-  test("should not login user with incorrect password", async () => {
-    const res = await request
-      .post("/api/user/login")
-      .send({ account: "testuser@gmail.com", password: "@incorrectpassword1" });
-    expect(res.statusCode).toBe(401);
-  });
-
-  test("should return authentication token on successful login", async () => {
-    const res = await request.post("/api/user/login").send(loginUser);
-
-    expect(res.statusCode).toBe(200);
-    expect(res.body.data.accessToken).toBeDefined();
-  });
-
-  test("should not login user with invalid formatted or empty email or password", async () => {
-    const res = await request
-      .post("/api/user/login")
-      .send({ account: "", password: "" });
-    expect(res.statusCode).toBe(404);
-  });
-});
-
-

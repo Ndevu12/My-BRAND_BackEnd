@@ -1,0 +1,89 @@
+/user/signup:
+  post:
+    tags:
+      - Authentication
+    summary: signup will register a new user
+    description: signup. This will create a new account for the user in database
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              fullName:
+                type: string
+                example: Jean Muhimana
+              email:
+                type: string
+                format: email
+                example: muhimana@gmail.com
+              password:
+                type: string
+                example: J#oKn@knight1234
+            required:
+              - fullName
+              - email
+              - password
+    responses:
+      "201":
+        description: Signed up successfully
+      "400":
+        description: Username or email already exists
+      "500":
+        description: Sorry, something went wrong
+
+/user/login:
+  post:
+    tags:
+      - Authentication
+    summary: login
+    description: login with email and password.  get authentication(bearer) tokens in return
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              email:
+                type: string
+                format: email
+                example: muhimana@gmail.com
+              password:
+                type: string
+                example: J#oKn@knight1234
+            required:
+              - email
+              - password
+    responses:
+      "200":
+        description: Logged in successfully!
+      "401":
+        description: Invalid username or password
+      "500":
+        description: Sorry, something went wrong
+
+/user/logout:
+  post:
+    tags:
+      - Authentication
+    summary: logout
+    description: logout from server. Your TOKEN will be blacklisted
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              token:
+                type: string
+                example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+            required:
+              - token
+    responses:
+      "200":
+        description: logged out successfully
+      "500":
+        description: Sorry, something went wrong

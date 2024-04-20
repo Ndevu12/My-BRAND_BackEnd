@@ -2,21 +2,20 @@ import { IBlog, Blog } from "../models/Blog.ts";
 import { Types } from "mongoose";
 
 class BlogServices {
-
-          /**
-         * Method to find blog documents by category.
-         * @param category The category to filter blogs by.
-         * @returns Promise resolving to an array of blog documents matching the category.
-         */
+  /**
+   * Method to find blog documents by category.
+   * @param category The category to filter blogs by.
+   * @returns Promise resolving to an array of blog documents matching the category.
+   */
   static async findBlogsByCategory(query: string): Promise<IBlog[]> {
-    const findBlogByCategor =  await Blog.find({category: query }).exec();
+    const findBlogByCategor = await Blog.find({ category: query }).exec();
     return findBlogByCategor;
-   }
+  }
 
-   static async getAllBlogComment(id: string): Promise<IBlog | null> {
-    const comments  = await Blog.findById(id).populate("comments").exec();
+  static async getAllBlogComment(id: string): Promise<IBlog | null> {
+    const comments = await Blog.findById(id).populate("comments").exec();
     return comments;
-   }
+  }
 
   static async getSingleBlog(query: string): Promise<IBlog | null> {
     const blog = await Blog.findOne({ title: query });
@@ -32,13 +31,16 @@ class BlogServices {
     return blogs;
   }
 
-
   static async getblogById(id: string): Promise<IBlog | null> {
     const blog = await Blog.findById(id);
     return blog;
   }
 
-  static async updateBlog(blogId: string, blogData: IBlog): Promise<IBlog | null> {
+  static async updateBlog(
+    blogId: string,
+    blogData: IBlog
+  ): Promise<IBlog | null> {
+    console.log("Inside update blog service");
     const blog = await Blog.findByIdAndUpdate(blogId, blogData, { new: true });
     return blog;
   }
@@ -48,10 +50,15 @@ class BlogServices {
     return blog;
   }
 
-  static async addCommentToBlog(blogId: any, commentId: Types.ObjectId): Promise<void> {
+  static async addCommentToBlog(
+    blogId: any,
+    commentId: Types.ObjectId
+  ): Promise<void> {
     const blog = await Blog.findById(blogId);
     if (!blog) {
-      throw new Error("Failed to add comment on blog. Blog not found\nLocation: BlogServices\n");
+      throw new Error(
+        "Failed to add comment on blog. Blog not found\nLocation: BlogServices\n"
+      );
     }
     blog.comments!.push(commentId);
     await blog.save();
@@ -68,16 +75,46 @@ class BlogServices {
     return blog;
   }
 
-   static async getBlogByTitle(query: string): Promise<IBlog | null> {
+  static async findAuthor(blogId: string): Promise<any> {
+    const blog = await Blog.findById(blogId);
+    if (!blog) {
+      throw new Error("Blog not found");
+    }
+    const author = blog.author;
+    return author;
+  }
+
+  static async updateAuthor(
+    BlogId: string,
+    newAuthor: Object
+  ): Promise<IBlog | null> {
+    const blogId = BlogId;
+    const Author = newAuthor;
+    console.log("Auhtor in updateAuthor service:", newAuthor);
+    const updatedBlog = await Blog.findByIdAndUpdate(
+      blogId,
+      { author: Author },
+      { new: true }
+    );
+    return updatedBlog;
+  }
+
+  static async deleteAuthor(BlogId: string): Promise<IBlog | null> {
+    const blogId = BlogId;
+
+    const updatedBlog = await Blog.findByIdAndDelete(blogId);
+    return updatedBlog;
+  }
+
+  static async getBlogByTitle(query: string): Promise<IBlog | null> {
     const blog = await Blog.findOne({ title: query });
     return blog;
   }
 
-    // Method to delete a blog document
-   static async deleteAllBlogs(): Promise<any> {
-      return await Blog.deleteMany().exec();
-    }
+  // Method to delete a blog document
+  static async deleteAllBlogs(): Promise<any> {
+    return await Blog.deleteMany();
+  }
 }
-
 
 export default BlogServices;
