@@ -16,6 +16,8 @@ import { seedMessage } from './populateDB.ts/seedMessage.ts';
 import { seedNotification } from './populateDB.ts/seedNotification.ts';
 import { seedSubscriber } from './populateDB.ts/seedSubscriber.ts';
 
+import { Documentation } from './OnStart/APIs-Docs.ts';
+
 dotenv.config();
 
 const app: Application = express();
@@ -35,6 +37,8 @@ app.use('/api', Route);
 // Set up mongoose connection
 connectDb();
 
+// SWAGGER DOCS
+Documentation();
 
 // Seeds
 // seedCategories();

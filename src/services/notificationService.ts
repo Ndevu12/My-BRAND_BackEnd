@@ -40,7 +40,7 @@ static async updateNotification(id: string, data: Partial<INotification>): Promi
  * @param id Notification ID to delete.
  * @const notification =s Promise resolving to the deleted Notification document, or null if not found.
  */
-static async deleteNotification(id: string): Promise<INotification | null> {
+static async deleteNotification(id: any): Promise<INotification | null> {
     const notification = await Notification.findByIdAndDelete(id).exec();
     return notification;
 }

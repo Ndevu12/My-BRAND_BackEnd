@@ -3,7 +3,7 @@
     tags:
       - Blog
     summary: Create a new blog
-    description: post the created new blog in database
+    description: post create a new blog in database
     security:
       - bearerAuth: []
     requestBody:

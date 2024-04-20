@@ -3,13 +3,14 @@ import dotenv from "dotenv";
 
 dotenv.config();
 // const dburl = process.env.DB_URL;
-  // process.env.NODE_ENV === "test"
-  //   ? process.env.DB_URL_TEST || ""
-  //   : process.env.DB_URL || "";
+// process.env.NODE_ENV === "test"
+// ? process.env.DB_URL_TEST || ""
+// : process.env.DB_URL || "";
 
 const connectDb = async (): Promise<void> => {
   try {
-    const dburl ="mongodb+srv://Ndevu:ndevuspace@cluster0.guntyex.mongodb.net/NdevuSpace?retryWrites=true&w=majority&appName=Cluster0"; 
+    const dburl = String(process.env.KEEPING) || "";
+
     await mongoose.connect(dburl);
     console.log(
       `${
@@ -24,4 +25,4 @@ const connectDb = async (): Promise<void> => {
   }
 };
 
-export { connectDb};
+export { connectDb };

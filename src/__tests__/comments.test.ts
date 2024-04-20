@@ -1,141 +1,119 @@
 import supertest from "supertest";
 import { app } from "../app";
-import  CommentServices from "../services/commentService.ts";
+import CommentController from "../controllers/CommentController.ts";
 import mongoose from "mongoose";
+import reset from "../controllers/reset.ts";
 
 export const request = supertest(app);
 
 const user = {
-  fullname: "Test User",
-  username: "test",
-  email: "ndevulion@gmail.com",
-  password: "@K1234passkey",
+  fullName: "kim Test User",
+  username: "Kimtest",
+  email: "kimndevulion@gmail.com",
+  password: "kimK1234passkey",
   phoneNumber: "0785044398",
   role: "admin",
 };
 
-let BlogID0 = '00';
-let BlogID1= '12';
-let BlogID4= '43';
+const author = {
+  author: {
+    name: "Hale",
+    email: "haleywywirbch@gmail.com",
+  },
+};
 
-
+let categoryID: string;
 let token: string;
 let userId: string;
-let CommentServicesID: string;
+let CommentID: string;
+let blogID: string;
 
-beforeAll(async () => {
-  await CommentServices.deletemany();
-},  100000);
+const categoryData = {
+  name: "hnmTechnology",
+};
 
-// Test signup feature/functionality
-describe("POST /api/Comment", () => {
-    test("create an author", async () => {
-        const res = await request.post("/api/user/signup").send(user);
-        expect(res.statusCode).toBe(201); 
-        expect(res.body.message).toBe("Signup successful");
-        userId = res.body.data._id;
-        token = res.body.data.accessToken;
-        expect(res.body.data).toBeDefined();
-    });
+// Startin gpoint
+describe("api/comment", () => {
+  beforeAll(async () => {
+    // reset.resetSetting();
+    try {
+      const res = await request.post("/api/user/create").send(user);
+      if (res.statusCode !== 201) {
+        throw new Error("Failed to create user");
+      }
+      token = res.body.data.accessToken;
+    } catch (error: any) {
+      console.error(error);
+      throw error;
+    }
+  }, 200000);
 
-    test("create a new CommentServices post", async () => {
-        const res = await request
-            .post("/api/blog/Category/create")
-            .set("Authorization", `Bearer ${token}`)
-            .send({
-                post_ID: BlogID0,
-                CommentServiceserName:  'Ndevu',
-                CommentServices: 'Wow I like this post, I would likt to have too much of it',
-            });
-        expect(res.statusCode).toBe(201);
-        expect(res.body.message).toBe("CommentServices created");
-        expect(res.body.data).toBeDefined();
-        CommentServicesID = res.body.data._id;
-    });
-    test("Don't create duplicate", async () => {
-        const res = await request
-            .post("/api/blog/Category/create")
-            .set("Authorization", `Bearer ${token}`)
-            .send({
-                post_ID: BlogID0,
-                CommentServiceserName:  'Ndevu',
-                CommentServices: 'Wow I like this post, I would likt to have too much of it',
-            });
-        expect(res.statusCode).toBe(409);
-        expect(res.body.message).toBe("CommentServices already exists");
-    });
-});
-
-describe("GET /api/blog/Category/:CommentServicesID", () => {
-    test("should retrieve a single CommentServices ", async () => {
-        const newCommentServicesdata = {
-            post_ID: BlogID1,
-            CommentServiceserName:  'Ndevu12',
-            CommentServices: 'Wow I like this post, I would likt to have too much of it. ooooooooh',
-        };
-        await CommentServices.createComment(newCommentServicesdata);
-        const res = await request.get(`/api/blog/Category/${CommentServicesID}`);
-        expect(res.statusCode).toBe(200);
-        expect(res.body.message).toBe("CommentServices retrieved successfully");
-        expect(res.body.data).toBeDefined();
-    });
-    test("should return CommentServices not found ,CommentServices id doesn't exist", async () => {
-        const res = await request.get(`/api/blog/Category/65f3134a494934b10177c062`);
-        expect(res.statusCode).toBe(404);
-        expect(res.body.message).toBe("CommentServices not found");
-    });
-});
-
-describe("GET /api/blog/Category/all", () => {
-  test("should retrieve all blog Categorys", async () => {
-    const res = await request.get("/api/blog/Category/all");
-    expect(res.statusCode).toBe(200);
-    expect(res.body.message).toBe("All CommentServicess retrieved!");
-    expect(res.body.data).toBeDefined();
+  afterAll(async () => {
+    await mongoose.disconnect();
+    await mongoose.connection.close();
   });
-});
-describe("PATCH /api/blog/Category/update/:CommentServicesID", () => {
-  test("should update the CommentServices", async () => {
-    const res = await request
-      .patch(`/api/blog/Category/update/${CommentServicesID}`)
-      .set("Authorization", `Bearer ${token}`)
-      .send({
-        post_ID: BlogID0,
-        CommentServiceserName:  'Ndevu',
-        CommentServices: 'Wow I like this post, I would likt to have too much of it',
-      });
-    expect(res.statusCode).toBe(200);
-    expect(res.body.message).toBe("CommentServices updated successfully");
-    expect(res.body.data).toBeDefined();
-  });
-  test("should not update a non-existing CommentServices", async () => {
-    const res = await request
-      .patch(`/api/blog/Category/update/65f3134a494934b10177c062`)
-      .set("Authorization", `Bearer ${token}`)
-      .send({
-        post_ID: BlogID4,
-        CommentServiceserName:  'Ndevu',
-        CommentServices: 'Wow I like this post, I would likt to have too much of it.',
-      });
-    expect(res.statusCode).toBe(404);
-    expect(res.body.message).toBe("blog Category not found");
-  });
-});
 
-describe("DELETE /api/blog/Category/delete/:CommentServicesID", () => {
-  test("should delete to a CommentServices", async () => {
-    const res = await request
-      .delete(`/api/blog/Category/delete/${CommentServicesID}`)
-      .set("Authorization", `Bearer ${token}`);
-    expect(res.statusCode).toBe(200);
-    expect(res.body.message).toBe("CommentServices deleted successfully");
-    expect(res.body.data).toBeDefined();
+  // Test signup feature/functionality
+  describe("POST /api/comment", () => {
+    test("Should create a category", async () => {
+      const res = await request
+        .post("/api/blogCategory/create")
+        .send(categoryData);
+      expect(res.statusCode).toBe(201);
+      expect(res.body.message).toBe("category created successful");
+      expect(res.body.data).toBeDefined();
+    });
+
+    test("Should create a new blog", async () => {
+      const res = await request
+        .post("/api/blog/create")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          title: "Test blog ufkiuvhvjkjgh",
+          content: "This is a test blog post",
+          Description: "This is a test blog post",
+          author: author,
+          category: ["6622c318d2ec9e81782bf6e3"],
+          tags: ["test"],
+          likes: 0,
+        });
+      expect(res.statusCode).toBe(201);
+      expect(res.body.message).toBe("Blog created successfully");
+      expect(res.body.data).toBeDefined();
+      blogID = res.body.data._id;
+    });
+
+    test("Should create a new comment", async () => {
+      const res = await request
+        .post("/api/comment/add")
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          postID: ["622642b7d063b567b5fdfae"],
+          commenterName: "Ndevu re",
+          comment: "Wow I like this post, I would likt to have too much of it",
+        });
+      expect(res.statusCode).toBe(201);
+      expect(res.body.message).toBe("Comment created");
+      expect(res.body.data).toBeDefined();
+      CommentID = res.body.data._id;
+    });
   });
-  test("should not delete a non-existing CommentServices", async () => {
-    const res = await request
-      .delete(`/api/blog/Category/delete/${CommentServicesID}`)
-      .set("Authorization", `Bearer ${token}`);
-    expect(res.statusCode).toBe(404);
-    expect(res.body.message).toBe("CommentServices not found");
+
+  describe("DELETE /api/comment/delete/:CommentID", () => {
+    test("should delete a Comment", async () => {
+      const res = await request
+        .delete(`/api/comment/delete/6622c737d2ec9e81782bf6fe`)
+        .set("Authorization", `Bearer ${token}`);
+      expect(res.statusCode).toBe(200);
+      expect(res.body.message).toBe("Comment deleted successfully");
+      expect(res.body.data).toBeDefined();
+    });
+    test("should not delete a non-existing Comment", async () => {
+      const res = await request
+        .delete(`/api/comment/delete/6622642b7d063b567b5fdfae`)
+        .set("Authorization", `Bearer ${token}`);
+      expect(res.statusCode).toBe(404);
+      expect(res.body.message).toBe("comment with the given ID was not found");
+    });
   });
 });

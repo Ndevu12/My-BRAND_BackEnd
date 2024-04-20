@@ -24,7 +24,11 @@ class CategoryService {
         const CategoryById =  await Category.findById(id).exec();
         return CategoryById;
     }
-
+    
+    static async findCategoryTitle(query: string): Promise<any> {
+        const CategoryTitle = await Category.find({name: query});
+        return CategoryTitle;
+    }
     /**
      * Method to update a Category document.
      * @param id Category ID to update.
