@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import subscriberUtils from "../utils/subscriberUtilities";
+// import subscriberUtils from "../utils/subscriberUtilities";
 import { ISubscriber } from "../models/Subscriber";
 import SubscriberService from "../services/subscriberService";
 import { sign } from "../helpers/jwtToken";
