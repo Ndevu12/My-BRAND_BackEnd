@@ -1,0 +1,10 @@
+declare module "cookie-parser";
+declare module "cors";
+declare module "dotenv";
+declare module "express";
+declare module "supertest";
+declare module "swagger-jsdoc";
+declare module "swagger-ui-express";
+declare module "jsonwebtoken";
+declare module "crypto-js";
+declare module "multer";
