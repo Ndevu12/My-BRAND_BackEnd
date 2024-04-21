@@ -8,7 +8,7 @@
         "coverage": "jest --collect-coverage",
         "dev": "nodemon --exec ts-node src/app.ts",
         "start:prod": "node dist/app.js",
-        "build": "yarn install && rimraf dist && yarn tsc"
+        "build": "yarn install && rimraf dist && tsc"
     },
     "keywords": [],
     "author": "Ndevu12",
