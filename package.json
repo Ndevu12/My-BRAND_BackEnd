@@ -9,7 +9,7 @@
         "coverage": "jest --collect-coverage",
         "dev": "nodemon --exec ts-node src/app.ts",
         "start": "node ./dist/app.js",
-        "build": "npm run clean:dist && npm install && tsc"
+        "build": "npm install -g rimraf && npm run clean:dist && npm install && tsc"
     },
     "keywords": [],
     "author": "Ndevu12",
