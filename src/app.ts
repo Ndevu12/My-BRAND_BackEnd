@@ -61,6 +61,7 @@ app.get("/", (req, res) => {
         <div class="container" style.margin-top=10px>
           <div class="jumbotron">
             <h1 class="display-4">Welcome to MyBrand API</h1>
+            <br><h2>Am Ndevu, a software developer</h2>
             <p class="lead">Use the following Endpoints to interact with the API:</p>
             <hr class="my-4">
             <ul>
