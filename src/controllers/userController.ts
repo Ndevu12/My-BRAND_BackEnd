@@ -1,8 +1,6 @@
 import { Request, Response } from "express";
 import { User, IUser } from "../models/user";
-import jwt from "jsonwebtoken";
-// import { sendAuthorizationCodeByEmailAndPhone } from "../utils/authorizationUtils";
-import { generate, check } from "../helpers/cryptoJs";
+import { check } from "../helpers/cryptoJs";
 import { sign } from "../helpers/jwtToken";
 import response from "../helpers/response";
 import UserServices from "../services/userServices";
@@ -23,31 +21,11 @@ class UserController {
         return;
       }
 
-      const strongPassward = await generate(password);
-
       const newUser = { ...req.body };
-      newUser.password = strongPassward;
 
       const user = await UserServices.userSignup(newUser);
 
-      const accessToken = sign({
-        id: user._id,
-        username: user.username,
-        role: user.role,
-        email: user.email,
-      });
-
-      const userObject: any = {
-        username: user.username,
-      };
-      userObject.accessToken = accessToken;
-
-      res.cookie("token", accessToken, {
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-        httpOnly: true,
-      });
-
-      response(res, 201, "Signed up successful", userObject);
+      response(res, 201, "Signed up successful");
     } catch (error) {
       response(
         res,
@@ -59,44 +37,29 @@ class UserController {
     }
   }
 
-  // Method to login admin
+  // API to login admin
   static async loginAdmin(req: Request, res: Response): Promise<void> {
     try {
       const { username, password } = req.body;
 
-      // Check if username is badly formatted
-      const usernameRegex = /^[a-zA-Z0-9]+$/;
-      if (!usernameRegex.test(username)) {
+      if (!username || !password) {
+        console.log('Username and password are required');
         response(
           res,
           400,
-          "Badly formatted username. Only alphanumeric characters are allowed.",
+          "Username and password are required",
           null,
-          "BAD_USERNAME_FORMAT"
+          "MISSING_CREDENTIALS"
         );
         return;
       }
-
-      // Check if password is badly formatted
-      const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
-      if (!passwordRegex.test(password)) {
-        response(
-          res,
-          400,
-          "Badly formatted password. It should contain minimum eight characters, at least one letter and one number.",
-          null,
-          "BAD_PASSWORD_FORMAT"
-        );
-        return;
-      }
-      const user = await UserServices.getSingleUser({
-        $or: [{ username: username }, { passward: password }],
-      });
+      const user = await UserServices.getUserByUsername(username);
 
       if (!user) {
+        console.log("User not found");
         response(
-          res,
-          401,
+          res, 
+          401, 
           "Invalid username or password",
           null,
           "USER_NOT_FOUND"
@@ -104,13 +67,24 @@ class UserController {
         return;
       }
 
-      // Send authorization code via email and phone
-      // const isCodeSent = await sendAuthorizationCodeByEmailAndPhone(user.email, user.phoneNumber);
+      const isPasswordValid = await check(password, user.password);  
+
+      if (!isPasswordValid) {
+        console.log('Invalid username or password.')
+        response(
+          res,
+          401,
+          "Invalid username or password",
+          null,
+          "INVALID_CREDENTIALS"
+        );
+        return;
+      }
 
       const accessToken = sign({
-        id: user._id,
-        email: user.email,
         role: user.role,
+        userId: user._id,
+        username: user.username,
       });
 
       const userObject: any = {
@@ -119,13 +93,10 @@ class UserController {
 
       userObject.accessToken = accessToken;
 
-      // if (isCodeSent) {
-      //   console.log("Authorization code sent successfully")
-      //     res.status(200).json({ token, message: 'Authorization code sent successfully' });
-      // } else {
-      //   console.log("Failed to send authorization")
-      //     res.status(500).json({ error: 'Failed to send authorization code' });
-      // }
+      res.cookie("token", accessToken, {
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        httpOnly: true,
+      });
 
       response(res, 200, "logged in successful", userObject);
     } catch (error) {

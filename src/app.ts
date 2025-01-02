@@ -1,5 +1,5 @@
 import express, { Application } from "express";
-// import bodyParser from 'body-parser';
+import bodyParser from 'body-parser';
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -9,12 +9,7 @@ import Route from "./routes/index";
 
 // import { seedCategories } from './populateDB/seedCategories';
 // import { seedBlog } from './populateDB/seedBlog';
-// import { seedAuthor } from './populateDB/seedAuthor';
 // import { seedUser } from './populateDB/seedUser';
-// import { seedComment } from './populateDB/seedComment';
-// import { seedMessage } from './populateDB/seedMessage';
-// import { seedNotification } from './populateDB/seedNotification';
-// import { seedSubscriber } from './populateDB/seedSubscriber';
 
 import { Documentation } from "./OnStart/APIs-Docs";
 
@@ -22,14 +17,24 @@ dotenv.config();
 
 const app: Application = express();
 
+const client_url = process.env.CLIENT_URL;
+if (!client_url) {
+  throw new Error("CLIENT_URL is not defined in the environment variables.");
+}
+
+const corsOptions = {
+    origin: client_url,
+    credentials: true,
+};
+
 // Middleware
 app.use(express.json());
-app.use(cors());
-
-// cookie-parser middleware
+app.use(cors(corsOptions));
 app.use(cookieParser());
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
-app.use("/api", Route);
+app.use(Route);
 
 // Set up mongoose connection
 connectDb();
@@ -40,12 +45,7 @@ Documentation();
 // Seeds
 // seedCategories();
 // seedBlog ();
-// seedAuthor();
 // seedUser();
-// seedComment();
-// seedMessage();
-// seedNotification();
-// seedSubscriber();
 
 app.get("/", (req, res) => {
   res.status(200).send(`
@@ -65,7 +65,7 @@ app.get("/", (req, res) => {
             <p class="lead">Use the following Endpoints to interact with the API:</p>
             <hr class="my-4">
             <ul>
-            <li>/api-docs</li> <li>/api/blog/</li> <li>/api/category/</li> <li>/api/comment</li> <li>/api/message</li> <li>/api/notification</li> <li>/api/subscriber/</li> <li>/api/user</li>
+            <li>/docs</li> <li>/blog/</li> <li>/category/</li> <li>/message</li> <li>/notification</li> <li>/user</li>
             </ul>
           </div>
         </div>
@@ -73,6 +73,7 @@ app.get("/", (req, res) => {
     </html>
   `);
 });
+
 // Start the server
 const PORT: number = Number(process.env.PORT) || 6090;
 app.listen(PORT, () => {

@@ -1,7 +1,7 @@
 import Joi from "joi";
 
 const passwordRegex =
-  /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+  /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
 const signupSchema = Joi.object({
   fullName: Joi.string()
@@ -12,7 +12,7 @@ const signupSchema = Joi.object({
       "string.min": "Full name must be at least 4 characters long.",
       "any.required": "Full name is required."
     }),
-    username: Joi.string()
+  username: Joi.string()
     .min(4)
     .required()
     .messages({ 
@@ -41,7 +41,7 @@ const signupSchema = Joi.object({
     .messages({
       "string.base": "Password must be a string.",
       "string.min": "Password must be at least 8 characters long.",
-      "string.pattern.base": "Badly formatted password. It should contain minimum eight characters, at least one UpperCase letter and one number.",
+      "string.pattern.base": "Password must contain at least one letter, one number, and one special character.",
       "any.required": "Password is required."
     }),
   role: Joi.string().max(8)

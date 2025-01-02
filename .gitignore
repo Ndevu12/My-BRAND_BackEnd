@@ -7,5 +7,9 @@ node_modules/
 # Ignore environment specific files
 .env
 
+yarn.lock
+
 # Ignore dist files
 /dist/
+
+.codegpt

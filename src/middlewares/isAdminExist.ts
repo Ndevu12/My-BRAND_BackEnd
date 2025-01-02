@@ -20,7 +20,7 @@ export const isAdminExist: RequestHandler = async (
             return next();
         }
     } catch (err) {
-        console.log("Failed to check if admin exists");
-        response(res, 401, "(err as Error).message || not Authorized. Admin already exists", null, "INTERNAL_SERVER_ERROR");
+        console.log("Failed to check if admin exists: ", (err as Error).message);
+        response(res, 401, (err as Error).message || "Not Authorized. Admin already exists", null, "INTERNAL_SERVER_ERROR");
     }
 }
