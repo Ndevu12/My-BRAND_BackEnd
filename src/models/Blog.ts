@@ -12,13 +12,11 @@ export interface IBlog extends Document {
   content: string;
   Description: string;
   imageUrl?: string | undefined;
-  author?: Object;
   createdAt?: Date;
   updatedAt?: Date;
-  comments?: Types.ObjectId[];
   category: Types.ObjectId[];
-  likes: number;
   tags: string[];
+  status: 'published' | 'draft' | 'archived';
 }
 
 /**
@@ -44,10 +42,6 @@ const blogSchema = new Schema<IBlog>({
     type: String,
     required: false,
   },
-  author: {
-    type: Object,
-    required: true,
-  },
   createdAt: {
     type: Date,
     default: Date.now,
@@ -56,15 +50,9 @@ const blogSchema = new Schema<IBlog>({
     type: Date,
     default: Date.now,
   },
-  comments: {
-    type: [Types.ObjectId],
-    ref: "Comment",
-    required: false,
-    default: [],
-  },
   category: {
     type: [Types.ObjectId],
-    required: true,
+    required: false,
     default: [],
   },
   tags: {
@@ -72,11 +60,11 @@ const blogSchema = new Schema<IBlog>({
     rquired: true,
     default: [],
   },
-  likes: {
-    type: Number,
-    default: 0,
-    required: false,
-  },
+  status: {
+    type: String,
+    enum: ['published', 'draft', 'archived'],
+    default: 'draft',
+  }
 });
 
 const Blog = mongoose.model<IBlog>("Blog", blogSchema);

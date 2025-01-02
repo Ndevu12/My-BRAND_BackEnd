@@ -9,7 +9,7 @@ export interface IUser extends Document {
     email: string;
     phoneNumber: string;
     fullName: string;
-    profileImage: string;
+    profileImage?: string;
     role: string;
 }
 
@@ -43,8 +43,8 @@ const userSchema = new Schema<IUser>({
     },
     role: {
         type: String,
-        enum: ['admin'], 
-        default: 'admin', 
+        enum: ['admin', 'user'], 
+        default: 'user', 
     },
 });
 

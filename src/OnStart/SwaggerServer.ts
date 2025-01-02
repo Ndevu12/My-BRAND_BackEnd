@@ -7,7 +7,7 @@ function SwaggerServer(): string {
     return process.env.SWAGGER_SERVER;
   }
 
-  return "http://localhost:6090/api";
+  return "http://localhost:6090";
 }
 
 export { SwaggerServer };

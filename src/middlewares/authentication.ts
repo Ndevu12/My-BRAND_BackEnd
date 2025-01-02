@@ -2,14 +2,11 @@ import { Request, Response, NextFunction, RequestHandler } from "express";
 import { verify } from "../helpers/jwtToken";
 import response from "../helpers/response";
 
-// ...
-
 export const blackListedTokens = new Set<string>();
 export interface DecodedUser {
   role: string;
-  id: string;
+  userId: string;
   username: string;
-  email: string;
 }
 
 export interface CustomeRequest extends Request {
@@ -25,10 +22,10 @@ export const isAdmin: RequestHandler = async (
     const authHeader = req.header("Authorization");
     if (!authHeader) {
       console.log(
-        "Acess denied, You are not allowed to perform this action. Please"
+        "Acess denied, No Authorization header found in the request."
       );
       throw new Error(
-        "Acess denied, You are not allowed to perform this action. Please "
+        "Acess denied, Please log in first."
       );
     }
     const token = authHeader.replace("Bearer ", "");
@@ -47,7 +44,7 @@ export const isAdmin: RequestHandler = async (
     const user = verify(token) as DecodedUser;
 
     if (user.role !== "admin") {
-      console.log("Acess denied. You are not an ADMIN");
+      console.log("Acess denied. User not an ADMIN");
       response(
         res,
         403,
@@ -60,6 +57,7 @@ export const isAdmin: RequestHandler = async (
     req.user = user;
     return next();
   } catch (error) {
+    console.log("Failed to authenticate user: ", (error as Error).message);
     response(
       res,
       401,

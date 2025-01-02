@@ -1,24 +1,21 @@
-import multer, { diskStorage, FileFilterCallback } from "multer";
-import path from "path";
-import { Request } from "express";
+import multer from 'multer';
+import path from 'path';
 
-interface MulterExtendedOptions extends multer.Options {
-  filename: (req: Request, file: Express.Multer.File, cb: (error: Error | null, filename: string) => void) => void;
-}
-
-const upload: multer.Multer = multer({
-  storage: diskStorage({}),
-  filename: (req: Request, file: Express.Multer.File, cb: (error: Error | null, filename: string) => void) => {
-    cb(null, new Date().toISOString() + '-' + file.originalname)
-  },
-  fileFilter: (req: Request, file: Express.Multer.File, cb: FileFilterCallback) => {
-    const extension = path.extname(file.originalname);
-    if (extension === '.png' || extension === '.jpg' || extension === '.jpeg' || extension === '.svg') {
-      cb(null, true);
-    } else {
-      cb(null, false);
+export default multer({
+  storage: multer.diskStorage({}),
+  fileFilter: (req, file, next) => {
+    try {
+    const ext = path.extname(file.originalname).toLowerCase();
+    console.log(ext);
+    const supported = ['.png', '.jpg', '.jpeg', '.webp', '.pdf'];
+    
+    if (!supported.includes(ext)) {
+      console.log('Unsupported file: ', ext);
+      return next(new Error(`File type ${ext} is not supported. Supported types are ${supported.join(', ')}.`));
     }
-  }
-} as MulterExtendedOptions);
-
-export default upload;
+    } catch (error) {
+        console.log('Error in multer middleware: ', error);
+    }
+    next(null, true);
+  },
+});

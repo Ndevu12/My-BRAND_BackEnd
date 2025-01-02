@@ -12,11 +12,6 @@ class BlogServices {
     return findBlogByCategor;
   }
 
-  static async getAllBlogComment(id: string): Promise<IBlog | null> {
-    const comments = await Blog.findById(id).populate("comments").exec();
-    return comments;
-  }
-
   static async getSingleBlog(query: string): Promise<IBlog | null> {
     const blog = await Blog.findOne({ title: query });
     return blog;
@@ -50,39 +45,6 @@ class BlogServices {
     return blog;
   }
 
-  static async addCommentToBlog(
-    blogId: any,
-    commentId: Types.ObjectId
-  ): Promise<void> {
-    const blog = await Blog.findById(blogId);
-    if (!blog) {
-      throw new Error(
-        "Failed to add comment on blog. Blog not found\nLocation: BlogServices\n"
-      );
-    }
-    blog.comments!.push(commentId);
-    await blog.save();
-  }
-
-  static async incrementLikes(blogId: string): Promise<IBlog | null> {
-    const blog = await Blog.findById(blogId);
-    if (!blog) {
-      throw new Error("Blog not found");
-    }
-    // const like = blog.likes + 1;
-    blog.likes! = blog.likes! + 1;
-    await blog.save();
-    return blog;
-  }
-
-  static async findAuthor(blogId: string): Promise<any> {
-    const blog = await Blog.findById(blogId);
-    if (!blog) {
-      throw new Error("Blog not found");
-    }
-    const author = blog.author;
-    return author;
-  }
 
   static async updateAuthor(
     BlogId: string,
@@ -114,6 +76,18 @@ class BlogServices {
   // Method to delete a blog document
   static async deleteAllBlogs(): Promise<any> {
     return await Blog.deleteMany();
+  }
+
+  /**
+   * Updates the status of a blog.
+   * @param blogId The ID of the blog to update.
+   * @param status The new status of the blog.
+   * @returns Promise resolving to the updated blog document, or null if not found.
+   */
+  static async updateBlogStatus(blogId: string, status: 'published' | 'draft'): Promise<IBlog | null> {
+    const id = blogId;
+    const updatedBlog = await Blog.findByIdAndUpdate(id, { status }, { new: true });
+    return updatedBlog;
   }
 }
 

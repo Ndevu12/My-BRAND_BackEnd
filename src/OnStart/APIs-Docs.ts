@@ -3,5 +3,5 @@ import swaggerDocs from "../API_config/swaggerOptions";
 import swaggerUi from "swagger-ui-express";
 
 export const Documentation = (): void => {
-  app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+  app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 };

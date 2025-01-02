@@ -2,29 +2,21 @@
 import { Router } from "express";
 import BlogController from "../controllers/blogController";
 import { isAdmin } from "../middlewares/authentication";
-import { isAdminOrSubscriber } from "../middlewares/authorize";
+import multer from "../helpers/multer";
+import UserValidation from "../middlewares/validation/validate";
 
 const blogRoutes: Router = Router();
 
-// blogRoutes.post("/create", BlogController.createBlog);
-// blogRoutes.put("/update/:id", BlogController.updateBlog);
-// blogRoutes.delete("/delete/:id", BlogController.deleteBlog);
-// blogRoutes.get("/:id", BlogController.getBlogById);
-// blogRoutes.get("/byCategory/:id", BlogController.getBlogsByCategory);
-// blogRoutes.get("/", BlogController.retrieveAllBlogs);
-// blogRoutes.put("/like/:id", BlogController.likeBlog);
-
-blogRoutes.get("/author/:id", BlogController.getAuthorByBlogId);
-blogRoutes.put("/author/update/:id", BlogController.updateBlogAuthor);
-blogRoutes.delete("/author/delete/:id", BlogController.deleteAuthor);
-
-blogRoutes.post("/create", isAdmin, BlogController.createBlog);
+blogRoutes.post("/create", isAdmin, multer.single('images'), BlogController.createBlog);
+// blogRoutes.post("/create", isAdmin, UserValidation.newBlog, multer.single('images'), BlogController.createBlog);
 blogRoutes.put("/update/:id", isAdmin, BlogController.updateBlog);
 blogRoutes.delete("/delete/:id", isAdmin, BlogController.deleteBlog);
-blogRoutes.get("/:id", BlogController.getBlogById);
+blogRoutes.put("/publish/:id", isAdmin, BlogController.publishBlog);
+blogRoutes.put("/unpublish/:id", isAdmin, BlogController.unpublishBlog);
+blogRoutes.get("/:id", BlogController.getBlogById as any);
 blogRoutes.get("/byCategory/:id", BlogController.getBlogsByCategory);
 blogRoutes.get("/byTitle", BlogController.getBlogByTitle);
-blogRoutes.get("/", BlogController.retrieveAllBlogs);
-blogRoutes.put("/like/:id", isAdminOrSubscriber, BlogController.likeBlog);
+blogRoutes.get("/status/published", BlogController.getPublishedBlogs);
+blogRoutes.get("/", BlogController.retrieveAllBlogs as any);
 
 export default blogRoutes;

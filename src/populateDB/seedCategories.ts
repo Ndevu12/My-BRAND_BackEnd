@@ -7,12 +7,11 @@ const seedCategories = async () => {
   try {
     // array of CategoryService data
     const categoriesData = [
-      { name: "Learning" },
-      // { name: 'Business oPERATIONS' },
-      // { name: 'PEACE KEEPING' },
-      // { name: 'Wild Life' },
-      // { name: 'Artificial Intelligence' },
-      // { name: 'Future of Humanity' }
+      { name: "Programming" },
+      { name: 'Technology' },
+      { name: 'Business' },
+      { name: 'Social Life' },
+      { name: 'Artificial Intelligence' },
     ];
 
     await Category.insertMany(categoriesData);
