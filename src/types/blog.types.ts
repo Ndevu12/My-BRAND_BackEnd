@@ -1,17 +1,6 @@
 import { Document, Types } from "mongoose";
 
 /**
- * Interface for blog content images
- */
-export interface ContentImage {
-  url: string;
-  alt?: string;
-  caption?: string;
-  position?: number; // Position in the content (character index)
-  id?: string;       // Unique identifier for the image
-}
-
-/**
  * Interface for blog data transfer object
  */
 export interface BlogDto {
@@ -20,15 +9,10 @@ export interface BlogDto {
   description: string;
   content: string;
   imageUrl?: string;
-  author: {
-    name: string;
-    avatarUrl?: string;
-    bio?: string;
-  };
+  author: Types.ObjectId | string; // Changed to reference User model
   category: string | string[];
   tags?: string[];
   readTime?: string;
-  contentImages?: ContentImage[];
 }
 
 /**
@@ -40,11 +24,7 @@ export interface IBlog extends Document {
   description: string;
   content: string;
   imageUrl?: string;
-  author: {
-    name: string;
-    avatarUrl?: string;
-    bio?: string;
-  };
+  author: Types.ObjectId; // Changed to reference User model
   createdAt: Date;
   updatedAt: Date;
   comments?: Types.ObjectId[];
@@ -52,5 +32,4 @@ export interface IBlog extends Document {
   tags: string[];
   likes: number;
   readTime?: string;
-  contentImages?: ContentImage[];
 }

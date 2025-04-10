@@ -1,4 +1,5 @@
 import Joi from 'joi';
+import mongoose from 'mongoose';
 
 // Blog schema validation
 export const validateBlog = (blog: any) => {
@@ -9,28 +10,20 @@ export const validateBlog = (blog: any) => {
     content: Joi.string().required().min(50),
     imageUrl: Joi.string().uri(),
     author: Joi.alternatives().try(
-      Joi.string(),
-      Joi.object({
-        name: Joi.string().required(),
-        avatarUrl: Joi.string().uri(),
-        bio: Joi.string()
-      })
+      Joi.string().custom((value, helpers) => {
+        if (!mongoose.Types.ObjectId.isValid(value)) {
+          return helpers.error('any.invalid');
+        }
+        return value;
+      }),
+      Joi.object().instance(mongoose.Types.ObjectId)
     ).required(),
     category: Joi.alternatives().try(
       Joi.string(),
       Joi.array().items(Joi.string())
     ).required(),
     tags: Joi.array().items(Joi.string()),
-    readTime: Joi.string(),
-    contentImages: Joi.array().items(
-      Joi.object({
-        url: Joi.string().uri().required(),
-        alt: Joi.string(),
-        caption: Joi.string(),
-        position: Joi.number(),
-        id: Joi.string()
-      })
-    )
+    readTime: Joi.string()
   });
 
   return schema.validate(blog);
@@ -41,18 +34,4 @@ export const sanitizeHtml = (html: string): string => {
   // Basic sanitization: remove script tags
   // For production, use a proper HTML sanitizer library like DOMPurify
   return html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
-};
-
-// Validate content has proper image tags
-export const validateContentImages = (content: string): boolean => {
-  const imgTags = content.match(/<img.*?src="(.*?)".*?>/g) || [];
-  
-  for (const imgTag of imgTags) {
-    // Check if img tag has proper src attribute
-    if (!imgTag.includes('src=')) {
-      return false;
-    }
-  }
-  
-  return true;
 };

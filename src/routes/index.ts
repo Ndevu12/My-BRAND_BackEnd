@@ -5,7 +5,7 @@ import commentRoutes from "./CommentRoute";
 import messageRoutes from "./MessageRouter";
 import notificationRoutes from "./NotificationRoute";
 import subscriberRoutes from "./SubscriberRoute";
-import adminRoutes from "./userRoutes";
+import adminRoutes from "./authRoutes";
 
 // Special porpuse module for testing purposes only
 // import reset from "../controllers/reset";
@@ -18,7 +18,7 @@ route.use("/comment", commentRoutes);
 route.use("/message", messageRoutes);
 route.use("/notification", notificationRoutes);
 route.use("/subscriber", subscriberRoutes);
-route.use("/user", adminRoutes);
+route.use("/auth", adminRoutes);
 
 // route.get("/reset", reset.resetSetting);
 

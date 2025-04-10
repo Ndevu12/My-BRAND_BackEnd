@@ -1,7 +1,7 @@
 // const necessary modules
 import { Router } from "express";
 import NotificationController from "../controllers/notificationController";
-import { isAdmin } from "../middlewares/authentication";
+import { isAdmin } from "../middlewares/authUtils";
 
 const notificationRoutes: Router = Router();
 

@@ -5,10 +5,11 @@ import response from "../helpers/response";
 import cloudinary from "../helpers/cloudinary";
 import SubscriberService from "../services/subscriberService";
 import { Types } from "mongoose";
-import { CustomeRequest } from "../middlewares/authentication";
+import { CustomeRequest } from "../middlewares/authUtils";
 import { Comment } from "../models/comments";
 import { BlogDto } from "../types/blog.types";
-import { validateBlog, sanitizeHtml, validateContentImages } from "../helpers/validators/blogValidator";
+import { validateBlog, sanitizeHtml } from "../helpers/validators/blogValidator";
+import { User } from "../models/user";
 
 // Define a custom interface that extends Express Request to include file
 interface RequestWithFile extends Request {
@@ -24,7 +25,7 @@ class blogController {
    * @param req The request object.
    * @param res The response object.
    */
-  static async createBlog(req: RequestWithFile, res: Response): Promise<void> {
+  static async createBlog(req: CustomeRequest & RequestWithFile, res: Response): Promise<void> {
     try {
       let imageURL: string | undefined;
       if (req.file !== undefined) {
@@ -40,6 +41,28 @@ class blogController {
         return;
       }
 
+      // Get the current user ID (author of the blog)
+      const userId = req.user?.id;
+      if (!userId) {
+        res.status(401).json({ 
+          status: 401, 
+          message: "Unauthorized. Please login first.", 
+          error: "UNAUTHORIZED" 
+        });
+        return;
+      }
+
+      // Verify the user exists
+      const author = await User.findById(userId);
+      if (!author) {
+        res.status(404).json({ 
+          status: 404, 
+          message: "Author user not found", 
+          error: "AUTHOR_NOT_FOUND" 
+        });
+        return;
+      }
+
       const tags = Array.isArray(req.body.tags) ? req.body.tags.map(String) : 
         req.body.tags ? [String(req.body.tags)] : [];
       
@@ -49,16 +72,6 @@ class blogController {
 
       // Sanitize HTML content
       const sanitizedContent = sanitizeHtml(req.body.content);
-      
-      // Validate content images
-      if (!validateContentImages(sanitizedContent)) {
-        res.status(400).json({ 
-          status: 400, 
-          message: "Invalid image format in content", 
-          error: "INVALID_CONTENT_IMAGES" 
-        });
-        return;
-      }
 
       const blogData: BlogDto = {
         title: req.body.title,
@@ -68,13 +81,8 @@ class blogController {
         imageUrl: imageURL,
         tags: tags,
         category: category,
-        author: {
-          name: req.body.author?.name || req.body.author || 'Anonymous',
-          avatarUrl: req.body.author?.avatarUrl || undefined,
-          bio: req.body.author?.bio || undefined
-        },
-        readTime: req.body.readTime,
-        contentImages: req.body.contentImages
+        author: userId,
+        readTime: req.body.readTime
       };
 
       // Validate blog data
@@ -104,15 +112,42 @@ class blogController {
    * @param req The request object.
    * @param res The response object.
    */
-  static async updateBlog(req: RequestWithFile, res: Response): Promise<void> {
+  static async updateBlog(req: CustomeRequest & RequestWithFile, res: Response): Promise<void> {
     try {
       const { id } = req.params;
+      
+      // Find the blog first to check ownership
+      const existingBlog = await BlogServices.getblogById(id);
+      if (!existingBlog) {
+        res.status(404).json({ 
+          status: 404, 
+          message: "Blog not found", 
+          error: "BLOG_NOT_FOUND" 
+        });
+        return;
+      }
+
+      // Check if the user is the author of the blog
+      const userId = req.user?.id;
+      if (!userId || (existingBlog.author._id.toString() !== userId && req.user?.role !== 'admin')) {
+        res.status(403).json({ 
+          status: 403, 
+          message: "You don't have permission to update this blog", 
+          error: "FORBIDDEN" 
+        });
+        return;
+      }
       
       let imageURL: string | undefined;
       if (req.file !== undefined) {
         const file = req.file.path;
         const link = await cloudinary.uploader.upload(file);
         imageURL = link.secure_url;
+      }
+
+      // If content is provided, sanitize it
+      if (req.body.content) {
+        req.body.content = sanitizeHtml(req.body.content);
       }
 
       const blogData: Partial<BlogDto> = {
@@ -132,20 +167,8 @@ class blogController {
           : [String(req.body.category)];
       }
 
-      // Format author data properly
-      if (req.body.author) {
-        if (typeof req.body.author === 'string') {
-          blogData.author = {
-            name: req.body.author
-          };
-        } else if (typeof req.body.author === 'object') {
-          blogData.author = {
-            name: req.body.author.name || 'Anonymous',
-            avatarUrl: req.body.author.avatarUrl,
-            bio: req.body.author.bio
-          };
-        }
-      }
+      // Don't allow changing the author
+      delete blogData.author;
 
       const updatedBlog = await BlogServices.updateBlog(id, blogData);
       if (!updatedBlog) {
@@ -154,6 +177,10 @@ class blogController {
         return;
       }
 
+      res.status(200).json({
+        message: "Blog updated successfully",
+        blog: updatedBlog
+      });
       res.status(200).json({
         message: "Blog updated successfully",
         blog: updatedBlog
@@ -169,14 +196,28 @@ class blogController {
    * @param req The request object.
    * @param res The response object.
    */
-  static async deleteBlog(req: Request, res: Response): Promise<void> {
+  static async deleteBlog(req: CustomeRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const blogExists = await BlogServices.getblogById(id);
-      if (!blogExists) {
+      
+      // Find the blog first to check ownership
+      const existingBlog = await BlogServices.getblogById(id);
+      if (!existingBlog) {
         response(res, 404, "Blog not found", null, "BLOG_NOT_FOUND");
         return;
       }
+
+      // Check if the user is the author of the blog or an admin
+      const userId = req.user?.id;
+      if (!userId || (existingBlog.author._id.toString() !== userId && req.user?.role !== 'admin')) {
+        res.status(403).json({ 
+          status: 403, 
+          message: "You don't have permission to delete this blog", 
+          error: "FORBIDDEN" 
+        });
+        return;
+      }
+      
       const deletedBlog = await BlogServices.deleteBlog(id);
       if (!deletedBlog) {
         res.status(404).send("Blog is not deleted yet");
@@ -188,7 +229,6 @@ class blogController {
       res.status(500).send("Sorry, something went wrong");
     }
   }
-
 
   static async getBlogByTitle(req: Request, res: Response): Promise<void> {
     try {
@@ -266,87 +306,23 @@ class blogController {
 
   /**
    * Method to retrieve an author by their ID.
-   * @param req Request object containing the author ID.
+   * @param req Request object containing the blog ID.
    * @param res Response object to send the author.
    */
   static async getAuthorByBlogId(req: Request, res: Response): Promise<void> {
     try {
       console.log("in getAuthorByBlogId");
       const { id } = req.params;
-      const getBlog = await BlogServices.getblogById(id);
-      if (getBlog) {
-        const author = await BlogServices.findAuthor(id);
-        if (author) {
-          res.status(200).json(author);
-        } else {
-          res.status(404).json({ error: "Author not found" });
-        }
+      const author = await BlogServices.findAuthor(id);
+      
+      if (author) {
+        res.status(200).json(author);
+      } else {
+        res.status(404).json({ error: "Author not found" });
       }
     } catch (error) {
       console.error("Error fetching author by ID:", error);
       res.status(500).json({ error: "Sorry something went wrong" });
-    }
-  }
-
-  /**
-   * Method to update an author by their ID.
-   * @param req Request object containing the author ID and updated data.
-   * @param res Response object to send the updated author.
-   */
-  static async updateBlogAuthor(req: Request, res: Response): Promise<void> {
-    try {
-      console.log("in updateBlogAuthor");
-      const { id } = req.params;
-      const updatedAuthorData = req.body.author;
-
-      const check = await Blog.findById(id);
-      if (!check) {
-        res.status(404).json({ error: "Blog not found" });
-        return;
-      }
-
-      const updatedAuthor = await BlogServices.updateAuthor(
-        id,
-        updatedAuthorData
-      );
-
-      console.log("Auhtor in updateAuthor controller:", updatedAuthorData);
-      if (!updatedAuthor) {
-        res.status(401).json({ error: "Author not updated" });
-        return;
-      }
-
-      res
-        .status(200)
-        .json({ Message: "Author updated successfully", updatedAuthor });
-    } catch (error) {
-      console.error("Error updating author:", error);
-      res.status(500).json({ error: "Sorry something went wrong" });
-    }
-  }
-
-  /**
-   * Method to delete an author by their ID.
-   * @param req Request object containing the author ID.
-   * @param res Response object to send the result.
-   */
-  static async deleteAuthor(req: Request, res: Response): Promise<void> {
-    try {
-      const { id } = req.params;
-      const checkBlog = await BlogServices.getblogById(id);
-      if (checkBlog) {
-        const deletedAuthor = await BlogServices.deleteAuthor(id);
-        if (deletedAuthor) {
-          res.status(200).json({ message: "Author deleted successfully" });
-        } else {
-          res.status(404).json({ error: "Author not found" });
-        }
-      } else {
-        res.status(404).json({ error: "Blog not found" });
-      }
-    } catch (error) {
-      console.error("Error deleting author:", error);
-      res.status(500).json({ error: "Internal Server Error" });
     }
   }
 
@@ -358,7 +334,7 @@ class blogController {
   static async getBlogById(req: Request, res: Response): Promise<void> {
     try {
       const id = req.params.id;
-      const blog = await Blog.findById(id);
+      const blog = await Blog.findById(id).populate('author').populate('comments');
 
       if (blog == null) {
         res.status(404).json({
@@ -368,27 +344,7 @@ class blogController {
         return;
       }
 
-      const comments = await Comment.find({ postID: blog._id });
-
-      const blogWithComments = {
-        _id: blog._id,
-        title: blog.title,
-        subtitle: blog.subtitle,
-        description: blog.description,
-        content: blog.content,
-        imageUrl: blog.imageUrl,
-        author: blog.author,
-        updatedAt: blog.updatedAt,
-        createdAt: blog.createdAt,
-        category: blog.category,
-        likes: blog.likes,
-        tags: blog.tags,
-        readTime: blog.readTime,
-        contentImages: blog.contentImages,
-        comments,
-      };
-
-      res.status(200).json({ statusCode: 200, blog: blogWithComments });
+      res.status(200).json({ statusCode: 200, blog });
     } catch (error) {
       res.status(500).json({ statusCode: 500, error: "Something went wrong" });
     }

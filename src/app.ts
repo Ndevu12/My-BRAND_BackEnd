@@ -29,7 +29,7 @@ app.use(cors());
 // cookie-parser middleware
 app.use(cookieParser());
 
-app.use("/api", Route);
+app.use("/v1", Route);
 
 // Set up mongoose connection
 connectDb();

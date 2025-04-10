@@ -1,8 +1,7 @@
-// const necessary modules
+// Import necessary modules
 import { Router } from "express";
 import CommentController from "../controllers/CommentController";
-import { isAdmin } from "../middlewares/authentication";
-import { isAdminOrSubscriber } from "../middlewares/authorize";
+import { isAdmin, isAdminOrSubscriber } from "../middlewares/authUtils";
 
 const commentRoutes: Router = Router();
 

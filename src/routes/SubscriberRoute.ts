@@ -1,9 +1,8 @@
 // const necessary modules
 import { Router } from "express";
 import SubscriberController from "../controllers/subscriberController";
-import { isAdmin } from "../middlewares/authentication";
-import UserValidation from "../middlewares/validation/validate";
-import { isAdminOrSubscriber } from "../middlewares/authorize";
+import { isAdmin, isAdminOrSubscriber } from "../middlewares/authUtils";
+import UserValidation from "../helpers/validators/validate";
 
 const subscriberRoutes: Router = Router();
 

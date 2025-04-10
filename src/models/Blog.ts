@@ -3,25 +3,7 @@
  */
 
 import mongoose, { Schema } from "mongoose";
-import { IBlog, ContentImage } from "../types/blog.types";
-
-/**
- * Schema representing content images
- */
-const contentImageSchema = new Schema<ContentImage>({
-  url: {
-    type: String,
-    required: true
-  },
-  alt: {
-    type: String,
-    required: false
-  },
-  caption: {
-    type: String,
-    required: false
-  }
-});
+import { IBlog } from "../types/blog.types";
 
 /**
  * Schema representing the Blog model
@@ -48,18 +30,9 @@ const blogSchema = new Schema<IBlog>({
     required: false,
   },
   author: {
-    name: {
-      type: String,
-      required: true,
-    },
-    avatarUrl: {
-      type: String,
-      required: false,
-    },
-    bio: {
-      type: String,
-      required: false,
-    }
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
   },
   createdAt: {
     type: Date,
@@ -77,6 +50,7 @@ const blogSchema = new Schema<IBlog>({
   },
   category: {
     type: [mongoose.Schema.Types.ObjectId],
+    ref: "Category",
     required: true,
     default: [],
   },
@@ -93,11 +67,6 @@ const blogSchema = new Schema<IBlog>({
   readTime: {
     type: String,
     required: false,
-  },
-  contentImages: {
-    type: [contentImageSchema],
-    required: false,
-    default: [],
   },
 });
 
