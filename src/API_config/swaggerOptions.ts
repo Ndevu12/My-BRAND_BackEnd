@@ -1,6 +1,6 @@
 import swaggerjsdoc from "swagger-jsdoc";
 import dotenv from "dotenv";
-import { SwaggerServer } from "../OnStart/SwaggerServer";
+import { SwaggerServer } from "../start-ups/SwaggerServer";
 
 dotenv.config();
 

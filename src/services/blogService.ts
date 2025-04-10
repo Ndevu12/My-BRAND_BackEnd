@@ -1,4 +1,5 @@
-import { IBlog, Blog } from "../models/Blog";
+import { Blog } from "../models/Blog";
+import { IBlog, BlogDto } from "../types/blog.types";
 import { Types } from "mongoose";
 
 class BlogServices {
@@ -22,26 +23,81 @@ class BlogServices {
     return blog;
   }
 
-  static async createBlog(blogData: string): Promise<IBlog> {
+  static async createBlog(blogData: BlogDto): Promise<IBlog> {
+    // Extract content images from HTML content if not provided
+    if (!blogData.contentImages) {
+      const imgRegex = /<img.*?src="(.*?)".*?alt="(.*?)".*?>/g;
+      const matches = [...blogData.content.matchAll(imgRegex)];
+      
+      const contentImages = matches.map(match => ({
+        url: match[1],
+        alt: match[2],
+        caption: ''  // Can be enhanced to extract figcaption if present
+      }));
+      
+      if (contentImages.length > 0) {
+        blogData.contentImages = contentImages;
+      }
+    }
+    
+    // Calculate read time if not provided
+    if (!blogData.readTime) {
+      // Average reading speed: 200-250 words per minute
+      const wordCount = blogData.content.replace(/<[^>]*>/g, '').split(/\s+/).length;
+      const readTimeMinutes = Math.ceil(wordCount / 200);
+      blogData.readTime = `${readTimeMinutes} min read`;
+    }
+    
     const blog = await Blog.create(blogData);
-    return blog.save();
+    return blog;
   }
+  
   static async findAllBlogs() {
-    const blogs = await Blog.find({}).exec();
+    const blogs = await Blog.find({}).populate("comments").exec();
     return blogs;
   }
 
   static async getblogById(id: string): Promise<IBlog | null> {
-    const blog = await Blog.findById(id);
+    const blog = await Blog.findById(id).populate("comments");
     return blog;
   }
 
   static async updateBlog(
     blogId: string,
-    blogData: IBlog
+    blogData: Partial<BlogDto>
   ): Promise<IBlog | null> {
     console.log("Inside update blog service");
-    const blog = await Blog.findByIdAndUpdate(blogId, blogData, { new: true });
+    
+    // Update the contentImages if the content has changed
+    if (blogData.content && !blogData.contentImages) {
+      const imgRegex = /<img.*?src="(.*?)".*?alt="(.*?)".*?>/g;
+      const matches = [...blogData.content.matchAll(imgRegex)];
+      
+      const contentImages = matches.map(match => ({
+        url: match[1],
+        alt: match[2],
+        caption: ''
+      }));
+      
+      if (contentImages.length > 0) {
+        blogData.contentImages = contentImages;
+      }
+    }
+    
+    // Update read time if content has changed
+    if (blogData.content && !blogData.readTime) {
+      const wordCount = blogData.content.replace(/<[^>]*>/g, '').split(/\s+/).length;
+      const readTimeMinutes = Math.ceil(wordCount / 200);
+      blogData.readTime = `${readTimeMinutes} min read`;
+    }
+    
+    const blog = await Blog.findByIdAndUpdate(blogId, 
+      { 
+        ...blogData, 
+        updatedAt: new Date() 
+      }, 
+      { new: true }
+    );
     return blog;
   }
 
@@ -69,8 +125,7 @@ class BlogServices {
     if (!blog) {
       throw new Error("Blog not found");
     }
-    // const like = blog.likes + 1;
-    blog.likes! = blog.likes! + 1;
+    blog.likes = blog.likes + 1;
     await blog.save();
     return blog;
   }
@@ -86,14 +141,13 @@ class BlogServices {
 
   static async updateAuthor(
     BlogId: string,
-    newAuthor: Object
+    newAuthor: any
   ): Promise<IBlog | null> {
     const blogId = BlogId;
-    const Author = newAuthor;
-    console.log("Auhtor in updateAuthor service:", newAuthor);
+    console.log("Author in updateAuthor service:", newAuthor);
     const updatedBlog = await Blog.findByIdAndUpdate(
       blogId,
-      { author: Author },
+      { author: newAuthor, updatedAt: new Date() },
       { new: true }
     );
     return updatedBlog;
@@ -101,7 +155,6 @@ class BlogServices {
 
   static async deleteAuthor(BlogId: string): Promise<IBlog | null> {
     const blogId = BlogId;
-
     const updatedBlog = await Blog.findByIdAndDelete(blogId);
     return updatedBlog;
   }
@@ -111,9 +164,21 @@ class BlogServices {
     return blog;
   }
 
-  // Method to delete a blog document
+  // Method to delete all blog documents
   static async deleteAllBlogs(): Promise<any> {
     return await Blog.deleteMany();
+  }
+  
+  // New method to extract and save content images
+  static async extractContentImages(content: string): Promise<any[]> {
+    const imgRegex = /<img.*?src="(.*?)".*?alt="(.*?)".*?>/g;
+    const matches = [...content.matchAll(imgRegex)];
+    
+    return matches.map(match => ({
+      url: match[1],
+      alt: match[2],
+      caption: '' // Can be enhanced to extract figcaption if present
+    }));
   }
 }
 

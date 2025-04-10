@@ -2,24 +2,26 @@
  * This file deals with blogs storing and handlings.
  */
 
-import mongoose, { Schema, Document, Types } from "mongoose";
+import mongoose, { Schema } from "mongoose";
+import { IBlog, ContentImage } from "../types/blog.types";
 
 /**
- *  Interface representing the structure of a blog document.
+ * Schema representing content images
  */
-export interface IBlog extends Document {
-  title: string;
-  content: string;
-  Description: string;
-  imageUrl?: string | undefined;
-  author?: Object;
-  createdAt?: Date;
-  updatedAt?: Date;
-  comments?: Types.ObjectId[];
-  category: Types.ObjectId[];
-  likes: number;
-  tags: string[];
-}
+const contentImageSchema = new Schema<ContentImage>({
+  url: {
+    type: String,
+    required: true
+  },
+  alt: {
+    type: String,
+    required: false
+  },
+  caption: {
+    type: String,
+    required: false
+  }
+});
 
 /**
  * Schema representing the Blog model
@@ -29,24 +31,35 @@ const blogSchema = new Schema<IBlog>({
     type: String,
     required: true,
   },
-
+  subtitle: {
+    type: String,
+    required: false,
+  },
+  description: {
+    type: String,
+    required: true,
+  },
   content: {
     type: String,
     required: true,
   },
-
   imageUrl: {
     type: String,
     required: false,
   },
-
-  Description: {
-    type: String,
-    required: false,
-  },
   author: {
-    type: Object,
-    required: true,
+    name: {
+      type: String,
+      required: true,
+    },
+    avatarUrl: {
+      type: String,
+      required: false,
+    },
+    bio: {
+      type: String,
+      required: false,
+    }
   },
   createdAt: {
     type: Date,
@@ -57,25 +70,34 @@ const blogSchema = new Schema<IBlog>({
     default: Date.now,
   },
   comments: {
-    type: [Types.ObjectId],
+    type: [mongoose.Schema.Types.ObjectId],
     ref: "Comment",
     required: false,
     default: [],
   },
   category: {
-    type: [Types.ObjectId],
+    type: [mongoose.Schema.Types.ObjectId],
     required: true,
     default: [],
   },
   tags: {
     type: [String],
-    rquired: true,
+    required: true,
     default: [],
   },
   likes: {
     type: Number,
     default: 0,
     required: false,
+  },
+  readTime: {
+    type: String,
+    required: false,
+  },
+  contentImages: {
+    type: [contentImageSchema],
+    required: false,
+    default: [],
   },
 });
 

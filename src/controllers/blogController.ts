@@ -1,15 +1,19 @@
 import { Request, Response } from "express";
-import { Blog, IBlog } from "../models/Blog";
+import { Blog } from "../models/Blog";
 import BlogServices from "../services/blogService";
-// import subscriberUtils from "../utils/subscriberUtilities";
 import response from "../helpers/response";
 import cloudinary from "../helpers/cloudinary";
 import SubscriberService from "../services/subscriberService";
 import { Types } from "mongoose";
 import { CustomeRequest } from "../middlewares/authentication";
-// import { Category } from "../models/blogCategories";
-// import { Message } from "../models/messages";
 import { Comment } from "../models/comments";
+import { BlogDto } from "../types/blog.types";
+import { validateBlog, sanitizeHtml, validateContentImages } from "../helpers/validators/blogValidator";
+
+// Define a custom interface that extends Express Request to include file
+interface RequestWithFile extends Request {
+  file?: Express.Multer.File;
+}
 
 /**
  * Controller class responsible for handling blog-related requests.
@@ -20,7 +24,7 @@ class blogController {
    * @param req The request object.
    * @param res The response object.
    */
-  static async createBlog(req: Request, res: Response): Promise<void> {
+  static async createBlog(req: RequestWithFile, res: Response): Promise<void> {
     try {
       let imageURL: string | undefined;
       if (req.file !== undefined) {
@@ -35,23 +39,60 @@ class blogController {
         response(res, 409, "Blog already exists", null, "BLOG_EXISTS");
         return;
       }
-      // const tags = Array.isArray(req.query.tags) ? req.query.tags.map(String) : [String(req.query.tags)];
-      // const category = Array.isArray(req.query.category)
-      //   ? req.query.category.map(String)
-      //   : [String(req.query.category)];
 
-      const blogData: any = {
+      const tags = Array.isArray(req.body.tags) ? req.body.tags.map(String) : 
+        req.body.tags ? [String(req.body.tags)] : [];
+      
+      const category = Array.isArray(req.body.category)
+        ? req.body.category.map(String)
+        : req.body.category ? [String(req.body.category)] : [];
+
+      // Sanitize HTML content
+      const sanitizedContent = sanitizeHtml(req.body.content);
+      
+      // Validate content images
+      if (!validateContentImages(sanitizedContent)) {
+        res.status(400).json({ 
+          status: 400, 
+          message: "Invalid image format in content", 
+          error: "INVALID_CONTENT_IMAGES" 
+        });
+        return;
+      }
+
+      const blogData: BlogDto = {
         title: req.body.title,
-        Description: req.body.Description,
-        content: req.body.content,
+        subtitle: req.body.subtitle,
+        description: req.body.description || req.body.Description || '',
+        content: sanitizedContent,
         imageUrl: imageURL,
-        tags: req.body.tags,
-        category: req.body.category,
-        author: req.body.author,
+        tags: tags,
+        category: category,
+        author: {
+          name: req.body.author?.name || req.body.author || 'Anonymous',
+          avatarUrl: req.body.author?.avatarUrl || undefined,
+          bio: req.body.author?.bio || undefined
+        },
+        readTime: req.body.readTime,
+        contentImages: req.body.contentImages
       };
 
+      // Validate blog data
+      const { error } = validateBlog(blogData);
+      if (error) {
+        res.status(400).json({ 
+          status: 400, 
+          message: error.details[0].message, 
+          error: "VALIDATION_ERROR" 
+        });
+        return;
+      }
+
       const newBlog = await BlogServices.createBlog(blogData);
-      res.status(201).json({ message: "Blog created successfully", newBlog });
+      res.status(201).json({ 
+        message: "Blog created successfully", 
+        blog: newBlog 
+      });
     } catch (error) {
       console.error("Error creating blog:", error);
       res.status(500).send("Sorry, something went wrong");
@@ -63,23 +104,60 @@ class blogController {
    * @param req The request object.
    * @param res The response object.
    */
-  static async updateBlog(req: Request, res: Response): Promise<void> {
+  static async updateBlog(req: RequestWithFile, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const { title } = req.body;
-      const updatedBlogData: IBlog = req.body;
-      const updatedBlog = await BlogServices.updateBlog(id, updatedBlogData);
+      
+      let imageURL: string | undefined;
+      if (req.file !== undefined) {
+        const file = req.file.path;
+        const link = await cloudinary.uploader.upload(file);
+        imageURL = link.secure_url;
+      }
+
+      const blogData: Partial<BlogDto> = {
+        ...req.body,
+        imageUrl: imageURL || req.body.imageUrl
+      };
+
+      // Handle tags and category properly
+      if (req.body.tags) {
+        blogData.tags = Array.isArray(req.body.tags) ? req.body.tags.map(String) : 
+          [String(req.body.tags)];
+      }
+      
+      if (req.body.category) {
+        blogData.category = Array.isArray(req.body.category)
+          ? req.body.category.map(String)
+          : [String(req.body.category)];
+      }
+
+      // Format author data properly
+      if (req.body.author) {
+        if (typeof req.body.author === 'string') {
+          blogData.author = {
+            name: req.body.author
+          };
+        } else if (typeof req.body.author === 'object') {
+          blogData.author = {
+            name: req.body.author.name || 'Anonymous',
+            avatarUrl: req.body.author.avatarUrl,
+            bio: req.body.author.bio
+          };
+        }
+      }
+
+      const updatedBlog = await BlogServices.updateBlog(id, blogData);
       if (!updatedBlog) {
         console.log("Blog not found");
         res.status(404).send("Blog not found");
         return;
       }
 
-      /**
-       * Notify subscribers about the  ssssssssssssnew updates
-       */
-      // await subscriberUtils.notifyAllSubscribersAboutUpdates(title, "Blog has been updated");
-      res.status(200).json(updatedBlog);
+      res.status(200).json({
+        message: "Blog updated successfully",
+        blog: updatedBlog
+      });
     } catch (error) {
       console.error("Error updating blog:", error);
       res.status(500).send("Sorry, something went wrong");
@@ -277,19 +355,17 @@ class blogController {
    * @param req The request object.
    * @param res The response object.
    */
-  static async getBlogById(
-    req: Request,
-    res: Response
-  ): Promise<undefined | Response<any, Record<string, any>>> {
+  static async getBlogById(req: Request, res: Response): Promise<void> {
     try {
       const id = req.params.id;
       const blog = await Blog.findById(id);
 
       if (blog == null) {
-        return res.status(404).json({
-          statuCode: 404,
-          error: "blog with the given ID was not found.",
+        res.status(404).json({
+          statusCode: 404,
+          error: "Blog with the given ID was not found.",
         });
+        return;
       }
 
       const comments = await Comment.find({ postID: blog._id });
@@ -297,19 +373,24 @@ class blogController {
       const blogWithComments = {
         _id: blog._id,
         title: blog.title,
+        subtitle: blog.subtitle,
+        description: blog.description,
         content: blog.content,
-        Description: blog.Description,
         imageUrl: blog.imageUrl,
+        author: blog.author,
         updatedAt: blog.updatedAt,
+        createdAt: blog.createdAt,
         category: blog.category,
         likes: blog.likes,
         tags: blog.tags,
+        readTime: blog.readTime,
+        contentImages: blog.contentImages,
         comments,
       };
 
-      res.status(200).json({ statuCode: 200, blogWithComments });
+      res.status(200).json({ statusCode: 200, blog: blogWithComments });
     } catch (error) {
-      res.status(500).json({ statuCode: 500, error: "Something went wrong" });
+      res.status(500).json({ statusCode: 500, error: "Something went wrong" });
     }
   }
 
@@ -317,39 +398,12 @@ class blogController {
    * Method to find all blog documents.
    * @returns Promise resolving to an array of all blog documents.
    */
-  static async retrieveAllBlogs(
-    req: Request,
-    res: Response
-  ): Promise<undefined | Response<any, Record<string, any>>> {
+  static async retrieveAllBlogs(req: Request, res: Response): Promise<void> {
     try {
-      const blogs = await Blog.find();
-
-      const blogsWithComments = [];
-
-      if (blogs.length !== 0) {
-        for (const blog of blogs) {
-          const comments = await Comment.find({ blog: blog._id });
-          const blogWithComments = {
-            _id: blog._id,
-            title: blog.title,
-            content: blog.content,
-            Description: blog.Description,
-            imageUrl: blog.imageUrl,
-            updatedAt: blog.updatedAt,
-            category: blog.category,
-            likes: blog.likes,
-            tags: blog.tags,
-            comments,
-          };
-          blogsWithComments.push(blogWithComments);
-        }
-      }
-
-      res.status(200).json({ statuCode: 200, blogsWithComments });
+      const blogs = await BlogServices.findAllBlogs();
+      res.status(200).json({ statusCode: 200, blogs });
     } catch (error) {
-      return res
-        .status(500)
-        .json({ statuCode: 500, error: "Something went wrong" });
+      res.status(500).json({ statusCode: 500, error: "Something went wrong" });
     }
   }
 }

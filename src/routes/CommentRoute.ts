@@ -20,6 +20,5 @@ commentRoutes.delete(
 //  commentRoutes.delete('/delete/:id',  CommentController.deleteComment);
 // commentRoutes.get('/byBlog/:id', CommentController.findCommentByPostID);
 
-// hijokl
 // Export the router
 export default commentRoutes;

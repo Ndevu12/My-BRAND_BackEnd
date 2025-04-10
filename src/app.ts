@@ -3,7 +3,7 @@ import express, { Application } from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
-import { connectDb } from "./OnStart/connectdb";
+import { connectDb } from "./start-ups/connectdb";
 
 import Route from "./routes/index";
 
@@ -16,7 +16,7 @@ import Route from "./routes/index";
 // import { seedNotification } from './populateDB/seedNotification';
 // import { seedSubscriber } from './populateDB/seedSubscriber';
 
-import { Documentation } from "./OnStart/APIs-Docs";
+import { Documentation } from "./start-ups/APIs-Docs";
 
 dotenv.config();
 
@@ -76,7 +76,7 @@ app.get("/", (req, res) => {
 // Start the server
 const PORT: number = Number(process.env.PORT) || 6090;
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`Server is running on port http://localhost:${PORT}`);
 });
 
 export { app };

@@ -9,3 +9,6 @@ node_modules/
 
 # Ignore dist files
 /dist/
+
+
+yarn.lock
