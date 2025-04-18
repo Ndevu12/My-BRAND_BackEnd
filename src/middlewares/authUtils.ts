@@ -150,14 +150,13 @@ export const isAdminExist = async (
     }
 
     // Otherwise, check if the current user is already an admin
-    // response(
-    //   res, 
-    //   403, 
-    //   "Action forbiden. Please try reading blogs on the website.", 
-    //   null, 
-    //   "ADMIN_EXISTS"
-    // );
-    next();
+    response(
+      res, 
+      403, 
+      "Action forbiden. Please try reading blogs on the website.", 
+      null, 
+      "ADMIN_EXISTS"
+    );
   } catch (error) {
     console.error("Error checking admin existence:", error);
     response(
