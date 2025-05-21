@@ -4,13 +4,6 @@ import { isAdmin, isAdminExist } from "../middlewares/authUtils";
 
 const authRoutes: Router = Router();
 
-// Admin routes
-authRoutes.post(
-  "/admin/signup",
-  isAdminExist,
-  UserController.registerAdmin
-);
-
 // User routes (both admin and regular users)
 authRoutes.post("/signup",  UserController.registerUser);
 authRoutes.post("/login", UserController.loginUser);

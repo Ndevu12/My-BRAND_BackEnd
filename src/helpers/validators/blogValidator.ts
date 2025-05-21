@@ -1,5 +1,11 @@
 import Joi from 'joi';
 import mongoose from 'mongoose';
+import createDOMPurify from 'dompurify';
+import { JSDOM } from 'jsdom';
+
+// Setup DOMPurify with a DOM environment for Node.js
+const window = new JSDOM('').window;
+const purify = createDOMPurify(window as unknown as any);
 
 // Blog schema validation
 export const validateBlog = (blog: any) => {
@@ -31,7 +37,19 @@ export const validateBlog = (blog: any) => {
 
 // Sanitize HTML content to prevent XSS
 export const sanitizeHtml = (html: string): string => {
-  // Basic sanitization: remove script tags
-  // For production, use a proper HTML sanitizer library like DOMPurify
-  return html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+  if (!html) return '';
+  
+  // Use DOMPurify for robust HTML sanitization
+  return purify.sanitize(html, {
+    ALLOWED_TAGS: [
+      'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'p', 'a', 'ul', 'ol',
+      'li', 'b', 'i', 'strong', 'em', 'strike', 'code', 'hr', 'br', 'div',
+      'table', 'thead', 'tbody', 'tr', 'th', 'td', 'pre', 'img'
+    ],
+    ALLOWED_ATTR: [
+      'href', 'name', 'target', 'src', 'alt', 'title', 'class', 'id', 'style'
+    ],
+    FORBID_TAGS: ['script', 'iframe', 'object', 'embed'],
+    FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover']
+  });
 };

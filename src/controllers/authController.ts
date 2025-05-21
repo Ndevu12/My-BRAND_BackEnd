@@ -7,74 +7,6 @@ import UserServices from "../services/authServices";
 import { blackListedTokens } from "../middlewares/authUtils";
 
 class UserController {
-  /**
-   * Register a new admin user
-   */
-  static async registerAdmin(req: Request, res: Response): Promise<void> {
-    try {
-      const { username, password, email } = req.body;
-
-      // Check if username or email already exists
-      const existingUser = await UserServices.findUserByCredentials(username, email);
-      if (existingUser) {
-        response(
-          res, 
-          409, 
-          "Username or email already exists", 
-          null, 
-          "USER_ALREADY_EXISTS"
-        );
-        return;
-      }
-
-      // Hash the password
-      const hashedPassword = await generate(password);
-
-      // Create the new user with role admin
-      const userData = {
-        ...req.body,
-        password: hashedPassword,
-        role: "admin"
-      };
-
-      const user = await UserServices.createUser(userData);
-
-      // Generate JWT token
-      const accessToken = sign({
-        id: user._id,
-        username: user.username,
-        role: user.role,
-        email: user.email,
-      });
-
-      // Prepare response data
-      const userResponse = {
-        id: user._id,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-        accessToken
-      };
-
-      // Set cookie and send response
-      res.cookie("token", accessToken, {
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production", // secure in production
-      });
-
-      response(res, 201, "Registration successful", userResponse);
-    } catch (error) {
-      console.error("Error registering user:", error);
-      response(
-        res,
-        500,
-        "Sorry, something went wrong during registration",
-        null,
-        "SERVER_ERROR"
-      );
-    }
-  }
 
   /**
    * Register a regular user (non-admin)
@@ -108,31 +40,14 @@ class UserController {
 
       const user = await UserServices.createUser(userData);
 
-      // Generate JWT token
-      const accessToken = sign({
-        id: user._id,
-        username: user.username,
-        role: user.role,
-        email: user.email,
-      });
-
-      // Prepare response data
-      const userResponse = {
-        id: user._id,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-        accessToken
-      };
-
       // Set cookie and send response
-      res.cookie("token", accessToken, {
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production", // secure in production
-      });
+      // res.cookie("token", accessToken, {
+      //   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      //   httpOnly: true,
+      //   secure: process.env.NODE_ENV === "production", // secure in production
+      // });
 
-      response(res, 201, "Registration successful", userResponse);
+      response(res, 201, "Registration successful", null);
     } catch (error) {
       console.error("Error registering user:", error);
       response(
@@ -198,15 +113,6 @@ class UserController {
         role: user.role,
       });
 
-      // Prepare response data
-      const userResponse = {
-        id: user._id,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-        accessToken
-      };
-
       // Set cookie and send response
       res.cookie("token", accessToken, {
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
@@ -214,7 +120,7 @@ class UserController {
         secure: process.env.NODE_ENV === "production", // secure in production
       });
 
-      response(res, 200, "Login successful", userResponse);
+      response(res, 200, "Login successful", null);
     } catch (error) {
       console.error("Error during login:", error);
       response(

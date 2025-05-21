@@ -12,12 +12,5 @@ commentRoutes.delete(
   CommentController.deleteComments
 );
 
-//  commentRoutes.post('/add',isAdminOrSubscriber, CommentController.createComment);
-//  commentRoutes.put('/update/:id',isAdminOrSubscriber, CommentController.updateComment);
-//  commentRoutes.get('/:id', CommentController.getCommentById);
-//  commentRoutes.get('/', CommentController.getAllComments);
-//  commentRoutes.delete('/delete/:id',  CommentController.deleteComment);
-// commentRoutes.get('/byBlog/:id', CommentController.findCommentByPostID);
-
 // Export the router
 export default commentRoutes;

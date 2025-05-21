@@ -4,8 +4,14 @@ import dotenv from 'dotenv';
 // Load environment variables
 dotenv.config();
 
-// Get JWT secret from environment or use a default (for development only)
-const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key';
+// Get JWT secret from environment
+const JWT_SECRET = process.env.JWT_SECRETKEY;
+
+// Ensure JWT secret is set
+if (!JWT_SECRET) {
+  console.error('ERROR: JWT_SECRET is not defined in the environment variables. This is a security risk.');
+  process.exit(1);
+}
 
 /**
  * Sign a JWT token with user data

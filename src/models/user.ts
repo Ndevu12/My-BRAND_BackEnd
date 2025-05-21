@@ -9,8 +9,6 @@ export interface IUser extends Document {
   password: string;
   role: "admin" | "user";
   verified?: boolean;
-  avatarUrl?: string;
-  bio?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -46,17 +44,9 @@ const userSchema = new Schema<IUser>(
       enum: ["user", "admin"],
       default: "user",
     },
-    verified: {
+  verified: {
       type: Boolean,
       default: false,
-    },
-    avatarUrl: {
-      type: String,
-      required: false,
-    },
-    bio: {
-      type: String,
-      required: false,
     }
   },
   { timestamps: true }

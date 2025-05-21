@@ -9,7 +9,7 @@ export interface BlogDto {
   description: string;
   content: string;
   imageUrl?: string;
-  author: Types.ObjectId | string; // Changed to reference User model
+  author: Types.ObjectId | string; // References UserProfile model
   category: string | string[];
   tags?: string[];
   readTime?: string;
@@ -24,7 +24,7 @@ export interface IBlog extends Document {
   description: string;
   content: string;
   imageUrl?: string;
-  author: Types.ObjectId; // Changed to reference User model
+  author: Types.ObjectId; // References UserProfile model
   createdAt: Date;
   updatedAt: Date;
   comments?: Types.ObjectId[];

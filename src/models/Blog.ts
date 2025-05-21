@@ -31,7 +31,7 @@ const blogSchema = new Schema<IBlog>({
   },
   author: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: 'UserProfile',
     required: true
   },
   createdAt: {

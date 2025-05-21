@@ -38,6 +38,14 @@ class UserServices {
   }
 
   /**
+   * Check if admin user exists (more efficient than getting all users)
+   */
+  static async findAdminUser(): Promise<boolean> {
+    const adminUser = await User.findOne({ role: "admin" });
+    return !!adminUser;
+  }
+
+  /**
    * Get all users (for admin purposes)
    */
   static async getAllUsers(): Promise<IUser[]> {

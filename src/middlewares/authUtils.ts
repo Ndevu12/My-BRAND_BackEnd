@@ -26,9 +26,9 @@ export interface CustomeRequest extends Request {
  */
 
 /**
- * Middleware to authenticate any user (admin or regular)
+ * Middleware to isAuth any user (admin or regular)
  */
-export const authenticate = (
+export const isAuth = (
   req: Request,
   res: Response,
   next: NextFunction
@@ -56,7 +56,7 @@ export const authenticate = (
     (req as CustomeRequest).user = decoded;
     next();
   } catch (error) {
-    console.error("Authentication error:", error);
+    console.error("Authentication error:");
     response(res, 401, "Invalid token", null, "INVALID_TOKEN");
   }
 };
@@ -70,7 +70,7 @@ export const isAdmin = (
   next: NextFunction
 ): void => {
   try {
-    authenticate(req, res, () => {
+    isAuth(req, res, () => {
       const user = (req as CustomeRequest).user;
       if (!user || user?.role !== "admin") {
         response(
@@ -85,7 +85,7 @@ export const isAdmin = (
       next();
     });
   } catch (error) {
-    console.error("Admin authentication error:", error);
+    console.error("Admin authentication error:");
     response(res, 500, "Something went wrong", null, "SERVER_ERROR");
   }
 };
@@ -104,7 +104,7 @@ export const isAdminOrSubscriber = (
   next: NextFunction
 ): void => {
   try {
-    authenticate(req, res, () => {
+    isAuth(req, res, () => {
       const user = (req as CustomeRequest).user;
       if (!user) {
         response(res, 401, "Authentication required", null, "UNAUTHORIZED");
@@ -140,20 +140,18 @@ export const isAdminExist = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const users = await UserServices.getAllUsers();
-    const adminExists = users.some((user) => user.role === "admin");
+    // Use findOne instead of getting all users and filtering
+    const adminExists = await UserServices.findAdminUser();
 
     // If no admin exists, allow creating one
     if (!adminExists) {
       next();
       return;
-    }
-
-    // Otherwise, check if the current user is already an admin
+    }    // Otherwise, check if the current user is already an admin
     response(
       res, 
       403, 
-      "Action forbiden. Please try reading blogs on the website.", 
+      "Action forbidden. Please try reading blogs on the website.", 
       null, 
       "ADMIN_EXISTS"
     );
