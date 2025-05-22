@@ -8,9 +8,6 @@ const authRoutes: Router = Router();
 authRoutes.post("/signup",  UserController.registerUser);
 authRoutes.post("/login", UserController.loginUser);
 authRoutes.post("/logout", UserController.logout);
-authRoutes.get("/me", isAdmin, UserController.getCurrentUser);
-
-// Testing/cleanup route (protected)
-authRoutes.delete("/users", isAdmin, UserController.deleteAllUsers);
+authRoutes.get("/status", isAdmin, UserController.getCurrentUser);
 
 export default authRoutes;
