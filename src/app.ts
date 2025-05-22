@@ -17,7 +17,13 @@ const app: Application = express();
 
 // Middleware
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: process.env.CORS_ORIGIN,
+  credentials: true, // Allow credentials if needed
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "Accept"],
+  // preflightContinue: true,
+}));
 
 // cookie-parser middleware
 app.use(cookieParser());
