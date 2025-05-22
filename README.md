@@ -18,6 +18,8 @@ My-BRAND_BackEnd serves as the backend infrastructure for the My-BRAND project, 
 
 - ****User Management:**** Implement user authentication, registration, and profile management functionalities.
 
+- ****User Profiles:**** Separate user authentication from public profile data for better security.
+
 - ****Data Management:**** Handle CRUD operations for various data entities such as create Blog, access a blog, update and delete preferences.
 
 - ****Security:**** Ensure data security through encryption, authentication, and authorization mechanisms.

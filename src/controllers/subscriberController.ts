@@ -5,8 +5,7 @@ import SubscriberService from "../services/subscriberService";
 import { sign } from "../helpers/jwtToken";
 import response from "../helpers/response";
 
-class subscriberController {
-  /**
+class subscriberController {  /**
    * Method to create a new subscriber.
    * @param req Request object containing subscriber data.
    * @param res Response object to send the result.
@@ -14,17 +13,13 @@ class subscriberController {
   static async createSubscriber(req: Request, res: Response): Promise<void> {
     try {
       const subscriberData: ISubscriber = req.body;
-      const { email } = req.body;
-
-      // Check if subscriber with the same email already exists
+      const { email } = req.body;      // Check if subscriber with the same email already exists
       const existingSubscriber = await SubscriberService.findSubscriberByEmail(
         subscriberData
       );
       if (existingSubscriber) {
-        res
-          .status(400)
-          .json({ message: "Subscriber with this email already exists" });
         console.error("Error fetching subscribers: /already subscribed");
+        response(res, 400, "Subscriber with this email already exists", null, "SUBSCRIBER_EXISTS");
         return;
       }
 
@@ -49,54 +44,47 @@ class subscriberController {
        */
       // await subscriberUtils.notifySubscriberOnSubscription(email);
 
-      response(res, 200, "Subscribed successful", userObject);
-    } catch (error) {
+      response(res, 200, "Subscribed successful", userObject);    } catch (error) {
       console.error("Error creating subscriber:", error);
-      res.status(500).send("Internal Server Error");
+      response(res, 500, "Internal Server Error", null, "SERVER_ERROR");
     }
   }
-
   /**
    * Method to retrieve all subscribers.
    * @param req Request object.
    * @param res Response object to send the subscribers.
-   */
-  static async getAllSubscribers(req: Request, res: Response): Promise<void> {
+   */  static async getAllSubscribers(req: Request, res: Response): Promise<void> {
     try {
       const subscribers = await SubscriberService.getAllSubscribers();
-      res.status(200).json(subscribers);
+      response(res, 200, "Subscribers retrieved successfully", subscribers);
     } catch (error) {
       console.error("Error fetching subscribers:", error);
-      res.status(500).send("Internal Server Error");
+      response(res, 500, "Internal Server Error", null, "SERVER_ERROR");
     }
   }
-
   /**
    * Method to retrieve a subscriber by its ID.
    * @param req Request object containing the subscriber ID.
    * @param res Response object to send the subscriber.
-   */
-  static async getSubscriberById(req: Request, res: Response): Promise<void> {
+   */  static async getSubscriberById(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
       const subscriber = await SubscriberService.findSubscriberById(id);
       if (subscriber) {
-        res.status(200).json(subscriber);
+        response(res, 200, "Subscriber retrieved successfully", subscriber);
       } else {
-        res.status(404).send("Subscriber not found");
+        response(res, 404, "Subscriber not found", null, "SUBSCRIBER_NOT_FOUND");
       }
     } catch (error) {
       console.error("Error fetching subscriber by ID:", error);
-      res.status(500).send("Internal Server Error");
+      response(res, 500, "Internal Server Error", null, "SERVER_ERROR");
     }
   }
-
   /**
    * Method to update a subscriber by its ID.
    * @param req Request object containing the subscriber ID and updated data.
    * @param res Response object to send the updated subscriber.
-   */
-  static async updateSubscriber(req: Request, res: Response): Promise<void> {
+   */  static async updateSubscriber(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
       const updatedSubscriberData = req.body;
@@ -105,33 +93,31 @@ class subscriberController {
         updatedSubscriberData
       );
       if (updatedSubscriber) {
-        res.status(200).json(updatedSubscriber);
+        response(res, 200, "Subscriber updated successfully", updatedSubscriber);
       } else {
-        res.status(404).send("Subscriber not found");
+        response(res, 404, "Subscriber not found", null, "SUBSCRIBER_NOT_FOUND");
       }
     } catch (error) {
       console.error("Error updating subscriber:", error);
-      res.status(500).send("Internal Server Error");
+      response(res, 500, "Internal Server Error", null, "SERVER_ERROR");
     }
   }
-
   /**
    * Method to delete a subscriber by its ID.
    * @param req Request object containing the subscriber ID.
    * @param res Response object to send the result.
-   */
-  static async deleteSubscriber(req: Request, res: Response): Promise<void> {
+   */  static async deleteSubscriber(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
       const deletedSubscriber = await SubscriberService.deleteSubscriber(id);
       if (deletedSubscriber) {
-        res.status(200).send("Subscriber deleted successfully");
+        response(res, 200, "Subscriber deleted successfully", null);
       } else {
-        res.status(404).send("Subscriber not found");
+        response(res, 404, "Subscriber not found", null, "SUBSCRIBER_NOT_FOUND");
       }
     } catch (error) {
       console.error("Error deleting subscriber:", error);
-      res.status(500).send("Internal Server Error");
+      response(res, 500, "Internal Server Error", null, "SERVER_ERROR");
     }
   }
 }

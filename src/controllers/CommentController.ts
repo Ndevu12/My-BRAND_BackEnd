@@ -2,21 +2,21 @@ import { type Request, type Response } from "express";
 import { Blog } from "../models/Blog";
 import { Comment, validate } from "../models/comments";
 import mongoose from "mongoose";
+import response from "../helpers/response";
 
-class CommentController {
-  static async createComment(req: Request, res: Response): Promise<void> {
-    try {
-      const { error } = validate(req.body);
+class CommentController {  static async createComment(req: Request, res: Response): Promise<void>  {
+    try {      const { error } = validate(req.body);
       if (error !== undefined) {
-        res.status(400).json({ statuCode: 400, error: error?.details[0].message });
+        response(res, 400, "Validation error: " + error?.details[0].message, null, "VALIDATION_ERROR");
         return;
       }
 
       const existingBlog = await Blog.findById(req.body.postID);
       if (existingBlog == null) {
-        res.status(404).json({ statuCode: 404, error: "Invalid blog ID" });
+        response(res, 404, "Invalid blog ID", null, "BLOG_NOT_FOUND");
         return;
       }
+      
       const comment = new Comment({
         commenterName: req.body.commenterName,
         comment: req.body.comment,
@@ -25,36 +25,28 @@ class CommentController {
 
       await comment.save();
 
-      res.status(201).json({
-        statuCode: 201,
-        message: "comment posted successfully",
-        comment,
-      });
-    } catch (error) {
-      res.status(500).json({ statuCode: 500, error: "Sorry, sommething went wrong" });
+      response(res, 201, "Comment posted successfully", comment);    } catch (error) {
+      response(res, 500, "Sorry, something went wrong", null, "SERVER_ERROR");
     }
   }
 
-  static async deleteComments(req: Request, res: Response): Promise<void> {
-    try {
-      const id = req.params.id;
+  static async deleteComments(req: Request, res: Response): Promise<void>  {
+    try {      const id = req.params.id;
       if (!mongoose.Types.ObjectId.isValid(id)) {
-        res.status(400).send({ error: "Invalid id" });
+        response(res, 400, "Invalid ID", null, "INVALID_ID");
         return;
       }
+      
       const comment = await Comment.findByIdAndDelete(id);
 
       if (comment == null) {
-        res.status(404).json({
-          statuCode: 404,
-          error: "comment with the given ID was not found.",
-        });
+        response(res, 404, "Comment with the given ID was not found", null, "COMMENT_NOT_FOUND");
         return;
       }
 
-      res.status(200).json({ statuCode: 200, message: "comment deleted successfully" });
+      response(res, 200, "Comment deleted successfully", null);
     } catch (error) {
-      res.status(500).json({ statuCode: 500, error: "An unexpected error occurred" });
+      response(res, 500, "An unexpected error occurred", null, "SERVER_ERROR");
     }
   }
 }

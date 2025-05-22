@@ -10,13 +10,13 @@ const options: swaggerjsdoc.Options = {
   definition: {
     openapi: "3.0.2",
     info: {
-      title: "Ndevu's portfolio Website API Documentation",
+      title: "Ndevu's Portfolio Website API Documentation",
       version: "1.0.0",
       description:
         "MyBrand Website's Backend API documentation of how to use the API to perform various operations.",
       contact: {
         name: "NdevuSpace",
-        url: "https://ndevu12.github.io/My-BRAND/",
+        url: "https://ndevuspace.netlify.app/",
         email: "niyokwizerwajeanpaulelisa@gmail.com",
       },
     },
@@ -31,7 +31,7 @@ const options: swaggerjsdoc.Options = {
       },
     },
   },
-  apis: ["./src/APIs_Documentation/*.ts", "./src/APIs_Documentation/*.yml"],
+  apis: ["./src/docs/*.yml"],
 };
 
 const swaggerDocs = swaggerjsdoc(options);

@@ -1,57 +1,60 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Document, Schema } from "mongoose";
 
 /**
- * Interface representing the structure of an admin document.
+ * Interface representing a user document in the database
  */
 export interface IUser extends Document {
-    username: string;
-    password: any;
-    email: string;
-    phoneNumber: string;
-    fullName: string;
-    profileImage: string;
-    role: string;
+  username: string;
+  email: string;
+  password: string;
+  role: "admin" | "user";
+  verified?: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-// Define the schema for the Admin collection
-const userSchema = new Schema<IUser>({
+/**
+ * Schema for the User model
+ */
+const userSchema = new Schema<IUser>(
+  {
     username: {
-        type: String,
-        required: true,
-        unique: true,
-    },
-    password: {
-        type: String,
-        required: true,
+      type: String,
+      required: true,
+      unique: true,
+      minlength: 3,
+      maxlength: 30,
     },
     email: {
-        type: String,
-        required: true,
-        unique: true,
+      type: String,
+      required: true,
+      unique: true,
+      match: [
+        /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
+        "Please fill a valid email address",
+      ],
     },
-    phoneNumber: {
-        type: String,
-        required: true,
-    },
-    fullName: {
-        type: String,
-        required: true,
-    },
-    profileImage: {
-        type: String,
-        required: false,
+    password: {
+      type: String,
+      required: true,
+      minlength: 8,
     },
     role: {
-        type: String,
-        enum: ['admin'], 
-        default: 'admin', 
+      type: String,
+      enum: ["user", "admin"],
+      default: "user",
     },
-});
+  verified: {
+      type: Boolean,
+      default: false,
+    }
+  },
+  { timestamps: true }
+);
 
-userSchema.methods.deletemany = function (): Promise<void | any> {
-    return this.deleteMany().exec();
-};
-
-const User = mongoose.model<IUser>('User', userSchema);
+/**
+ * User model
+ */
+const User = mongoose.model<IUser>("User", userSchema);
 
 export { User };

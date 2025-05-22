@@ -9,37 +9,27 @@ class BlogServices {
    * @returns Promise resolving to an array of blog documents matching the category.
    */
   static async findBlogsByCategory(query: string): Promise<IBlog[]> {
-    const findBlogByCategor = await Blog.find({ category: query }).exec();
+    const findBlogByCategor = await Blog.find({ category: query })
+      .populate('author')
+      .exec();
     return findBlogByCategor;
   }
 
   static async getAllBlogComment(id: string): Promise<IBlog | null> {
-    const comments = await Blog.findById(id).populate("comments").exec();
+    const comments = await Blog.findById(id)
+      .populate('author')
+      .populate("comments")
+      .exec();
     return comments;
   }
 
   static async getSingleBlog(query: string): Promise<IBlog | null> {
-    const blog = await Blog.findOne({ title: query });
+    const blog = await Blog.findOne({ title: query })
+      .populate('author');
     return blog;
   }
 
   static async createBlog(blogData: BlogDto): Promise<IBlog> {
-    // Extract content images from HTML content if not provided
-    if (!blogData.contentImages) {
-      const imgRegex = /<img.*?src="(.*?)".*?alt="(.*?)".*?>/g;
-      const matches = [...blogData.content.matchAll(imgRegex)];
-      
-      const contentImages = matches.map(match => ({
-        url: match[1],
-        alt: match[2],
-        caption: ''  // Can be enhanced to extract figcaption if present
-      }));
-      
-      if (contentImages.length > 0) {
-        blogData.contentImages = contentImages;
-      }
-    }
-    
     // Calculate read time if not provided
     if (!blogData.readTime) {
       // Average reading speed: 200-250 words per minute
@@ -49,16 +39,21 @@ class BlogServices {
     }
     
     const blog = await Blog.create(blogData);
-    return blog;
+    return blog.populate('author');
   }
   
   static async findAllBlogs() {
-    const blogs = await Blog.find({}).populate("comments").exec();
+    const blogs = await Blog.find({})
+      .populate('author')
+      .populate("comments")
+      .exec();
     return blogs;
   }
 
   static async getblogById(id: string): Promise<IBlog | null> {
-    const blog = await Blog.findById(id).populate("comments");
+    const blog = await Blog.findById(id)
+      .populate('author')
+      .populate("comments");
     return blog;
   }
 
@@ -67,22 +62,6 @@ class BlogServices {
     blogData: Partial<BlogDto>
   ): Promise<IBlog | null> {
     console.log("Inside update blog service");
-    
-    // Update the contentImages if the content has changed
-    if (blogData.content && !blogData.contentImages) {
-      const imgRegex = /<img.*?src="(.*?)".*?alt="(.*?)".*?>/g;
-      const matches = [...blogData.content.matchAll(imgRegex)];
-      
-      const contentImages = matches.map(match => ({
-        url: match[1],
-        alt: match[2],
-        caption: ''
-      }));
-      
-      if (contentImages.length > 0) {
-        blogData.contentImages = contentImages;
-      }
-    }
     
     // Update read time if content has changed
     if (blogData.content && !blogData.readTime) {
@@ -97,12 +76,12 @@ class BlogServices {
         updatedAt: new Date() 
       }, 
       { new: true }
-    );
+    ).populate('author');
     return blog;
   }
 
   static async deleteBlog(blogId: string): Promise<IBlog | null> {
-    const blog = await Blog.findByIdAndDelete(blogId);
+    const blog = await Blog.findByIdAndDelete(blogId).populate('author');
     return blog;
   }
 
@@ -127,11 +106,11 @@ class BlogServices {
     }
     blog.likes = blog.likes + 1;
     await blog.save();
-    return blog;
+    return blog.populate('author');
   }
 
   static async findAuthor(blogId: string): Promise<any> {
-    const blog = await Blog.findById(blogId);
+    const blog = await Blog.findById(blogId).populate('author');
     if (!blog) {
       throw new Error("Blog not found");
     }
@@ -139,28 +118,8 @@ class BlogServices {
     return author;
   }
 
-  static async updateAuthor(
-    BlogId: string,
-    newAuthor: any
-  ): Promise<IBlog | null> {
-    const blogId = BlogId;
-    console.log("Author in updateAuthor service:", newAuthor);
-    const updatedBlog = await Blog.findByIdAndUpdate(
-      blogId,
-      { author: newAuthor, updatedAt: new Date() },
-      { new: true }
-    );
-    return updatedBlog;
-  }
-
-  static async deleteAuthor(BlogId: string): Promise<IBlog | null> {
-    const blogId = BlogId;
-    const updatedBlog = await Blog.findByIdAndDelete(blogId);
-    return updatedBlog;
-  }
-
   static async getBlogByTitle(query: string): Promise<IBlog | null> {
-    const blog = await Blog.findOne({ title: query });
+    const blog = await Blog.findOne({ title: query }).populate('author');
     return blog;
   }
 
