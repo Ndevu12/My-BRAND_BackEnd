@@ -23,6 +23,9 @@ export interface CustomeRequest extends Request {
 
 /**
  * AUTHENTICATION MIDDLEWARE
+ * The application uses cookie-based authentication as the primary method.
+ * JWT tokens are stored in HTTP-only cookies and automatically sent with each request.
+ * Authorization header with Bearer token is supported as a fallback method.
  */
 
 /**
@@ -34,10 +37,10 @@ export const isAuth = (
   next: NextFunction
 ): void => {
   try {
-    // Get token from header or cookie
-    const token = 
-      req.header("Authorization")?.replace("Bearer ", "") || 
-      req.cookies?.token;
+    // Get token primarily from cookie, fallback to header if needed
+    const token =
+      req.cookies?.token ||
+      req.header("Authorization")?.replace("Bearer ", "");
 
     // Check if token exists
     if (!token) {
@@ -110,7 +113,7 @@ export const isAdminOrSubscriber = (
         response(res, 401, "Authentication required", null, "UNAUTHORIZED");
         return;
       }
-      
+
       // Allow both admin and regular users to proceed
       if (user.role === "admin" || user.role === "user") {
         next();
