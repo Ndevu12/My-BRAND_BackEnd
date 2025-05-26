@@ -1,5 +1,7 @@
-import { connectDb } from "../start-ups/connectdb";
+import connectDb from "../start-ups/connectdb";
 import { seedCategories } from "./seedCategories";
+import { seedUser } from "./seedUser";
+import { seedBlog } from "./seedBlog";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 
@@ -21,13 +23,16 @@ async function runSeeders() {
     if (args.length === 0 || args.includes('categories')) {
       console.log("\n=== Running Category Seeder ===");
       await seedCategories();
+    }    // User seeder must run before blog seeder
+    if (args.length === 0 || args.includes('users')) {
+      console.log("\n=== Running User Seeder ===");
+      await seedUser();
     }
-
-    // Add other seeders here with similar conditional logic
-    // if (args.length === 0 || args.includes('users')) {
-    //   console.log("\n=== Running User Seeder ===");
-    //   await seedUsers();
-    // }
+    
+    if (args.length === 0 || args.includes('blogs')) {
+      console.log("\n=== Running Blog Seeder ===");
+      await seedBlog();
+    }
 
     console.log("\nAll seeding completed successfully!");
     

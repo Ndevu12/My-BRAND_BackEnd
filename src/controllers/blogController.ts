@@ -289,10 +289,51 @@ class blogController {  /**
    * Method to find all blog documents.
    * @returns Promise resolving to an array of all blog documents.
    */
-  static async retrieveAllBlogs(req: Request, res: Response): Promise<void> {    try {
+  static async retrieveAllBlogs(req: Request, res: Response): Promise<void> {
+    try {
       const blogs = await BlogServices.findAllBlogs();
       response(res, 200, "All blogs retrieved successfully", blogs);
     } catch (error) {
+      response(res, 500, "Something went wrong", null, "SERVER_ERROR");
+    }
+  }
+
+  /**
+   * Method to get recent blogs with pagination.
+   * @param req The request object with optional query params for limit and page.
+   * @param res The response object.
+   */
+  static async getRecentBlogs(req: Request, res: Response): Promise<void> {
+    try {
+      const limit = parseInt(req.query.limit as string) || 10;
+      const page = parseInt(req.query.page as string) || 1;
+
+      // Validate pagination parameters
+      if (limit <= 0 || limit > 50) {
+        response(res, 400, "Limit must be between 1 and 50", null, "INVALID_LIMIT");
+        return;
+      }
+
+      if (page <= 0) {
+        response(res, 400, "Page must be greater than 0", null, "INVALID_PAGE");
+        return;
+      }
+
+      const result = await BlogServices.getRecentBlogs(limit, page);
+      
+      response(res, 200, "Recent blogs retrieved successfully", {
+        ...result,
+        pagination: {
+          currentPage: result.page,
+          totalPages: result.totalPages,
+          totalBlogs: result.total,
+          limit: limit,
+          hasNextPage: result.page < result.totalPages,
+          hasPrevPage: result.page > 1
+        }
+      });
+    } catch (error) {
+      console.error("Error retrieving recent blogs:", error);
       response(res, 500, "Something went wrong", null, "SERVER_ERROR");
     }
   }

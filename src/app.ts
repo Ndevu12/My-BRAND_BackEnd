@@ -1,13 +1,11 @@
 import express, { Application } from "express";
-// import bodyParser from 'body-parser';
+import bodyParser from 'body-parser';
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
 import morgan from "morgan";
-import { connectDb } from "./start-ups/connectdb";
-
+import connectDB from "./start-ups/connectdb";
 import Route from "./routes/index";
-
 import { Documentation } from "./start-ups/APIs-Docs";
 import { HomePage } from "./utils/templates/homePage";
 
@@ -17,22 +15,34 @@ const app: Application = express();
 
 // Middleware
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+    origin: ["http://localhost:3000", "http://127.0.0.1:5501", "http://localhost:5173"],
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"],
+    credentials: true,
+    preflightContinue: false,
+    optionsSuccessStatus: 204
+  }));
 
 // cookie-parser middleware
 app.use(cookieParser());
 
+// Body parser middleware
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+
+// Morgan logging middleware
+const morganFormat = ':method :url :status :response-time ms - :res[content-length]';
+app.use(morgan(morganFormat));
+
+// ROUTES
 app.use("/v1", Route);
 
 // Set up mongoose connection
-connectDb();
+connectDB();
 
 // SWAGGER DOCS
 Documentation();
-
-// Morgan format for logging
-const morganFormat = ':method :url :status :response-time ms - :res[content-length]';
-app.use(morgan(morganFormat));
 
 app.get("/", (req, res) => {
   res.status(200).send(HomePage);

@@ -50,6 +50,29 @@ class BlogServices {
     return blogs;
   }
 
+  // Method to get recent blogs with pagination
+  static async getRecentBlogs(limit: number = 10, page: number = 1): Promise<{ blogs: IBlog[], total: number, page: number, totalPages: number }> {
+    const skip = (page - 1) * limit;
+    
+    const blogs = await Blog.find({})
+      .sort({ createdAt: -1 }) // Sort by creation date, newest first
+      .skip(skip)
+      .limit(limit)
+      .populate('author')
+      .select('title description imageUrl category tags readTime createdAt likes views author') // Select only necessary fields for performance
+      .exec();
+    
+    const total = await Blog.countDocuments();
+    const totalPages = Math.ceil(total / limit);
+    
+    return {
+      blogs,
+      total,
+      page,
+      totalPages
+    };
+  }
+
   static async getblogById(id: string): Promise<IBlog | null> {
     const blog = await Blog.findById(id)
       .populate('author')

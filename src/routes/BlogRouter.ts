@@ -8,6 +8,7 @@ const blogRoutes: Router = Router();
 
 // Public routes (no authentication required)
 blogRoutes.get("/public", BlogController.retrieveAllBlogs); // Public view of all blogs
+blogRoutes.get("/public/recent", BlogController.getRecentBlogs); // Public view of recent blogs with pagination
 blogRoutes.get("/public/:id", BlogController.getBlogById); // Public view of a single blog
 blogRoutes.get("/by-category/:id", BlogController.getBlogsByCategory);
 blogRoutes.get("/by-title", BlogController.getBlogByTitle);
