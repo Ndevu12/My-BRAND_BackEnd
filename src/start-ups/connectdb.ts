@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const connectDb = async (): Promise<void> => {
+const connectDB = async (): Promise<void> => {
   try {
     const dburl = String(process.env.DB_URL) || "";
 
@@ -21,4 +21,4 @@ const connectDb = async (): Promise<void> => {
   }
 };
 
-export { connectDb };
+export default connectDB;
