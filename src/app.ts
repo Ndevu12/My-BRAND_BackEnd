@@ -13,18 +13,23 @@ dotenv.config();
 
 const app: Application = express();
 
+// Get CORS origins from environment variable
+const getCorsOrigins = (): string[] => {
+  const corsEnv = process.env.CORS_ORIGINS;
+  if (!corsEnv) return [];
+  
+  // Handle both single origin and comma-separated origins
+  return corsEnv.includes(',') 
+    ? corsEnv.split(',').map(origin => origin.trim())
+    : [corsEnv.trim()];
+};
+
+const corsOrigins = getCorsOrigins();
+
 // Middleware
 app.use(express.json());
 app.use(cors({
-        origin: [
-        "http://localhost:3000", 
-        "http://127.0.0.1:5501", 
-        "http://localhost:5173",
-        "http://localhost:5500",  // Add this if using Live Server
-        "http://127.0.0.1:5500",  // Add this too
-        "http://localhost:5501",  // Common Live Server port
-        "null"  // Add this for file:// protocol during development
-    ],
+    origin: corsOrigins,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"],
     credentials: true,
