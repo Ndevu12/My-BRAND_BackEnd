@@ -110,8 +110,8 @@ class UserController {
       res.cookie("token", accessToken, {
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         httpOnly: process.env.NODE_ENV === "production", // httpOnly in production
-        secure: process.env.NODE_ENV === "production", // secure in production
-        sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax", // CSRF protection
+        secure: true,
+        sameSite: "none",
         path: "/", // Available for all routes
       });
 
@@ -149,8 +149,8 @@ class UserController {
       // Clear cookie with proper options
       res.clearCookie("token", {
         httpOnly: process.env.NODE_ENV === "production", // httpOnly in production,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+        secure: true,
+        sameSite: "none",
         path: "/",
       });
       

@@ -8,8 +8,10 @@ node_modules/
 .env
 
 # Ignore dist files
-/dist/
+dist/
 
+# Ignore build files
+.vscode/
 
 yarn.lock
 package-lock.json
