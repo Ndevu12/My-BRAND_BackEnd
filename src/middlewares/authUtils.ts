@@ -41,7 +41,7 @@ export const isAuth = (
     const token =
       req.cookies?.token ||
       req.header("Authorization")?.replace("Bearer ", "");
-
+    
     // Check if token exists
     if (!token) {
       response(res, 401, "Access denied. No token provided", null, "NO_TOKEN");

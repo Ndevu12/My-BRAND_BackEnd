@@ -40,13 +40,6 @@ class UserController {
 
       const user = await UserServices.createUser(userData);
 
-      // Set cookie and send response
-      // res.cookie("token", accessToken, {
-      //   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      //   httpOnly: true,
-      //   secure: process.env.NODE_ENV === "production", // secure in production
-      // });
-
       response(res, 201, "Registration successful", null);
     } catch (error) {
       console.error("Error registering user:", error);
@@ -116,8 +109,10 @@ class UserController {
       // Set cookie and send response
       res.cookie("token", accessToken, {
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production", // secure in production
+        httpOnly: process.env.NODE_ENV === "production", // httpOnly in production
+        secure: true,
+        sameSite: "none",
+        path: "/", // Available for all routes
       });
 
       response(res, 200, "Login successful", null);
@@ -138,8 +133,11 @@ class UserController {
    */
   static async logout(req: Request, res: Response): Promise<void> {
     try {
-      // Get token from authorization header
-      const token = req.header("Authorization")?.replace("Bearer ", "");
+      // Get token from cookie first, then fallback to authorization header
+      const token = 
+        req.cookies?.token ||
+        req.header("Authorization")?.replace("Bearer ", "");
+        
       if (!token) {
         response(res, 401, "No token provided", null, "TOKEN_MISSING");
         return;
@@ -148,8 +146,13 @@ class UserController {
       // Add token to blacklist
       blackListedTokens.add(token);
       
-      // Clear cookie
-      res.clearCookie("token");
+      // Clear cookie with proper options
+      res.clearCookie("token", {
+        httpOnly: process.env.NODE_ENV === "production", // httpOnly in production,
+        secure: true,
+        sameSite: "none",
+        path: "/",
+      });
       
       response(res, 200, "Logout successful", null);
     } catch (error) {
@@ -188,8 +191,7 @@ class UserController {
         id: user._id,
         username: user.username,
         email: user.email,
-        role: user.role,
-        // Add any other non-sensitive fields
+        role: user.role
       };
 
       response(res, 200, "User profile retrieved successfully", userData);

@@ -16,7 +16,15 @@ const app: Application = express();
 // Middleware
 app.use(express.json());
 app.use(cors({
-    origin: ["http://localhost:3000", "http://127.0.0.1:5501", "http://localhost:5173"],
+        origin: [
+        "http://localhost:3000", 
+        "http://127.0.0.1:5501", 
+        "http://localhost:5173",
+        "http://localhost:5500",  // Add this if using Live Server
+        "http://127.0.0.1:5500",  // Add this too
+        "http://localhost:5501",  // Common Live Server port
+        "null"  // Add this for file:// protocol during development
+    ],
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"],
     credentials: true,
