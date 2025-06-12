@@ -8,9 +8,10 @@ import Joi from "joi";
  * Interface representing the structure of a comment document.
  */
 export interface IComment extends Document {
-  postID: Schema.Types.ObjectId;
-  commenterName: undefined;
-  comment: string;
+  blogId: Schema.Types.ObjectId;
+  name: string;
+  email: string;
+  content: string;
   createdAt?: Date;
 }
 
@@ -19,18 +20,31 @@ export interface IComment extends Document {
  */
 
 const commentSchema = new Schema<IComment>({
-  postID: {
-    type: [Schema.Types.ObjectId],
+  blogId: {
+    type: Schema.Types.ObjectId,
     ref: "Blog",
     required: true,
   },
-  commenterName: {
+  name: {
     type: String,
     required: true,
+    trim: true,
+    minlength: 2,
+    maxlength: 100,
   },
-  comment: {
+  email: {
     type: String,
     required: true,
+    trim: true,
+    lowercase: true,
+    match: [/^\S+@\S+\.\S+$/, 'Please enter a valid email address'],
+  },
+  content: {
+    type: String,
+    required: true,
+    trim: true,
+    minlength: 3,
+    maxlength: 1000,
   },
   createdAt: {
     type: Date,
@@ -41,17 +55,25 @@ const commentSchema = new Schema<IComment>({
 const Comment = model<IComment>("Comment", commentSchema);
 
 const validateComment = (
-  comment: Pick<IComment, "comment" | "postID">
+  comment: Pick<IComment, "content" | "blogId" | "name" | "email">
 ): Joi.ValidationResult<any> => {
   const schema = Joi.object({
-    comment: Joi.string().min(3).required().messages({
-      "any.required": "content is required.",
+    content: Joi.string().min(3).max(1000).required().messages({
+      "any.required": "Content is required.",
+      "string.min": "Content must be at least 3 characters long.",
+      "string.max": "Content cannot exceed 1000 characters.",
     }),
-    postID: Joi.string().required().messages({
-      "any.required": "Blog is required.",
+    blogId: Joi.string().required().messages({
+      "any.required": "Blog ID is required.",
     }),
-    commenterName: Joi.string().min(3).required().messages({
+    name: Joi.string().min(2).max(100).required().trim().messages({
       "any.required": "Name is required.",
+      "string.min": "Name must be at least 2 characters long.",
+      "string.max": "Name cannot exceed 100 characters.",
+    }),
+    email: Joi.string().email().required().trim().messages({
+      "any.required": "Email is required.",
+      "string.email": "Please enter a valid email address.",
     }),
   });
 

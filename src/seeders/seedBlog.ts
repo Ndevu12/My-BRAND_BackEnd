@@ -81,11 +81,17 @@ const seedBlog = async (options = { forceUpdate: false }) => {
       const existingBlog = await Blog.findOne({ title: blog.title });
       
       if (existingBlog) {
-        if (options.forceUpdate) {
+        if (options.forceUpdate) {         
           // Update existing blog
           await Blog.updateOne(
             { _id: existingBlog._id },
             {
+              metaTitle: blog.title,
+              metaDescription: blog.description,
+              publishDate: blog.createdAt ? new Date(blog.createdAt).toISOString() : new Date().toISOString(),
+              imageCaption: `Featured image for ${blog.title}`,
+              status: 'published',
+              ...(blog.hasOwnProperty('subtitle') ? { subtitle: (blog as any).subtitle } : {}),
               description: blog.description,
               content: blog.content,
               imageUrl: blog.imageUrl,
@@ -102,10 +108,16 @@ const seedBlog = async (options = { forceUpdate: false }) => {
           skippedCount++;
           console.log(`Skipped existing blog: ${blog.title}`);
         }
-      } else {
+      } else {        
         // Create new blog
         await Blog.create({
           title: blog.title,
+          metaTitle: blog.title, // Use title as metaTitle fallback
+          metaDescription: blog.description, // Use description as metaDescription fallback
+          publishDate: blog.createdAt ? new Date(blog.createdAt).toISOString() : new Date().toISOString(),
+          imageCaption: `Featured image for ${blog.title}`,
+          status: 'published',
+          ...(blog.hasOwnProperty('subtitle') ? { subtitle: (blog as any).subtitle } : {}),
           description: blog.description,
           content: blog.content,
           imageUrl: blog.imageUrl,

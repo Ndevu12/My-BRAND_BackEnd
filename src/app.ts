@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
 import morgan from "morgan";
+import rateLimit from "express-rate-limit";
 import connectDB from "./start-ups/connectdb";
 import Route from "./routes/index";
 import { Documentation } from "./start-ups/APIs-Docs";
@@ -12,6 +13,21 @@ import { HomePage } from "./utils/templates/homePage";
 dotenv.config();
 
 const app: Application = express();
+
+// Rate limiting middleware
+const limiter = rateLimit({
+  windowMs: 5 * 60 * 1000, // 5 minutes
+  max: 40, // Limit each IP to 40 requests per windowMs
+  message: {
+    error: "Too many requests from this IP, please try again later.",
+    retryAfter: "5 minutes"
+  },
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+});
+
+// Apply rate limiting to all requests
+app.use(limiter);
 
 // Get CORS origins from environment variable
 const getCorsOrigins = (): string[] => {
