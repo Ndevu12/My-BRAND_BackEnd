@@ -26,7 +26,13 @@ class blogController {  /**
   static async createBlog(req: CustomeRequest & RequestWithFile, res: Response): Promise<void> {
     try {
       let imageURL: string | undefined;
-      if (req.file !== undefined) {
+      
+      // Priority: URL takes precedence over file upload
+      if (req.body?.imageUrl) {
+        // URL provided - use the URL
+        imageURL = req.body.imageUrl;
+      } else if (req.file !== undefined) {
+        // No URL provided, but file uploaded - upload to Cloudinary
         const file = req.file.path;
         const link = await cloudinary.uploader.upload(file);
         imageURL = link.secure_url;
@@ -64,6 +70,11 @@ class blogController {  /**
 
       const blogData: BlogDto = {
         title: req.body.title,
+        metaTitle: req.body.metaTitle,
+        metaDescription: req.body.metaDescription,
+        publishDate: req.body.publishDate,
+        imageCaption: req.body.imageCaption,
+        status: req.body.status,
         subtitle: req.body.subtitle,
         description: req.body.description || req.body.Description || '',
         content: sanitizedContent,
@@ -72,7 +83,7 @@ class blogController {  /**
         category: category,
         author: authorProfile._id as Types.ObjectId, 
         readTime: req.body.readTime
-      };      // Validate blog data
+      };// Validate blog data
 
       const { error } = validateBlog(blogData);
       if (error) {
@@ -108,12 +119,19 @@ class blogController {  /**
       }
       
       let imageURL: string | undefined;
-      if (req.file !== undefined) {
+      
+      // Priority: URL takes precedence over file upload
+      if (req.body?.imageUrl !== undefined) {
+        // URL provided - use the URL
+        imageURL = req.body.imageUrl;
+      } else if (req.file !== undefined) {
+        // No URL provided, but file uploaded - upload to Cloudinary
         const file = req.file.path;
         const link = await cloudinary.uploader.upload(file);
         imageURL = link.secure_url;
       }
 
+      
       // If content is provided, sanitize it
       if (req.body.content) {
         req.body.content = sanitizeHtml(req.body.content);
@@ -121,8 +139,9 @@ class blogController {  /**
 
       const blogData: Partial<BlogDto> = {
         ...req.body,
-        imageUrl: imageURL || req.body.imageUrl
+        imageUrl: imageURL !== undefined ? imageURL : existingBlog.imageUrl
       };
+
 
       // Handle tags and category properly
       if (req.body.tags) {
@@ -218,6 +237,7 @@ class blogController {  /**
       response(res, 500, "Sorry, something went wrong", null, "SERVER_ERROR");
     }
   }
+
   static async likeBlog(req: CustomeRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
@@ -285,6 +305,7 @@ class blogController {  /**
       response(res, 500, "Something went wrong", null, "SERVER_ERROR");
     }
   }
+ 
   /**
    * Method to find all blog documents.
    * @returns Promise resolving to an array of all blog documents.
@@ -294,6 +315,56 @@ class blogController {  /**
       const blogs = await BlogServices.findAllBlogs();
       response(res, 200, "All blogs retrieved successfully", blogs);
     } catch (error) {
+      console.error("Error retrieving all blogs:", error);
+      response(res, 500, "Something went wrong", null, "SERVER_ERROR");
+    }
+  }
+
+/**
+   * Method to find all blog documents for admin privileged user with advanced filtering.
+   * @returns Promise resolving to paginated blog documents with filters.
+   */
+  static async adminGetAllBlogs(req: Request, res: Response): Promise<void> {
+    try {      // Extract query parameters
+      const queryParams = {
+        page: parseInt(req.query.page as string) || 1,
+        limit: parseInt(req.query.limit as string) || 10,
+        status: req.query.status as string || 'all',
+        category: req.query.category as string,
+        search: req.query.search as string,
+        sortBy: req.query.sortBy as string || 'createdAt',
+        order: req.query.order as string || 'desc',
+        dateFrom: req.query.dateFrom as string,
+        dateTo: req.query.dateTo as string
+      };
+
+      // Validate pagination parameters
+      if (queryParams.limit <= 0 || queryParams.limit > 50) {
+        response(res, 400, "Limit must be between 1 and 50", null, "INVALID_LIMIT");
+        return;
+      }
+
+      if (queryParams.page <= 0) {
+        response(res, 400, "Page must be greater than 0", null, "INVALID_PAGE");
+        return;
+      }      // Validate sort parameters
+      const validSortFields = ['title', 'publishDate', 'createdAt'];
+      if (!validSortFields.includes(queryParams.sortBy)) {
+        response(res, 400, "Invalid sort field", null, "INVALID_SORT_FIELD");
+        return;
+      }
+
+      const validSortOrders = ['asc', 'desc'];
+      if (!validSortOrders.includes(queryParams.order)) {
+        response(res, 400, "Invalid sort order. Use 'asc' or 'desc'", null, "INVALID_SORT_ORDER");
+        return;
+      }
+
+      const result = await BlogServices.adminGetAllBlogs(queryParams);
+      
+      response(res, 200, "Blogs retrieved successfully", result);
+    } catch (error) {
+      console.error("Error retrieving admin blogs:", error);
       response(res, 500, "Something went wrong", null, "SERVER_ERROR");
     }
   }

@@ -5,6 +5,11 @@ import { Document, Types } from "mongoose";
  */
 export interface BlogDto {
   title: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  publishDate?: string;
+  imageCaption?: string;
+  status?: 'published' | 'draft' | 'archived';
   subtitle?: string;
   description: string;
   content: string;
@@ -20,6 +25,11 @@ export interface BlogDto {
  */
 export interface IBlog extends Document {
   title: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  publishDate?: string;
+  imageCaption?: string;
+  status?: 'published' | 'draft' | 'archived';
   subtitle?: string;
   description: string;
   content: string;

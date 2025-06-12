@@ -13,6 +13,29 @@ const blogSchema = new Schema<IBlog>({
     type: String,
     required: true,
   },
+  metaTitle: {
+    type: String,
+    required: false,
+    },
+  metaDescription: {
+    type: String,
+    required: false,
+    },  
+  publishDate: {
+    type: String,
+    required: false,
+    default: () => new Date().toISOString(),
+    },  
+  imageCaption: {
+    type: String,
+    required: false,
+    },
+  status: {
+    type: String,
+    enum: ['published', 'draft', 'archived'],
+    default: 'published',
+    required: false,
+  },
   subtitle: {
     type: String,
     required: false,
@@ -63,10 +86,10 @@ const blogSchema = new Schema<IBlog>({
     type: Number,
     default: 0,
     required: false,
-  },
-  readTime: {
+  },  readTime: {
     type: String,
     required: false,
+    default: "5",
   },
 });
 

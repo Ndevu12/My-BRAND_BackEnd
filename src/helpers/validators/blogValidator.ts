@@ -11,6 +11,11 @@ const purify = createDOMPurify(window as unknown as any);
 export const validateBlog = (blog: any) => {
   const schema = Joi.object({
     title: Joi.string().required().min(5).max(100),
+    metaTitle: Joi.string().max(100),
+    metaDescription: Joi.string().max(160),
+    publishDate: Joi.string().isoDate(),
+    imageCaption: Joi.string().max(200),
+    status: Joi.string().valid('published', 'draft'),
     subtitle: Joi.string().max(200),
     description: Joi.string().required().min(10).max(500),
     content: Joi.string().required().min(50),

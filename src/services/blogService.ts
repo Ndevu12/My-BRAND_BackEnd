@@ -1,6 +1,7 @@
 import { Blog } from "../models/Blog";
 import { IBlog, BlogDto } from "../types/blog.types";
 import { Types } from "mongoose";
+import mongoose from "mongoose";
 
 class BlogServices {
   /**
@@ -59,7 +60,7 @@ class BlogServices {
       .skip(skip)
       .limit(limit)
       .populate('author')
-      .select('title description imageUrl category tags readTime createdAt likes views author') // Select only necessary fields for performance
+      .select('title description imageUrl category tags readTime createdAt likes author') // Select only necessary fields for performance
       .exec();
     
     const total = await Blog.countDocuments();
@@ -145,10 +146,244 @@ class BlogServices {
     const blog = await Blog.findOne({ title: query }).populate('author');
     return blog;
   }
-
   // Method to delete all blog documents
   static async deleteAllBlogs(): Promise<any> {
     return await Blog.deleteMany();
+  }
+  // Enhanced admin method to get all blogs with essential filtering and pagination
+  static async adminGetAllBlogs(queryParams: {
+    page?: number;
+    limit?: number;
+    status?: string;
+    category?: string;
+    search?: string;
+    sortBy?: string;
+    order?: string;
+    dateFrom?: string;
+    dateTo?: string;
+  }): Promise<{
+    blogs: any[];
+    pagination: {
+      currentPage: number;
+      totalPages: number;
+      totalBlogs: number;
+      blogsPerPage: number;
+      hasNextPage: boolean;
+      hasPrevPage: boolean;
+      nextPage: number | null;
+      prevPage: number | null;
+      startIndex: number;
+      endIndex: number;
+    };
+    filters: {
+      appliedFilters: {
+        status: string | null;
+        category: string | undefined;
+        search: string | undefined;
+        sortBy: string;
+        order: string;
+        dateFrom: string | undefined;
+        dateTo: string | undefined;
+      };
+      availableCategories: any[];
+      statusCounts: {
+        all: number;
+        published: number;
+        draft: number;
+        archived: number;
+      };
+    };
+  }> {    const {
+      page = 1,
+      limit = 10,
+      status = 'all',
+      category,
+      search,
+      sortBy = 'createdAt',
+      order = 'desc',
+      dateFrom,
+      dateTo
+    } = queryParams;
+
+    // Validate pagination parameters
+    const validatedPage = Math.max(1, page);
+    const validatedLimit = Math.min(Math.max(1, limit), 50);
+    const skip = (validatedPage - 1) * validatedLimit;
+
+    // Build aggregation pipeline
+    const pipeline: any[] = [];
+
+    // Match stage for filtering
+    const matchStage: any = {};
+
+    // Status filter (exclude archived unless specifically requested)
+    if (status !== 'all') {
+      matchStage.status = status;
+    }
+
+    // Category filter
+    if (category) {
+      // Support both category ID and category name/slug
+      if (mongoose.Types.ObjectId.isValid(category)) {
+        matchStage.category = { $in: [new mongoose.Types.ObjectId(category)] };
+      } else {
+        // If not ObjectId, we'll need to lookup category by name later
+        pipeline.push({
+          $lookup: {
+            from: 'categories',
+            localField: 'category',
+            foreignField: '_id',
+            as: 'categoryDetails'
+          }
+        });
+        matchStage['categoryDetails.name'] = { $regex: category, $options: 'i' };
+      }    }
+
+    // Date range filter
+    if (dateFrom || dateTo) {
+      matchStage.createdAt = {};
+      if (dateFrom) {
+        matchStage.createdAt.$gte = new Date(dateFrom);
+      }
+      if (dateTo) {
+        matchStage.createdAt.$lte = new Date(dateTo);
+      }
+    }    // Search filter (title only - keeping it simple)
+    if (search) {
+      matchStage.title = { $regex: search, $options: 'i' };
+    }pipeline.push({ $match: matchStage });
+
+    // Lookup only categories - we only need category names
+    pipeline.push({
+      $lookup: {
+        from: 'categories',
+        localField: 'category',
+        foreignField: '_id',
+        as: 'category'
+      }
+    });
+
+    // Project only the 4 essential fields for admin dashboard
+    pipeline.push({
+      $project: {
+        _id: 1,
+        title: 1,
+        category: 1,
+        description: 1,
+        publishDate: {
+          $cond: {
+            if: { $eq: ['$status', 'published'] },
+            then: '$createdAt',
+            else: null
+          }
+        },
+        status: 1
+      }
+    });    // Sort stage - only allow sorting by title and publishDate (createdAt)
+    const sortStage: any = {};
+    const sortDirection = order === 'asc' ? 1 : -1;
+    
+    switch (sortBy) {
+      case 'title':
+        sortStage.title = sortDirection;
+        break;
+      case 'publishDate':
+      case 'createdAt':
+      default:
+        sortStage.createdAt = sortDirection;
+        break;
+    }
+
+    pipeline.push({ $sort: sortStage });
+
+    // Count total documents
+    const countPipeline = [...pipeline, { $count: 'total' }];
+    const totalResult = await Blog.aggregate(countPipeline);
+    const totalBlogs = totalResult[0]?.total || 0;
+
+    // Add pagination
+    pipeline.push({ $skip: skip }, { $limit: validatedLimit });
+
+    // Execute main query
+    const blogs = await Blog.aggregate(pipeline);
+
+    // Calculate pagination info
+    const totalPages = Math.ceil(totalBlogs / validatedLimit);
+    const hasNextPage = validatedPage < totalPages;
+    const hasPrevPage = validatedPage > 1;
+    const nextPage = hasNextPage ? validatedPage + 1 : null;
+    const prevPage = hasPrevPage ? validatedPage - 1 : null;
+    const startIndex = skip + 1;
+    const endIndex = Math.min(skip + validatedLimit, totalBlogs);
+
+    // Get filter data
+    const [availableCategories, statusCounts] = await Promise.all([
+      // Get available categories with blog counts
+      Blog.aggregate([
+        {
+          $lookup: {
+            from: 'categories',
+            localField: 'category',
+            foreignField: '_id',
+            as: 'categoryDetails'
+          }
+        },
+        { $unwind: '$categoryDetails' },
+        {
+          $group: {
+            _id: '$categoryDetails._id',
+            name: { $first: '$categoryDetails.name' },
+            count: { $sum: 1 }
+          }
+        },
+        { $sort: { count: -1 } }
+      ]),
+      // Get status counts
+      Blog.aggregate([
+        {
+          $group: {
+            _id: '$status',
+            count: { $sum: 1 }
+          }
+        }
+      ])
+    ]);
+
+    // Format status counts
+    const statusCountsFormatted = {
+      all: totalBlogs,
+      published: statusCounts.find(s => s._id === 'published')?.count || 0,
+      draft: statusCounts.find(s => s._id === 'draft')?.count || 0,
+      archived: statusCounts.find(s => s._id === 'archived')?.count || 0
+    };
+
+    return {
+      blogs,
+      pagination: {
+        currentPage: validatedPage,
+        totalPages,
+        totalBlogs,
+        blogsPerPage: validatedLimit,
+        hasNextPage,
+        hasPrevPage,
+        nextPage,
+        prevPage,
+        startIndex,
+        endIndex
+      },
+      filters: {        appliedFilters: {
+          status: status !== 'all' ? status : null,
+          category,
+          search,
+          sortBy,
+          order,
+          dateFrom,
+          dateTo
+        },
+        availableCategories,
+        statusCounts: statusCountsFormatted
+      }
+    };
   }
   
   // New method to extract and save content images

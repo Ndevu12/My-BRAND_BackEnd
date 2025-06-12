@@ -18,7 +18,7 @@ blogRoutes.post("/create", isAdmin, upload.single('image'), BlogController.creat
 blogRoutes.put("/update/:id", isAuth, upload.single('image'), BlogController.updateBlog); // Author or admin can update
 blogRoutes.delete("/delete/:id", isAuth, BlogController.deleteBlog); // Author or admin can delete
 blogRoutes.get("/:id", isAdminOrSubscriber, BlogController.getBlogById); // Protected view with comments
-blogRoutes.get("/", isAdmin, BlogController.retrieveAllBlogs); // Admin view of all blogs
+blogRoutes.get("/", isAdmin, BlogController.adminGetAllBlogs); // Admin view of all blogs
 blogRoutes.put("/like/:id", isAdminOrSubscriber, BlogController.likeBlog); // isAuthd users can like
 
 // Author related routes

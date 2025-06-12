@@ -12,10 +12,8 @@ class CommentServices {
     static findCommentById(id: string): Promise<IComment | null> {
         const comment = Comment.findById(id);
         return comment;
-    }
-
-    static findCommentByPostID(id: string): Promise<IComment | any> {
-        const comments = Comment.find({postID: id});
+    }    static findCommentByBlogId(id: string): Promise<IComment[] | null> {
+        const comments = Comment.find({blogId: id}).sort({ createdAt: -1 });
         return comments;
     }
 
