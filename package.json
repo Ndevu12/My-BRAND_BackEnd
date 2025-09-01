@@ -9,6 +9,10 @@
         "start": "node ./dist/app.js",
         "build": "npm install && npm audit fix --force && rimraf dist && tsc",
         "migrate:userprofiles": "ts-node src/migrations/createUserProfiles.ts",
+        "migrate:slugs": "ts-node src/migrations/addSlugToBlogs.ts",
+        "migrate:slugs:regenerate": "ts-node src/migrations/addSlugToBlogs.ts regenerate",
+        "migrate:category-icons": "ts-node src/migrations/addIconToCategories.ts",
+        "migrate:category-icons:regenerate": "ts-node src/migrations/addIconToCategories.ts regenerate",
         "seed": "ts-node src/seeders/index.ts",
         "seed:categories": "ts-node src/seeders/index.ts categories",
         "seed:categories:force": "ts-node src/seeders/index.ts categories --force"
@@ -30,6 +34,7 @@
         "@types/swagger-jsdoc": "^6.0.4",
         "@types/swagger-ui-express": "^4.1.8",
         "bcryptjs": "^2.4.3",
+        "body-parser": "^2.2.0",
         "cloudinary": "^2.1.0",
         "cookie-parser": "^1.4.6",
         "cors": "^2.8.5",

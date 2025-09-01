@@ -22,6 +22,11 @@ paths:
                   type: string
                   description: The title of the blog post
                   example: "How to Master TypeScript in 2023"
+                slug:
+                  type: string
+                  description: SEO-friendly URL slug (optional - auto-generated from title if not provided)
+                  example: "how-to-master-typescript-in-2023"
+                  pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$"
                 content:
                   type: string
                   description: The main content of the blog post
@@ -255,6 +260,41 @@ paths:
           description: Blog not found
         "500":
           description: Internal server error
+  /blogs/by-slug/{slug}:
+    get:
+      tags:
+        - Blog
+      summary: Retrieve a blog by slug (SEO-friendly URL)
+      description: Retrieves a blog from the database by its SEO-friendly slug
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          description: The SEO-friendly slug of the blog to retrieve
+          schema:
+            type: string
+            pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            example: "how-to-master-typescript-in-2023"
+      responses:
+        "200":
+          description: Blog retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                    example: 200
+                  message:
+                    type: string
+                    example: "Blog retrieved successfully"
+                  data:
+                    $ref: "#/components/schemas/blogs"
+        "404":
+          description: Blog not found
+        "500":
+          description: Internal server error
   /blogs/by-category/{id}:
     get:
       tags:
@@ -394,23 +434,28 @@ paths:
     get:
       tags:
         - Blog
-      summary: Retrieve all blogs for public view
-      description: Retrieves all blogs from the database for public access with no authentication required
+      summary: Retrieve all blogs for public view with pagination
+      description: Retrieves all blogs from the database for public access with no authentication required. Supports pagination parameters.
       parameters:
         - name: page
           in: query
           required: false
-          description: Page number for pagination
+          description: Page number for pagination (minimum 1)
           schema:
             type: integer
+            minimum: 1
             default: 1
+            example: 1
         - name: limit
           in: query
           required: false
-          description: Number of blogs per page
+          description: Number of blogs per page (minimum 1, maximum 50)
           schema:
             type: integer
+            minimum: 1
+            maximum: 50
             default: 10
+            example: 10
       responses:
         "200":
           description: Blogs retrieved successfully
@@ -424,20 +469,67 @@ paths:
                     example: 200
                   message:
                     type: string
-                    example: "Blogs retrieved successfully"
+                    example: "All blogs retrieved successfully"
                   data:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/blogs"
-                  pagination:
                     type: object
                     properties:
-                      currentPage:
-                        type: number
-                      totalPages:
-                        type: number
-                      totalItems:
-                        type: number
+                      blogs:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/blogs"
+                      pagination:
+                        type: object
+                        properties:
+                          currentPage:
+                            type: number
+                            example: 1
+                          totalPages:
+                            type: number
+                            example: 5
+                          totalBlogs:
+                            type: number
+                            example: 47
+                          blogsPerPage:
+                            type: number
+                            example: 10
+                          hasNextPage:
+                            type: boolean
+                            example: true
+                          hasPrevPage:
+                            type: boolean
+                            example: false
+                          nextPage:
+                            type: number
+                            nullable: true
+                            example: 2
+                          prevPage:
+                            type: number
+                            nullable: true
+                            example: null
+                          startIndex:
+                            type: number
+                            example: 1
+                          endIndex:
+                            type: number
+                            example: 10
+        "400":
+          description: Invalid pagination parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                    example: 400
+                  message:
+                    type: string
+                    example: "Limit must be between 1 and 50"
+                  data:
+                    type: null
+                  errorCode:
+                    type: string
+                    example: "INVALID_LIMIT"
         "500":
           description: Internal server error
           
@@ -535,6 +627,11 @@ components:
           type: string
           description: Blog title
           example: "How to Master TypeScript in 2023"
+        slug:
+          type: string
+          description: SEO-friendly URL slug
+          example: "how-to-master-typescript-in-2023"
+          pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$"
         content:
           type: string
           description: Blog content

@@ -2,6 +2,7 @@ import { Blog } from "../models/Blog";
 import { IBlog, BlogDto } from "../types/blog.types";
 import { Types } from "mongoose";
 import mongoose from "mongoose";
+import { generateUniqueSlug, isValidSlugFormat } from "../utils/slugGenerator";
 
 class BlogServices {
   /**
@@ -31,6 +32,14 @@ class BlogServices {
   }
 
   static async createBlog(blogData: BlogDto): Promise<IBlog> {
+    // Generate slug if not provided or if provided slug is invalid
+    if (!blogData.slug || !isValidSlugFormat(blogData.slug)) {
+      blogData.slug = await generateUniqueSlug(blogData.title);
+    } else {
+      // If slug is provided and valid, ensure it's unique
+      blogData.slug = await generateUniqueSlug(blogData.slug);
+    }
+
     // Calculate read time if not provided
     if (!blogData.readTime) {
       // Average reading speed: 200-250 words per minute
@@ -43,12 +52,56 @@ class BlogServices {
     return blog.populate('author');
   }
   
-  static async findAllBlogs() {
-    const blogs = await Blog.find({})
+  // Method to get all blogs with pagination and filtering options
+  static async getAllBlogs(
+    limit: number = 10, 
+    page: number = 1,
+    sortBy: string = 'createdAt',
+    sortOrder: 'asc' | 'desc' = 'desc',
+    status?: string
+  ): Promise<{ 
+    blogs: IBlog[], 
+    total: number, 
+    page: number, 
+    totalPages: number,
+    hasNextPage: boolean,
+    hasPrevPage: boolean,
+    nextPage: number | null,
+    prevPage: number | null 
+  }> {
+    const skip = (page - 1) * limit;
+    
+    // Build query filter
+    const filter: any = {};
+    if (status && status !== 'all') {
+      filter.status = status;
+    }
+    
+    // Build sort object
+    const sortObj: any = {};
+    sortObj[sortBy] = sortOrder === 'desc' ? -1 : 1;
+    
+    const blogs = await Blog.find(filter)
+      .sort(sortObj)
+      .skip(skip)
+      .limit(limit)
       .populate('author')
-      .populate("comments")
+      .populate('comments')
       .exec();
-    return blogs;
+    
+    const total = await Blog.countDocuments(filter);
+    const totalPages = Math.ceil(total / limit);
+    
+    return {
+      blogs,
+      total,
+      page,
+      totalPages,
+      hasNextPage: page < totalPages,
+      hasPrevPage: page > 1,
+      nextPage: page < totalPages ? page + 1 : null,
+      prevPage: page > 1 ? page - 1 : null
+    };
   }
 
   // Method to get recent blogs with pagination
@@ -60,7 +113,7 @@ class BlogServices {
       .skip(skip)
       .limit(limit)
       .populate('author')
-      .select('title description imageUrl category tags readTime createdAt likes author') // Select only necessary fields for performance
+      .select('title description imageUrl category tags readTime publishedDate likes author slug') // Added slug to selection
       .exec();
     
     const total = await Blog.countDocuments();
@@ -86,6 +139,17 @@ class BlogServices {
     blogData: Partial<BlogDto>
   ): Promise<IBlog | null> {
     console.log("Inside update blog service");
+    
+    // Generate new slug if title has changed or slug is manually provided
+    if (blogData.title || blogData.slug) {
+      if (blogData.slug && isValidSlugFormat(blogData.slug)) {
+        // Use provided slug but ensure uniqueness
+        blogData.slug = await generateUniqueSlug(blogData.slug, blogId);
+      } else if (blogData.title) {
+        // Generate slug from new title
+        blogData.slug = await generateUniqueSlug(blogData.title, blogId);
+      }
+    }
     
     // Update read time if content has changed
     if (blogData.content && !blogData.readTime) {
@@ -145,6 +209,33 @@ class BlogServices {
   static async getBlogByTitle(query: string): Promise<IBlog | null> {
     const blog = await Blog.findOne({ title: query }).populate('author');
     return blog;
+  }
+
+  /**
+   * Get blog by slug for SEO-friendly URLs
+   * @param slug - The slug to search for
+   * @returns Promise resolving to blog document or null
+   */
+  static async getBlogBySlug(slug: string): Promise<IBlog | null> {
+    const blog = await Blog.findOne({ slug: slug.toLowerCase() })
+      .populate('author')
+      .populate('comments');
+    return blog;
+  }
+
+  /**
+   * Check if a slug exists (excluding a specific blog ID)
+   * @param slug - The slug to check
+   * @param excludeId - Optional blog ID to exclude from the check
+   * @returns Promise resolving to boolean
+   */
+  static async slugExists(slug: string, excludeId?: string): Promise<boolean> {
+    const query = excludeId 
+      ? { slug: slug.toLowerCase(), _id: { $ne: excludeId } }
+      : { slug: slug.toLowerCase() };
+    
+    const existingBlog = await Blog.findOne(query);
+    return !!existingBlog;
   }
   // Method to delete all blog documents
   static async deleteAllBlogs(): Promise<any> {

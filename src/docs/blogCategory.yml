@@ -3,7 +3,7 @@ tags:
     description: Blog category management API endpoints
 
 paths:
-  /blogCategory/create:
+  /blog-category/create:
     post:
       tags:
         - Blog Categories
@@ -22,10 +22,10 @@ paths:
                   type: string
                   description: The name of the category
                   example: "Web Development"
-                description:
+                icon:
                   type: string
-                  description: Description of the category
-                  example: "All articles related to web development technologies"
+                  description: Icon name/class for the category (optional)
+                  example: "code"
               required:
                 - name
       responses:
@@ -43,7 +43,7 @@ paths:
                     type: string
                     example: "Blog category created successfully"
                   data:
-                    $ref: "#/components/schemas/BlogCategory"
+                    $ref: "#/components/schemas/blog-category"
         "400":
           description: Validation error or category already exists
         "401":
@@ -51,7 +51,7 @@ paths:
         "500":
           description: Internal server error
         
-  /blogCategory:
+  /blog-category:
     get:
       tags:
         - Blog Categories
@@ -74,11 +74,11 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: "#/components/schemas/BlogCategory"
+                      $ref: "#/components/schemas/blog-category"
         "500":
           description: Internal server error
 
-  /blogCategory/{id}:
+  /blog-category/{id}:
     get:
       tags:
         - Blog Categories
@@ -106,13 +106,13 @@ paths:
                     type: string
                     example: "Category retrieved successfully"
                   data:
-                    $ref: "#/components/schemas/BlogCategory"
+                    $ref: "#/components/schemas/blog-category"
         "404":
           description: Category not found
         "500":
           description: Internal server error
 
-  /blogCategory/update/{id}:
+  /blog-category/update/{id}:
     put:
       tags:
         - Blog Categories
@@ -138,6 +138,10 @@ paths:
                   type: string
                   description: The updated name of the category
                   example: "Frontend Development"
+                icon:
+                  type: string
+                  description: The updated icon for the category
+                  example: "desktop"
                 description:
                   type: string
                   description: Updated description of the category
@@ -157,7 +161,7 @@ paths:
                     type: string
                     example: "Blog category updated successfully"
                   data:
-                    $ref: "#/components/schemas/BlogCategory"
+                    $ref: "#/components/schemas/blog-category"
         "400":
           description: Validation error
         "401":
@@ -167,7 +171,7 @@ paths:
         "500":
           description: Internal server error
 
-  /blogCategory/delete/{id}:
+  /blog-category/delete/{id}:
     delete:
       tags:
         - Blog Categories
@@ -205,7 +209,7 @@ paths:
 
 components:
   schemas:
-    BlogCategory:
+    blog-category:
       type: object
       properties:
         _id:
@@ -216,16 +220,10 @@ components:
           type: string
           description: Category name
           example: "Web Development"
-        description:
+        icon:
           type: string
-          description: Category description
-          example: "All articles related to web development technologies"
-        blogs:
-          type: array
-          description: Blogs that belong to this category
-          items:
-            type: string
-            description: Blog ID reference
+          description: Icon name/class for the category
+          example: "code"
         createdAt:
           type: string
           format: date-time

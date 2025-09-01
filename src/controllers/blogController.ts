@@ -70,6 +70,7 @@ class blogController {  /**
 
       const blogData: BlogDto = {
         title: req.body.title,
+        slug: req.body.slug, // Optional - will be auto-generated if not provided
         metaTitle: req.body.metaTitle,
         metaDescription: req.body.metaDescription,
         publishDate: req.body.publishDate,
@@ -217,6 +218,28 @@ class blogController {  /**
       return;
     }
   }
+
+  /**
+   * Get blog by slug for SEO-friendly URLs
+   * @param req The request object.
+   * @param res The response object.
+   */
+  static async getBlogBySlug(req: Request, res: Response): Promise<void> {
+    try {
+      const { slug } = req.params;
+      
+      const blog = await BlogServices.getBlogBySlug(slug);
+      if (!blog) {
+        response(res, 404, "Blog not found", null, "BLOG_NOT_FOUND");
+        return;
+      }
+      
+      response(res, 200, "Blog retrieved successfully", blog);
+    } catch (error) {
+      console.error("Error fetching blog by slug:", error);
+      response(res, 500, "Sorry, something went wrong", null, "SERVER_ERROR");
+    }
+  }
   /**
    * Method to find blog documents by category.
    * @param category The category to filter blogs by.
@@ -307,13 +330,59 @@ class blogController {  /**
   }
  
   /**
-   * Method to find all blog documents.
-   * @returns Promise resolving to an array of all blog documents.
+   * Method to find all blog documents with pagination.
+   * @returns Promise resolving to paginated blog documents.
    */
   static async retrieveAllBlogs(req: Request, res: Response): Promise<void> {
     try {
-      const blogs = await BlogServices.findAllBlogs();
-      response(res, 200, "All blogs retrieved successfully", blogs);
+      // Extract pagination and filtering parameters from query
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      const sortBy = (req.query.sortBy as string) || 'createdAt';
+      const sortOrder = (req.query.sortOrder as 'asc' | 'desc') || 'desc';
+      const status = req.query.status as string;
+
+      // Validate pagination parameters
+      if (limit <= 0 || limit > 50) {
+        response(res, 400, "Limit must be between 1 and 50", null, "INVALID_LIMIT");
+        return;
+      }
+
+      if (page <= 0) {
+        response(res, 400, "Page must be greater than 0", null, "INVALID_PAGE");
+        return;
+      }
+
+      // Validate sortBy parameter
+      const validSortFields = ['createdAt', 'updatedAt', 'title', 'likes', 'publishDate'];
+      if (!validSortFields.includes(sortBy)) {
+        response(res, 400, "Invalid sortBy field. Allowed fields: " + validSortFields.join(', '), null, "INVALID_SORT_FIELD");
+        return;
+      }
+
+      // Use the new getAllBlogs service method with enhanced pagination
+      const result = await BlogServices.getAllBlogs(limit, page, sortBy, sortOrder, status);
+      
+      response(res, 200, "All blogs retrieved successfully", {
+        blogs: result.blogs,
+        pagination: {
+          currentPage: result.page,
+          totalPages: result.totalPages,
+          totalBlogs: result.total,
+          blogsPerPage: limit,
+          hasNextPage: result.hasNextPage,
+          hasPrevPage: result.hasPrevPage,
+          nextPage: result.nextPage,
+          prevPage: result.prevPage,
+          startIndex: (result.page - 1) * limit + 1,
+          endIndex: Math.min(result.page * limit, result.total)
+        },
+        filters: {
+          sortBy,
+          sortOrder,
+          status: status || 'all'
+        }
+      });
     } catch (error) {
       console.error("Error retrieving all blogs:", error);
       response(res, 500, "Something went wrong", null, "SERVER_ERROR");
