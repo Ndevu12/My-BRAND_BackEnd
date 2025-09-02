@@ -280,20 +280,30 @@ class blogController {  /**
   }
   /**
    * Method to find blog documents by category.
-   * @param category The category to filter blogs by.
-   * @returns Promise resolving to an array of blog documents matching the category.
+   * @param req Request object containing category ID or name in params
+   * @param res Response object
+   * @returns Promise resolving to blogs matching the category.
    */
-
   static async getBlogsByCategory(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const blogs = await BlogServices.findBlogsByCategory(id);      
+      
+      // Validate input
+      if (!id || id.trim() === '') {
+        response(res, 400, "Category ID or name is required", null, "INVALID_INPUT");
+        return;
+      }
+      
+      console.log(`Searching for blogs by category: ${id}`);
+      const blogs = await BlogServices.findBlogsByCategory(id.trim());
+      
       if (!blogs || blogs.length === 0) {
         response(res, 404, "No blogs found for this category", null, "CATEGORY_HAS_NO_BLOGS");
       } else {
+        console.log(`Found ${blogs.length} blogs for category: ${id}`);
         response(res, 200, "Blogs retrieved by category successfully", blogs);
       }    
-      } catch (error) {
+    } catch (error) {
       console.error("Error fetching blogs by category:", error);
       response(res, 500, "Sorry, something went wrong", null, "SERVER_ERROR");
     }

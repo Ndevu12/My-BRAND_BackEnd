@@ -6,16 +6,43 @@ import { generateUniqueSlug, isValidSlugFormat } from "../utils/slugGenerator";
 
 class BlogServices {
   /**
-   * Method to find blog documents by category.
-   * @param category The category to filter blogs by.
+   * Method to find blog documents by category ID.
+   * @param categoryId The category ID to filter blogs by.
    * @returns Promise resolving to an array of blog documents matching the category.
    */
-  static async findBlogsByCategory(query: string): Promise<IBlog[]> {
-    const findBlogByCategor = await Blog.find({ category: query })
-      .populate('author')
-      .populate('category', '_id name icon')
-      .exec();
-    return findBlogByCategor;
+  static async findBlogsByCategory(categoryId: string): Promise<IBlog[]> {
+    try {
+      console.log(`🔍 Searching for blogs by category ID: "${categoryId}"`);
+      
+      // Validate that the categoryId is a valid ObjectId
+      if (!mongoose.Types.ObjectId.isValid(categoryId)) {
+        console.log(`❌ Invalid category ID format: ${categoryId}`);
+        throw new Error('Invalid category ID format');
+      }
+
+      // Find blogs by category ObjectId
+      const blogs = await Blog.find({ category: new mongoose.Types.ObjectId(categoryId) })
+        .populate('author')
+        .populate('category', '_id name icon')
+        .populate('comments')
+        .sort({ createdAt: -1 }) // Sort by newest first
+        .exec();
+      
+      console.log(`📊 Found ${blogs.length} blogs for category ID: ${categoryId}`);
+      
+      if (blogs.length > 0) {
+        const categoryName = blogs[0].category ? (blogs[0].category as any).name : 'Unknown';
+        console.log(`📂 Category: ${categoryName}`);
+        console.log(`📋 Blog titles found:`, blogs.map(blog => blog.title));
+      } else {
+        console.log(`⚠️ No blogs found for category ID: ${categoryId}`);
+      }
+      
+      return blogs;
+    } catch (error) {
+      console.error(`❌ Error in findBlogsByCategory for category ID ${categoryId}:`, error);
+      throw error;
+    }
   }
 
   static async getAllBlogComment(id: string): Promise<IBlog | null> {
