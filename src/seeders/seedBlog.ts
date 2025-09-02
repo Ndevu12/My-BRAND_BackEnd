@@ -3,6 +3,7 @@ import { Category } from "../models/blogCategories";
 import { User } from "../models/user";
 import { dummyBlogs } from "./data/blogs";
 import mongoose from "mongoose";
+import { generateUniqueSlug } from "../utils/slugGenerator";
 
 const seedBlog = async (options = { forceUpdate: false }) => {
   try {
@@ -40,12 +41,12 @@ const seedBlog = async (options = { forceUpdate: false }) => {
     
     // Process each dummy blog individually
     for (const blog of dummyBlogs) {
-      // Map category strings to actual category ObjectIds
-      const categoryIds = [];
+      // Map category strings to single category ObjectId
+      let categoryId: mongoose.Types.ObjectId | undefined;
       if (blog.category) {
         const categoryKey = blog.category.toLowerCase();
         if (categoryMap[categoryKey]) {
-          categoryIds.push(categoryMap[categoryKey]);
+          categoryId = categoryMap[categoryKey];
         } else {
           // If specific category doesn't exist, try to map to closest match
           // For example, "webdev" -> "Web Development"
@@ -54,19 +55,16 @@ const seedBlog = async (options = { forceUpdate: false }) => {
           );
           
           if (possibleMatch) {
-            categoryIds.push(categoryMap[possibleMatch]);
+            categoryId = categoryMap[possibleMatch];
           } else {
             // If no match, assign the first available category
-            const firstCategoryId = Object.values(categoryMap)[0];
-            if (firstCategoryId) {
-              categoryIds.push(firstCategoryId);
-            }
+            categoryId = Object.values(categoryMap)[0];
           }
         }
       }
 
       // If no category could be assigned, skip this blog
-      if (categoryIds.length === 0) {
+      if (!categoryId) {
         console.log(`Skipped blog '${blog.title}': No valid category could be assigned`);
         skippedCount++;
         continue;
@@ -78,14 +76,21 @@ const seedBlog = async (options = { forceUpdate: false }) => {
         : defaultAuthor._id;
       
       // Check if this blog already exists by title
-      const existingBlog = await Blog.findOne({ title: blog.title });
+      const existingBlog = await Blog.findOne({ title: blog.title }) as (mongoose.Document & { _id: mongoose.Types.ObjectId, slug?: string });
       
       if (existingBlog) {
         if (options.forceUpdate) {         
           // Update existing blog
+          // Generate unique slug for updated blog if it doesn't have one
+          let updateSlug = existingBlog.slug;
+          if (!updateSlug) {
+            updateSlug = await generateUniqueSlug(blog.title, existingBlog._id.toString());
+          }
+          
           await Blog.updateOne(
             { _id: existingBlog._id },
             {
+              slug: updateSlug, // Ensure slug is present
               metaTitle: blog.title,
               metaDescription: blog.description,
               publishDate: blog.createdAt ? new Date(blog.createdAt).toISOString() : new Date().toISOString(),
@@ -95,7 +100,7 @@ const seedBlog = async (options = { forceUpdate: false }) => {
               description: blog.description,
               content: blog.content,
               imageUrl: blog.imageUrl,
-              category: categoryIds,
+              category: categoryId,
               tags: blog.tags || [],
               likes: blog.views || 0,
               readTime: blog.readTime,
@@ -103,15 +108,19 @@ const seedBlog = async (options = { forceUpdate: false }) => {
             }
           );
           updatedCount++;
-          console.log(`Updated blog: ${blog.title}`);
+          console.log(`Updated blog: ${blog.title} with slug: ${updateSlug}`);
         } else {
           skippedCount++;
           console.log(`Skipped existing blog: ${blog.title}`);
         }
       } else {        
         // Create new blog
+        // Generate unique slug for the blog
+        const slug = await generateUniqueSlug(blog.title);
+        
         await Blog.create({
           title: blog.title,
+          slug: slug, // Add the generated slug
           metaTitle: blog.title, // Use title as metaTitle fallback
           metaDescription: blog.description, // Use description as metaDescription fallback
           publishDate: blog.createdAt ? new Date(blog.createdAt).toISOString() : new Date().toISOString(),
@@ -122,7 +131,7 @@ const seedBlog = async (options = { forceUpdate: false }) => {
           content: blog.content,
           imageUrl: blog.imageUrl,
           author: authorId,
-          category: categoryIds,
+          category: categoryId,
           tags: blog.tags || [],
           likes: blog.views || 0,
           readTime: blog.readTime,
@@ -130,7 +139,7 @@ const seedBlog = async (options = { forceUpdate: false }) => {
           updatedAt: new Date()
         });
         createdCount++;
-        console.log(`Created blog: ${blog.title}`);
+        console.log(`Created blog: ${blog.title} with slug: ${slug}`);
       }
     }
     

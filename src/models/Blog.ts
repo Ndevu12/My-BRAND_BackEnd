@@ -13,6 +13,14 @@ const blogSchema = new Schema<IBlog>({
     type: String,
     required: true,
   },
+  slug: {
+    type: String,
+    required: true,
+    unique: true,
+    index: true, // Index for better query performance
+    lowercase: true,
+    match: /^[a-z0-9]+(?:-[a-z0-9]+)*$/, // URL-friendly format validation
+  },
   metaTitle: {
     type: String,
     required: false,
@@ -72,10 +80,9 @@ const blogSchema = new Schema<IBlog>({
     default: [],
   },
   category: {
-    type: [mongoose.Schema.Types.ObjectId],
+    type: mongoose.Schema.Types.ObjectId,
     ref: "Category",
     required: true,
-    default: [],
   },
   tags: {
     type: [String],
@@ -86,7 +93,8 @@ const blogSchema = new Schema<IBlog>({
     type: Number,
     default: 0,
     required: false,
-  },  readTime: {
+  },  
+  readTime: {
     type: String,
     required: false,
     default: "5",

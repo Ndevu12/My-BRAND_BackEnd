@@ -4,7 +4,8 @@ import mongoose, { Document, Schema } from 'mongoose';
  * Interface representing the structure of a category document.
  */
 export interface ICategory extends Document {
-    name?: any;
+    name: string;
+    icon?: string;
     // blog: string; 
 }
         /**
@@ -15,7 +16,14 @@ export interface ICategory extends Document {
                 type: String,
                 required: true,
                 unique: true 
+            },
+            icon: {
+                type: String,
+                required: false,
+                default: null
             }
+        }, {
+            timestamps: true // This will add createdAt and updatedAt automatically
         });
 
 // categorySchema.virtual('blogs', {

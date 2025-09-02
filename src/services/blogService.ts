@@ -2,18 +2,69 @@ import { Blog } from "../models/Blog";
 import { IBlog, BlogDto } from "../types/blog.types";
 import { Types } from "mongoose";
 import mongoose from "mongoose";
+import { generateUniqueSlug, isValidSlugFormat } from "../utils/slugGenerator";
 
 class BlogServices {
   /**
-   * Method to find blog documents by category.
-   * @param category The category to filter blogs by.
-   * @returns Promise resolving to an array of blog documents matching the category.
+   * Method to find blog documents by category ID with pagination.
+   * @param categoryId The category ID to filter blogs by.
+   * @param limit Number of blogs per page (default: 10).
+   * @param page Page number (default: 1).
+   * @returns Promise resolving to paginated blog documents matching the category.
    */
-  static async findBlogsByCategory(query: string): Promise<IBlog[]> {
-    const findBlogByCategor = await Blog.find({ category: query })
-      .populate('author')
-      .exec();
-    return findBlogByCategor;
+  static async findBlogsByCategory(
+    categoryId: string,
+    limit: number = 10,
+    page: number = 1
+  ): Promise<{
+    blogs: IBlog[];
+    total: number;
+    page: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+    nextPage: number | null;
+    prevPage: number | null;
+  }> {
+    try {
+      
+      // Validate that the categoryId is a valid ObjectId
+      if (!mongoose.Types.ObjectId.isValid(categoryId)) {
+        throw new Error('Invalid category ID format');
+      }
+
+      const skip = (page - 1) * limit;
+      const categoryObjectId = new mongoose.Types.ObjectId(categoryId);
+
+      // Find blogs by category ObjectId with pagination
+      const blogs = await Blog.find({ category: categoryObjectId })
+        .populate('author')
+        .populate('category', '_id name icon')
+        .populate('comments')
+        .sort({ createdAt: -1 }) // Sort by newest first
+        .skip(skip)
+        .limit(limit)
+        .exec();
+
+      // Get total count for pagination metadata
+      const total = await Blog.countDocuments({ category: categoryObjectId });
+      const totalPages = Math.ceil(total / limit);
+      
+
+      return {
+        blogs,
+        total,
+        page,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1,
+        nextPage: page < totalPages ? page + 1 : null,
+        prevPage: page > 1 ? page - 1 : null
+      };
+    } catch (error) {
+      console.error(`❌ Error in findBlogsByCategory for category ID ${categoryId}:`, error);
+      throw error;
+    }
   }
 
   static async getAllBlogComment(id: string): Promise<IBlog | null> {
@@ -31,6 +82,14 @@ class BlogServices {
   }
 
   static async createBlog(blogData: BlogDto): Promise<IBlog> {
+    // Generate slug if not provided or if provided slug is invalid
+    if (!blogData.slug || !isValidSlugFormat(blogData.slug)) {
+      blogData.slug = await generateUniqueSlug(blogData.title);
+    } else {
+      // If slug is provided and valid, ensure it's unique
+      blogData.slug = await generateUniqueSlug(blogData.slug);
+    }
+
     // Calculate read time if not provided
     if (!blogData.readTime) {
       // Average reading speed: 200-250 words per minute
@@ -40,15 +99,60 @@ class BlogServices {
     }
     
     const blog = await Blog.create(blogData);
-    return blog.populate('author');
+    return blog.populate('author').then(blog => blog.populate('category', '_id name icon'));
   }
   
-  static async findAllBlogs() {
-    const blogs = await Blog.find({})
+  // Method to get all blogs with pagination and filtering options
+  static async getAllBlogs(
+    limit: number = 10, 
+    page: number = 1,
+    sortBy: string = 'createdAt',
+    sortOrder: 'asc' | 'desc' = 'desc',
+    status?: string
+  ): Promise<{ 
+    blogs: IBlog[], 
+    total: number, 
+    page: number, 
+    totalPages: number,
+    hasNextPage: boolean,
+    hasPrevPage: boolean,
+    nextPage: number | null,
+    prevPage: number | null 
+  }> {
+    const skip = (page - 1) * limit;
+    
+    // Build query filter
+    const filter: any = {};
+    if (status && status !== 'all') {
+      filter.status = status;
+    }
+    
+    // Build sort object
+    const sortObj: any = {};
+    sortObj[sortBy] = sortOrder === 'desc' ? -1 : 1;
+    
+    const blogs = await Blog.find(filter)
+      .sort(sortObj)
+      .skip(skip)
+      .limit(limit)
       .populate('author')
-      .populate("comments")
+      .populate('comments')
+      .populate('category', '_id name icon')
       .exec();
-    return blogs;
+    
+    const total = await Blog.countDocuments(filter);
+    const totalPages = Math.ceil(total / limit);
+    
+    return {
+      blogs,
+      total,
+      page,
+      totalPages,
+      hasNextPage: page < totalPages,
+      hasPrevPage: page > 1,
+      nextPage: page < totalPages ? page + 1 : null,
+      prevPage: page > 1 ? page - 1 : null
+    };
   }
 
   // Method to get recent blogs with pagination
@@ -60,7 +164,8 @@ class BlogServices {
       .skip(skip)
       .limit(limit)
       .populate('author')
-      .select('title description imageUrl category tags readTime createdAt likes author') // Select only necessary fields for performance
+      .populate('category', '_id name icon')
+      .select('title description imageUrl category tags readTime publishedDate likes author slug') // Added slug to selection
       .exec();
     
     const total = await Blog.countDocuments();
@@ -77,6 +182,7 @@ class BlogServices {
   static async getblogById(id: string): Promise<IBlog | null> {
     const blog = await Blog.findById(id)
       .populate('author')
+      .populate('category', '_id name icon')
       .populate("comments");
     return blog;
   }
@@ -86,6 +192,17 @@ class BlogServices {
     blogData: Partial<BlogDto>
   ): Promise<IBlog | null> {
     console.log("Inside update blog service");
+    
+    // Generate new slug if title has changed or slug is manually provided
+    if (blogData.title || blogData.slug) {
+      if (blogData.slug && isValidSlugFormat(blogData.slug)) {
+        // Use provided slug but ensure uniqueness
+        blogData.slug = await generateUniqueSlug(blogData.slug, blogId);
+      } else if (blogData.title) {
+        // Generate slug from new title
+        blogData.slug = await generateUniqueSlug(blogData.title, blogId);
+      }
+    }
     
     // Update read time if content has changed
     if (blogData.content && !blogData.readTime) {
@@ -100,12 +217,15 @@ class BlogServices {
         updatedAt: new Date() 
       }, 
       { new: true }
-    ).populate('author');
+    ).populate('author')
+    .populate('category', '_id name icon');
     return blog;
   }
 
   static async deleteBlog(blogId: string): Promise<IBlog | null> {
-    const blog = await Blog.findByIdAndDelete(blogId).populate('author');
+    const blog = await Blog.findByIdAndDelete(blogId)
+      .populate('author')
+      .populate('category', '_id name icon');
     return blog;
   }
 
@@ -130,7 +250,7 @@ class BlogServices {
     }
     blog.likes = blog.likes + 1;
     await blog.save();
-    return blog.populate('author');
+    return blog.populate('author').then(blog => blog.populate('category', '_id name icon'));
   }
 
   static async findAuthor(blogId: string): Promise<any> {
@@ -142,9 +262,244 @@ class BlogServices {
     return author;
   }
 
-  static async getBlogByTitle(query: string): Promise<IBlog | null> {
-    const blog = await Blog.findOne({ title: query }).populate('author');
+  static async getBlogByTitle(query: string): Promise<IBlog[]> {
+    // Validate input
+    if (!query || typeof query !== 'string') {
+      throw new Error('Query parameter must be a non-empty string');
+    }
+
+    // Sanitize the query to prevent regex injection
+    const sanitizedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    
+    // Search for blogs with similar titles using case-insensitive regex
+    const blogs = await Blog.find({ 
+      title: { $regex: sanitizedQuery, $options: 'i' } 
+    })
+      .populate('author')
+      .populate('category', '_id name icon')
+      .sort({ createdAt: -1 }) // Sort by newest first
+      .limit(10); // Limit to 10 results to avoid performance issues
+    
+    return blogs;
+  }
+
+  /**
+   * Get blog by exact title match (used for checking duplicates during creation)
+   * @param title - The exact title to search for
+   * @returns Promise resolving to blog document or null
+   */
+  static async getBlogByExactTitle(title: string): Promise<IBlog | null> {
+    const blog = await Blog.findOne({ title: title })
+      .populate('author')
+      .populate('category', '_id name icon');
     return blog;
+  }
+
+  /**
+   * Advanced search for blogs by title with fuzzy matching and relevance scoring
+   * @param query - The search query
+   * @param options - Search options (limit, sortBy)
+   * @returns Promise resolving to array of blogs with relevance scoring
+   */
+  static async searchBlogsByTitle(
+    query: string, 
+    options: { 
+      limit?: number; 
+      sortBy?: 'relevance' | 'date' | 'popularity';
+      includeContent?: boolean;
+    } = {}
+  ): Promise<IBlog[]> {
+    // Validate input
+    if (!query || typeof query !== 'string') {
+      throw new Error('Query parameter must be a non-empty string');
+    }
+
+    // Sanitize the query to prevent regex injection
+    const sanitizedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    
+    const { limit = 10, sortBy = 'relevance', includeContent = false } = options;
+    
+    // Build search aggregation pipeline
+    const pipeline: any[] = [];
+    
+    // Match stage - search in title and optionally content
+    const matchConditions: any[] = [
+      { title: { $regex: sanitizedQuery, $options: 'i' } }
+    ];
+    
+    if (includeContent) {
+      matchConditions.push({ description: { $regex: sanitizedQuery, $options: 'i' } });
+    }
+    
+    pipeline.push({
+      $match: { $or: matchConditions }
+    });
+    
+    // Add relevance scoring
+    pipeline.push({
+      $addFields: {
+        relevanceScore: {
+          $add: [
+            // Exact title match gets highest score
+            { $cond: [{ $eq: [{ $toLower: '$title' }, query.toLowerCase()] }, 10, 0] },
+            // Title starts with query gets high score
+            { $cond: [{ $regexMatch: { input: { $toLower: '$title' }, regex: `^${query.toLowerCase()}` } }, 5, 0] },
+            // Title contains all words from query
+            { $cond: [{ $regexMatch: { input: { $toLower: '$title' }, regex: sanitizedQuery.toLowerCase() } }, 3, 0] },
+            // Boost popular blogs slightly
+            { $divide: ['$likes', 10] }
+          ]
+        }
+      }
+    });
+    
+    // Sort by relevance or other criteria
+    const sortStage: any = {};
+    switch (sortBy) {
+      case 'relevance':
+        sortStage.relevanceScore = -1;
+        sortStage.createdAt = -1; // Secondary sort by date
+        break;
+      case 'date':
+        sortStage.createdAt = -1;
+        break;
+      case 'popularity':
+        sortStage.likes = -1;
+        sortStage.createdAt = -1;
+        break;
+    }
+    
+    pipeline.push({ $sort: sortStage });
+    pipeline.push({ $limit: limit });
+    
+    // Lookup author and category
+    pipeline.push({
+      $lookup: {
+        from: 'userprofiles',
+        localField: 'author',
+        foreignField: '_id',
+        as: 'author'
+      }
+    });
+    
+    pipeline.push({
+      $lookup: {
+        from: 'categories',
+        localField: 'category',
+        foreignField: '_id',
+        as: 'category'
+      }
+    });
+    
+    // Convert arrays to single objects
+    pipeline.push({
+      $addFields: {
+        author: { $arrayElemAt: ['$author', 0] },
+        category: { $arrayElemAt: ['$category', 0] }
+      }
+    });
+    
+    // Remove relevanceScore from final output
+    pipeline.push({
+      $unset: 'relevanceScore'
+    });
+    
+    const results = await Blog.aggregate(pipeline);
+    return results;
+  }
+
+  /**
+   * Get blog by slug for SEO-friendly URLs
+   * @param slug - The slug to search for
+   * @returns Promise resolving to blog document or null
+   */
+  static async getBlogBySlug(slug: string): Promise<IBlog | null> {
+    const blog = await Blog.findOne({ slug: slug.toLowerCase() })
+      .populate('author')
+      .populate('category', '_id name icon')
+      .populate('comments', '-email'); // Exclude email field from comments
+    return blog;
+  }
+
+  /**
+   * Get blogs by tag with pagination
+   * @param tag - Single tag to search for
+   * @param limit - Number of blogs per page (default: 10)
+   * @param page - Page number (default: 1)
+   * @param sortBy - Field to sort by (default: 'createdAt')
+   * @param sortOrder - Sort order (default: 'desc')
+   * @param status - Blog status filter (optional)
+   * @returns Promise resolving to paginated blog documents matching the tag
+   */
+  static async getBlogsByTags(
+    tag: string,
+    limit: number = 10,
+    page: number = 1,
+    sortBy: string = 'createdAt',
+    sortOrder: 'asc' | 'desc' = 'desc',
+    status?: string
+  ): Promise<{
+    blogs: IBlog[];
+    total: number;
+    page: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+    nextPage: number | null;
+    prevPage: number | null;
+  }> {
+    const skip = (page - 1) * limit;
+    
+    // Build query filter
+    const filter: any = {
+      tags: tag // Match blogs that have the specified tag
+    };
+    
+    if (status && status !== 'all') {
+      filter.status = status;
+    }
+    
+    // Build sort object
+    const sortObj: any = {};
+    sortObj[sortBy] = sortOrder === 'desc' ? -1 : 1;
+    
+    const blogs = await Blog.find(filter)
+      .sort(sortObj)
+      .skip(skip)
+      .limit(limit)
+      .populate('author')
+      .populate('comments', '-email') // Exclude email field from comments
+      .populate('category', '_id name icon')
+      .exec();
+    
+    const total = await Blog.countDocuments(filter);
+    const totalPages = Math.ceil(total / limit);
+    
+    return {
+      blogs,
+      total,
+      page,
+      totalPages,
+      hasNextPage: page < totalPages,
+      hasPrevPage: page > 1,
+      nextPage: page < totalPages ? page + 1 : null,
+      prevPage: page > 1 ? page - 1 : null
+    };
+  }
+
+  /**
+   * Check if a slug exists (excluding a specific blog ID)
+   * @param slug - The slug to check
+   * @param excludeId - Optional blog ID to exclude from the check
+   * @returns Promise resolving to boolean
+   */
+  static async slugExists(slug: string, excludeId?: string): Promise<boolean> {
+    const query = excludeId 
+      ? { slug: slug.toLowerCase(), _id: { $ne: excludeId } }
+      : { slug: slug.toLowerCase() };
+    
+    const existingBlog = await Blog.findOne(query);
+    return !!existingBlog;
   }
   // Method to delete all blog documents
   static async deleteAllBlogs(): Promise<any> {
@@ -225,7 +580,7 @@ class BlogServices {
     if (category) {
       // Support both category ID and category name/slug
       if (mongoose.Types.ObjectId.isValid(category)) {
-        matchStage.category = { $in: [new mongoose.Types.ObjectId(category)] };
+        matchStage.category = new mongoose.Types.ObjectId(category);
       } else {
         // If not ObjectId, we'll need to lookup category by name later
         pipeline.push({
@@ -253,14 +608,26 @@ class BlogServices {
       matchStage.title = { $regex: search, $options: 'i' };
     }pipeline.push({ $match: matchStage });
 
-    // Lookup only categories - we only need category names
+    // Lookup categories - we need _id, name, and icon for frontend operations
     pipeline.push({
       $lookup: {
         from: 'categories',
         localField: 'category',
         foreignField: '_id',
-        as: 'category'
+        as: 'categoryDetails'
       }
+    });
+
+    // Add category details to the document
+    pipeline.push({
+      $addFields: {
+        category: { $arrayElemAt: ['$categoryDetails', 0] }
+      }
+    });
+
+    // Remove the temporary categoryDetails field
+    pipeline.push({
+      $unset: 'categoryDetails'
     });
 
     // Project only the 4 essential fields for admin dashboard

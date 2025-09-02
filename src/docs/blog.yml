@@ -22,6 +22,11 @@ paths:
                   type: string
                   description: The title of the blog post
                   example: "How to Master TypeScript in 2023"
+                slug:
+                  type: string
+                  description: SEO-friendly URL slug (optional - auto-generated from title if not provided)
+                  example: "how-to-master-typescript-in-2023"
+                  pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$"
                 content:
                   type: string
                   description: The main content of the blog post
@@ -40,10 +45,14 @@ paths:
                   type: string
                   description: Brief summary of the blog content
                   example: "Learn the fundamentals of TypeScript and how to apply them in real projects"
+                category:
+                  type: string
+                  description: The category ID for the blog post
+                  example: "60a6b5f8d9b4c72a8c123456"
               required:
                 - title
                 - content
-                - imageUrl
+                - category
                 - description
       responses:
         "201":
@@ -226,15 +235,97 @@ paths:
     get:
       tags:
         - Blog
-      summary: Retrieve a blog by title
-      description: Retrieves a blog from the database by its title
+      summary: Search blogs by title with fuzzy matching
+      description: Search for blogs with similar titles using flexible matching. Supports both simple regex search and advanced fuzzy matching with relevance scoring.
       parameters:
         - name: title
           in: query
           required: true
-          description: The title of the blog to retrieve
+          description: The title or search query to find similar blog titles
           schema:
             type: string
+            example: "Getting Started"
+        - name: limit
+          in: query
+          required: false
+          description: Maximum number of results to return
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 50
+        - name: advanced
+          in: query
+          required: false
+          description: Use advanced search with fuzzy matching and relevance scoring
+          schema:
+            type: boolean
+            default: false
+        - name: sortBy
+          in: query
+          required: false
+          description: Sort results by relevance, date, or popularity (only applies to advanced search)
+          schema:
+            type: string
+            enum: ['relevance', 'date', 'popularity']
+            default: 'relevance'
+        - name: includeContent
+          in: query
+          required: false
+          description: Also search in blog descriptions/content (only applies to advanced search)
+          schema:
+            type: boolean
+            default: false
+      responses:
+        "200":
+          description: Blogs found successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                    example: 200
+                  message:
+                    type: string
+                    example: "Found 3 blog(s) with similar titles"
+                  data:
+                    type: object
+                    properties:
+                      blogs:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/blogs"
+                      searchQuery:
+                        type: string
+                        example: "Getting Started"
+                      totalResults:
+                        type: integer
+                        example: 3
+                      searchType:
+                        type: string
+                        enum: ['simple', 'advanced']
+                        example: "advanced"
+        "404":
+          description: No blogs found with similar titles
+        "500":
+          description: Internal server error
+  /blogs/by-slug/{slug}:
+    get:
+      tags:
+        - Blog
+      summary: Retrieve a blog by slug (SEO-friendly URL)
+      description: Retrieves a blog from the database by its SEO-friendly slug
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          description: The SEO-friendly slug of the blog to retrieve
+          schema:
+            type: string
+            pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            example: "how-to-master-typescript-in-2023"
       responses:
         "200":
           description: Blog retrieved successfully
@@ -313,6 +404,169 @@ paths:
           description: No blogs found in this category
         "500":
           description: Internal server error
+  
+  /blogs/by-tags:
+    get:
+      tags:
+        - Blog
+      summary: Retrieve blogs by tag
+      description: Retrieves all blogs that match the specified tag with pagination support
+      parameters:
+        - name: tag
+          in: query
+          required: true
+          description: Single tag to search for
+          schema:
+            type: string
+            example: "javascript"
+        - name: page
+          in: query
+          required: false
+          description: Page number for pagination
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+        - name: limit
+          in: query
+          required: false
+          description: Number of blogs per page (1-50)
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 50
+        - name: sortBy
+          in: query
+          required: false
+          description: Field to sort by
+          schema:
+            type: string
+            enum: [createdAt, updatedAt, title, likes, publishDate]
+            default: createdAt
+        - name: sortOrder
+          in: query
+          required: false
+          description: Sort order
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+        - name: status
+          in: query
+          required: false
+          description: Filter by blog status
+          schema:
+            type: string
+            example: published
+      responses:
+        "200":
+          description: Blogs retrieved by tag successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                    example: 200
+                  message:
+                    type: string
+                    example: "Blogs retrieved by tag successfully"
+                  data:
+                    type: object
+                    properties:
+                      blogs:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/blogs"
+                      pagination:
+                        type: object
+                        properties:
+                          currentPage:
+                            type: number
+                            example: 1
+                          totalPages:
+                            type: number
+                            example: 5
+                          totalBlogs:
+                            type: number
+                            example: 47
+                          blogsPerPage:
+                            type: number
+                            example: 10
+                          hasNextPage:
+                            type: boolean
+                            example: true
+                          hasPrevPage:
+                            type: boolean
+                            example: false
+                          nextPage:
+                            type: number
+                            nullable: true
+                            example: 2
+                          prevPage:
+                            type: number
+                            nullable: true
+                            example: null
+                          startIndex:
+                            type: number
+                            example: 1
+                          endIndex:
+                            type: number
+                            example: 10
+                      filters:
+                        type: object
+                        properties:
+                          tag:
+                            type: string
+                            example: "javascript"
+                          sortBy:
+                            type: string
+                            example: "createdAt"
+                          sortOrder:
+                            type: string
+                            example: "desc"
+                          status:
+                            type: string
+                            example: "all"
+        "400":
+          description: Bad Request - Invalid parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                    example: 400
+                  message:
+                    type: string
+                    example: "Tag is required"
+                  data:
+                    type: null
+                  errorCode:
+                    type: string
+                    example: "INVALID_INPUT"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                    example: 500
+                  message:
+                    type: string
+                    example: "Sorry, something went wrong"
+                  data:
+                    type: null
+                  errorCode:
+                    type: string
+                    example: "SERVER_ERROR"
+
   /blogs/like/{id}:
     put:
       tags:
@@ -394,23 +648,28 @@ paths:
     get:
       tags:
         - Blog
-      summary: Retrieve all blogs for public view
-      description: Retrieves all blogs from the database for public access with no authentication required
+      summary: Retrieve all blogs for public view with pagination
+      description: Retrieves all blogs from the database for public access with no authentication required. Supports pagination parameters.
       parameters:
         - name: page
           in: query
           required: false
-          description: Page number for pagination
+          description: Page number for pagination (minimum 1)
           schema:
             type: integer
+            minimum: 1
             default: 1
+            example: 1
         - name: limit
           in: query
           required: false
-          description: Number of blogs per page
+          description: Number of blogs per page (minimum 1, maximum 50)
           schema:
             type: integer
+            minimum: 1
+            maximum: 50
             default: 10
+            example: 10
       responses:
         "200":
           description: Blogs retrieved successfully
@@ -424,20 +683,67 @@ paths:
                     example: 200
                   message:
                     type: string
-                    example: "Blogs retrieved successfully"
+                    example: "All blogs retrieved successfully"
                   data:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/blogs"
-                  pagination:
                     type: object
                     properties:
-                      currentPage:
-                        type: number
-                      totalPages:
-                        type: number
-                      totalItems:
-                        type: number
+                      blogs:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/blogs"
+                      pagination:
+                        type: object
+                        properties:
+                          currentPage:
+                            type: number
+                            example: 1
+                          totalPages:
+                            type: number
+                            example: 5
+                          totalBlogs:
+                            type: number
+                            example: 47
+                          blogsPerPage:
+                            type: number
+                            example: 10
+                          hasNextPage:
+                            type: boolean
+                            example: true
+                          hasPrevPage:
+                            type: boolean
+                            example: false
+                          nextPage:
+                            type: number
+                            nullable: true
+                            example: 2
+                          prevPage:
+                            type: number
+                            nullable: true
+                            example: null
+                          startIndex:
+                            type: number
+                            example: 1
+                          endIndex:
+                            type: number
+                            example: 10
+        "400":
+          description: Invalid pagination parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                    example: 400
+                  message:
+                    type: string
+                    example: "Limit must be between 1 and 50"
+                  data:
+                    type: null
+                  errorCode:
+                    type: string
+                    example: "INVALID_LIMIT"
         "500":
           description: Internal server error
           
@@ -535,6 +841,11 @@ components:
           type: string
           description: Blog title
           example: "How to Master TypeScript in 2023"
+        slug:
+          type: string
+          description: SEO-friendly URL slug
+          example: "how-to-master-typescript-in-2023"
+          pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$"
         content:
           type: string
           description: Blog content
@@ -553,6 +864,22 @@ components:
           type: string
           description: Brief summary of the blog
           example: "Learn the fundamentals of TypeScript and how to apply them in real projects"
+        category:
+          type: object
+          description: Category of the blog
+          properties:
+            _id:
+              type: string
+              description: Category ID
+              example: "60a6b5f8d9b4c72a8c123456"
+            name:
+              type: string
+              description: Category name
+              example: "Web Development"
+            icon:
+              type: string
+              description: Category icon
+              example: "code"
         author:
           type: string
           description: Author of the blog

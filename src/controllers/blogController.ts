@@ -6,7 +6,7 @@ import cloudinary from "../helpers/cloudinary";
 import SubscriberService from "../services/subscriberService";
 import { Types } from "mongoose";
 import { CustomeRequest } from "../middlewares/authUtils";
-import { BlogDto } from "../types/blog.types";
+import { BlogDto, IBlog } from "../types/blog.types";
 import { validateBlog, sanitizeHtml } from "../helpers/validators/blogValidator";
 import UserProfileService from "../services/userProfileService";
 
@@ -39,7 +39,8 @@ class blogController {  /**
       }
 
       const { title } = req.body;
-      const blogExists = await BlogServices.getBlogByTitle(title);      if (blogExists) {
+      const blogExists = await BlogServices.getBlogByExactTitle(title);
+      if (blogExists) {
         response(res, 409, "Blog already exists", null, "BLOG_EXISTS");
         return;
       }// Get the current user ID (author of the blog)
@@ -61,15 +62,15 @@ class blogController {  /**
       const tags = Array.isArray(req.body.tags) ? req.body.tags.map(String) : 
         req.body.tags ? [String(req.body.tags)] : [];
       
-      const category = Array.isArray(req.body.category)
-        ? req.body.category.map(String)
-        : req.body.category ? [String(req.body.category)] : [];
+      // Category should be a single string ID, not an array
+      const category = String(req.body.category || '');
 
       // Sanitize HTML content
       const sanitizedContent = sanitizeHtml(req.body.content);
 
       const blogData: BlogDto = {
         title: req.body.title,
+        slug: req.body.slug, // Optional - will be auto-generated if not provided
         metaTitle: req.body.metaTitle,
         metaDescription: req.body.metaDescription,
         publishDate: req.body.publishDate,
@@ -150,9 +151,8 @@ class blogController {  /**
       }
       
       if (req.body.category) {
-        blogData.category = Array.isArray(req.body.category)
-          ? req.body.category.map(String)
-          : [String(req.body.category)];
+        // Category should be a single string ID, not an array
+        blogData.category = String(req.body.category);
       }
 
       // Don't allow changing the author
@@ -204,36 +204,205 @@ class blogController {  /**
   }
   static async getBlogByTitle(req: Request, res: Response): Promise<void> {
     try {
-      const { title } = req.params;      const blog = await BlogServices.getBlogByTitle(title);
-      if (!blog) {
-        console.log("Blog not found");
-        response(res, 404, "Blog not found", null, "BLOG_NOT_FOUND");
+      // Get title from query parameters instead of params
+      const title = req.query.title as string;
+      
+      // Validate that title is provided and is a string
+      if (!title || typeof title !== 'string') {
+        response(res, 400, "Title query parameter is required", null, "TITLE_REQUIRED");
         return;
       }
-      response(res, 200, "Blog retrieved successfully", blog);    
-      } catch (error) {
-      console.error("Error fetching blog by title:", error);
+
+      // Validate minimum length to avoid overly broad searches
+      if (title.length < 1) {
+        response(res, 400, "Title must be at least 1 character long", null, "TITLE_TOO_SHORT");
+        return;
+      }
+      
+      // Get search options from query parameters
+      const limit = parseInt(req.query.limit as string) || 10;
+      const sortBy = (req.query.sortBy as 'relevance' | 'date' | 'popularity') || 'relevance';
+      const includeContent = req.query.includeContent === 'true';
+      const useAdvancedSearch = req.query.advanced === 'true';
+      
+      let blogs: IBlog[];
+      
+      if (useAdvancedSearch) {
+        // Use advanced search with fuzzy matching and relevance scoring
+        blogs = await BlogServices.searchBlogsByTitle(title, { 
+          limit, 
+          sortBy, 
+          includeContent 
+        });
+      } else {
+        // Use simple regex search
+        blogs = await BlogServices.getBlogByTitle(title);
+      }
+      
+      if (!blogs || blogs.length === 0) {
+        response(res, 404, "No blogs found with similar titles", null, "BLOGS_NOT_FOUND");
+        return;
+      }
+      
+      response(res, 200, `Found ${blogs.length} blog(s) with similar titles`, {
+        blogs,
+        searchQuery: title,
+        totalResults: blogs.length,
+        searchType: useAdvancedSearch ? 'advanced' : 'simple'
+      });    
+    } catch (error) {
+      console.error("Error fetching blogs by title:", error);
       response(res, 500, "Sorry, something went wrong", null, "SERVER_ERROR");
       return;
     }
   }
-  /**
-   * Method to find blog documents by category.
-   * @param category The category to filter blogs by.
-   * @returns Promise resolving to an array of blog documents matching the category.
-   */
 
+  /**
+   * Get blog by slug for SEO-friendly URLs
+   * @param req The request object.
+   * @param res The response object.
+   */
+  static async getBlogBySlug(req: Request, res: Response): Promise<void> {
+    try {
+      const { slug } = req.params;
+      
+      const blog = await BlogServices.getBlogBySlug(slug);
+      if (!blog) {
+        response(res, 404, "Blog not found", null, "BLOG_NOT_FOUND");
+        return;
+      }
+      
+      response(res, 200, "Blog retrieved successfully", blog);
+    } catch (error) {
+      console.error("Error fetching blog by slug:", error);
+      response(res, 500, "Sorry, something went wrong", null, "SERVER_ERROR");
+    }
+  }
+  /**
+   * Method to find blog documents by category with pagination.
+   * @param req Request object containing category ID in params and optional page/limit in query
+   * @param res Response object
+   * @returns Promise resolving to paginated blogs matching the category.
+   */
   static async getBlogsByCategory(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const blogs = await BlogServices.findBlogsByCategory(id);      
-      if (!blogs || blogs.length === 0) {
-        response(res, 404, "No blogs found for this category", null, "CATEGORY_HAS_NO_BLOGS");
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      
+      // Validate input
+      if (!id || id.trim() === '') {
+        response(res, 400, "Category ID or name is required", null, "INVALID_INPUT");
+        return;
+      }
+      
+      const result = await BlogServices.findBlogsByCategory(id.trim(), limit, page);
+      
+      if (!result.blogs || result.blogs.length === 0) {
+        response(res, 404, "No blogs found for this category", {
+          blogs: result.blogs,
+          pagination: {
+            currentPage: result.page,
+            totalPages: result.totalPages,
+            totalBlogs: result.total,
+            blogsPerPage: limit,
+            hasNextPage: result.hasNextPage,
+            hasPrevPage: result.hasPrevPage,
+            nextPage: result.nextPage,
+            prevPage: result.prevPage,
+            startIndex: (result.page - 1) * limit + 1,
+            endIndex: Math.min(result.page * limit, result.total)
+          }
+        }, "CATEGORY_HAS_NO_BLOGS");
       } else {
-        response(res, 200, "Blogs retrieved by category successfully", blogs);
+        response(res, 200, "Blogs retrieved by category successfully", {
+          blogs: result.blogs,
+          pagination: {
+            currentPage: result.page,
+            totalPages: result.totalPages,
+            totalBlogs: result.total,
+            blogsPerPage: limit,
+            hasNextPage: result.hasNextPage,
+            hasPrevPage: result.hasPrevPage,
+            nextPage: result.nextPage,
+            prevPage: result.prevPage,
+            startIndex: (result.page - 1) * limit + 1,
+            endIndex: Math.min(result.page * limit, result.total)
+          }
+        });
       }    
-      } catch (error) {
+    } catch (error) {
       console.error("Error fetching blogs by category:", error);
+      response(res, 500, "Sorry, something went wrong", null, "SERVER_ERROR");
+    }
+  }
+
+  /**
+   * Method to find blog documents by tag with pagination.
+   * @param req Request object containing tag in query params and optional page/limit in query
+   * @param res Response object
+   * @returns Promise resolving to paginated blogs matching the tag.
+   */
+  static async getBlogsByTags(req: Request, res: Response): Promise<void> {
+    try {
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      const sortBy = (req.query.sortBy as string) || 'createdAt';
+      const sortOrder = (req.query.sortOrder as 'asc' | 'desc') || 'desc';
+      const status = req.query.status as string;
+      
+      // Get tag from query parameters
+      const tag = req.query.tag as string;
+      
+      // Validate input
+      if (!tag || tag.trim() === '') {
+        response(res, 400, "Tag is required", null, "INVALID_INPUT");
+        return;
+      }
+
+      // Validate pagination parameters
+      if (limit <= 0 || limit > 50) {
+        response(res, 400, "Limit must be between 1 and 50", null, "INVALID_LIMIT");
+        return;
+      }
+
+      if (page <= 0) {
+        response(res, 400, "Page must be greater than 0", null, "INVALID_PAGE");
+        return;
+      }
+
+      // Validate sortBy parameter
+      const validSortFields = ['createdAt', 'updatedAt', 'title', 'likes', 'publishDate'];
+      if (!validSortFields.includes(sortBy)) {
+        response(res, 400, "Invalid sortBy field. Allowed fields: " + validSortFields.join(', '), null, "INVALID_SORT_FIELD");
+        return;
+      }
+      
+      const result = await BlogServices.getBlogsByTags(tag.trim(), limit, page, sortBy, sortOrder, status);
+      
+      response(res, 200, "Blogs retrieved by tag successfully", {
+        blogs: result.blogs,
+        pagination: {
+          currentPage: result.page,
+          totalPages: result.totalPages,
+          totalBlogs: result.total,
+          blogsPerPage: limit,
+          hasNextPage: result.hasNextPage,
+          hasPrevPage: result.hasPrevPage,
+          nextPage: result.nextPage,
+          prevPage: result.prevPage,
+          startIndex: (result.page - 1) * limit + 1,
+          endIndex: Math.min(result.page * limit, result.total)
+        },
+        filters: {
+          tag: tag.trim(),
+          sortBy,
+          sortOrder,
+          status: status || 'all'
+        }
+      });    
+    } catch (error) {
+      console.error("Error fetching blogs by tag:", error);
       response(res, 500, "Sorry, something went wrong", null, "SERVER_ERROR");
     }
   }
@@ -307,13 +476,59 @@ class blogController {  /**
   }
  
   /**
-   * Method to find all blog documents.
-   * @returns Promise resolving to an array of all blog documents.
+   * Method to find all blog documents with pagination.
+   * @returns Promise resolving to paginated blog documents.
    */
   static async retrieveAllBlogs(req: Request, res: Response): Promise<void> {
     try {
-      const blogs = await BlogServices.findAllBlogs();
-      response(res, 200, "All blogs retrieved successfully", blogs);
+      // Extract pagination and filtering parameters from query
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      const sortBy = (req.query.sortBy as string) || 'createdAt';
+      const sortOrder = (req.query.sortOrder as 'asc' | 'desc') || 'desc';
+      const status = req.query.status as string;
+
+      // Validate pagination parameters
+      if (limit <= 0 || limit > 50) {
+        response(res, 400, "Limit must be between 1 and 50", null, "INVALID_LIMIT");
+        return;
+      }
+
+      if (page <= 0) {
+        response(res, 400, "Page must be greater than 0", null, "INVALID_PAGE");
+        return;
+      }
+
+      // Validate sortBy parameter
+      const validSortFields = ['createdAt', 'updatedAt', 'title', 'likes', 'publishDate'];
+      if (!validSortFields.includes(sortBy)) {
+        response(res, 400, "Invalid sortBy field. Allowed fields: " + validSortFields.join(', '), null, "INVALID_SORT_FIELD");
+        return;
+      }
+
+      // Use the new getAllBlogs service method with enhanced pagination
+      const result = await BlogServices.getAllBlogs(limit, page, sortBy, sortOrder, status);
+      
+      response(res, 200, "All blogs retrieved successfully", {
+        blogs: result.blogs,
+        pagination: {
+          currentPage: result.page,
+          totalPages: result.totalPages,
+          totalBlogs: result.total,
+          blogsPerPage: limit,
+          hasNextPage: result.hasNextPage,
+          hasPrevPage: result.hasPrevPage,
+          nextPage: result.nextPage,
+          prevPage: result.prevPage,
+          startIndex: (result.page - 1) * limit + 1,
+          endIndex: Math.min(result.page * limit, result.total)
+        },
+        filters: {
+          sortBy,
+          sortOrder,
+          status: status || 'all'
+        }
+      });
     } catch (error) {
       console.error("Error retrieving all blogs:", error);
       response(res, 500, "Something went wrong", null, "SERVER_ERROR");

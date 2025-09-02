@@ -5,6 +5,7 @@ import { Document, Types } from "mongoose";
  */
 export interface BlogDto {
   title: string;
+  slug?: string; // Optional - will be auto-generated if not provided
   metaTitle?: string;
   metaDescription?: string;
   publishDate?: string;
@@ -15,7 +16,7 @@ export interface BlogDto {
   content: string;
   imageUrl?: string;
   author: Types.ObjectId | string; // References UserProfile model
-  category: string | string[];
+  category: string; // Single category ID
   tags?: string[];
   readTime?: string;
 }
@@ -25,6 +26,7 @@ export interface BlogDto {
  */
 export interface IBlog extends Document {
   title: string;
+  slug: string; // Required field for SEO-friendly URLs
   metaTitle?: string;
   metaDescription?: string;
   publishDate?: string;
@@ -38,7 +40,7 @@ export interface IBlog extends Document {
   createdAt: Date;
   updatedAt: Date;
   comments?: Types.ObjectId[];
-  category: Types.ObjectId[] | string[];
+  category: Types.ObjectId; // Single category reference
   tags: string[];
   likes: number;
   readTime?: string;

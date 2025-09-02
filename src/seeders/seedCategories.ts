@@ -13,13 +13,46 @@ const seedCategories = async (options = { forceUpdate: false }) => {
 
     // array of categories data
     const categoriesData = [
-      { name: "Programming" },
-      { name: "Web Development" },
-      { name: "UX/UI Design" },
-      { name: "Technology" },
-      { name: "Career" },
-      { name: "Entrepreneurship" },
-      { name: "Social" }
+      {
+    name: 'Web Development',
+    icon: 'code'
+  },
+  {
+    name: 'DevOps',
+    icon: 'cogs'
+  },
+  {
+    name: 'Cloud Computing',
+    icon: 'cloud'
+   },
+  {
+    name: 'Philosophy',
+    icon: 'book'
+   },
+  {
+    name: 'Career',
+    icon: 'briefcase'
+  },
+  {
+    name: 'Tutorials',
+    icon: 'graduation-cap'
+  },
+  {
+    name: 'Architecture',
+    icon: 'sitemap'
+  },
+  {
+    name: 'Design',
+    icon: 'palette',
+  },
+  {
+    name: 'Technology',
+    icon: 'microchip'
+  },
+  {
+    name: 'Entrepreneurship',
+    icon: 'rocket'
+  }
     ];
 
     let createdCount = 0;
@@ -42,10 +75,10 @@ const seedCategories = async (options = { forceUpdate: false }) => {
         // Update the category if forceUpdate is enabled
         await Category.updateOne(
           { _id: exists._id },
-          { $set: { name: category.name } } // This ensures correct capitalization
+          { $set: { name: category.name, icon: category.icon } } // Update both name and icon
         );
         updatedCount++;
-        console.log(`🔄 Updated category: ${category.name}`);
+        console.log(`🔄 Updated category: ${category.name} with icon: ${category.icon}`);
       } else {
         skippedCount++;
         console.log(`⏭️ Skipped existing category: ${category.name}`);
