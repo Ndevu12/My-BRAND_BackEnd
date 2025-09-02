@@ -279,14 +279,16 @@ class blogController {  /**
     }
   }
   /**
-   * Method to find blog documents by category.
-   * @param req Request object containing category ID or name in params
+   * Method to find blog documents by category with pagination.
+   * @param req Request object containing category ID in params and optional page/limit in query
    * @param res Response object
-   * @returns Promise resolving to blogs matching the category.
+   * @returns Promise resolving to paginated blogs matching the category.
    */
   static async getBlogsByCategory(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
       
       // Validate input
       if (!id || id.trim() === '') {
@@ -294,17 +296,113 @@ class blogController {  /**
         return;
       }
       
-      console.log(`Searching for blogs by category: ${id}`);
-      const blogs = await BlogServices.findBlogsByCategory(id.trim());
+      const result = await BlogServices.findBlogsByCategory(id.trim(), limit, page);
       
-      if (!blogs || blogs.length === 0) {
-        response(res, 404, "No blogs found for this category", null, "CATEGORY_HAS_NO_BLOGS");
+      if (!result.blogs || result.blogs.length === 0) {
+        response(res, 404, "No blogs found for this category", {
+          blogs: result.blogs,
+          pagination: {
+            currentPage: result.page,
+            totalPages: result.totalPages,
+            totalBlogs: result.total,
+            blogsPerPage: limit,
+            hasNextPage: result.hasNextPage,
+            hasPrevPage: result.hasPrevPage,
+            nextPage: result.nextPage,
+            prevPage: result.prevPage,
+            startIndex: (result.page - 1) * limit + 1,
+            endIndex: Math.min(result.page * limit, result.total)
+          }
+        }, "CATEGORY_HAS_NO_BLOGS");
       } else {
-        console.log(`Found ${blogs.length} blogs for category: ${id}`);
-        response(res, 200, "Blogs retrieved by category successfully", blogs);
+        response(res, 200, "Blogs retrieved by category successfully", {
+          blogs: result.blogs,
+          pagination: {
+            currentPage: result.page,
+            totalPages: result.totalPages,
+            totalBlogs: result.total,
+            blogsPerPage: limit,
+            hasNextPage: result.hasNextPage,
+            hasPrevPage: result.hasPrevPage,
+            nextPage: result.nextPage,
+            prevPage: result.prevPage,
+            startIndex: (result.page - 1) * limit + 1,
+            endIndex: Math.min(result.page * limit, result.total)
+          }
+        });
       }    
     } catch (error) {
       console.error("Error fetching blogs by category:", error);
+      response(res, 500, "Sorry, something went wrong", null, "SERVER_ERROR");
+    }
+  }
+
+  /**
+   * Method to find blog documents by tag with pagination.
+   * @param req Request object containing tag in query params and optional page/limit in query
+   * @param res Response object
+   * @returns Promise resolving to paginated blogs matching the tag.
+   */
+  static async getBlogsByTags(req: Request, res: Response): Promise<void> {
+    try {
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      const sortBy = (req.query.sortBy as string) || 'createdAt';
+      const sortOrder = (req.query.sortOrder as 'asc' | 'desc') || 'desc';
+      const status = req.query.status as string;
+      
+      // Get tag from query parameters
+      const tag = req.query.tag as string;
+      
+      // Validate input
+      if (!tag || tag.trim() === '') {
+        response(res, 400, "Tag is required", null, "INVALID_INPUT");
+        return;
+      }
+
+      // Validate pagination parameters
+      if (limit <= 0 || limit > 50) {
+        response(res, 400, "Limit must be between 1 and 50", null, "INVALID_LIMIT");
+        return;
+      }
+
+      if (page <= 0) {
+        response(res, 400, "Page must be greater than 0", null, "INVALID_PAGE");
+        return;
+      }
+
+      // Validate sortBy parameter
+      const validSortFields = ['createdAt', 'updatedAt', 'title', 'likes', 'publishDate'];
+      if (!validSortFields.includes(sortBy)) {
+        response(res, 400, "Invalid sortBy field. Allowed fields: " + validSortFields.join(', '), null, "INVALID_SORT_FIELD");
+        return;
+      }
+      
+      const result = await BlogServices.getBlogsByTags(tag.trim(), limit, page, sortBy, sortOrder, status);
+      
+      response(res, 200, "Blogs retrieved by tag successfully", {
+        blogs: result.blogs,
+        pagination: {
+          currentPage: result.page,
+          totalPages: result.totalPages,
+          totalBlogs: result.total,
+          blogsPerPage: limit,
+          hasNextPage: result.hasNextPage,
+          hasPrevPage: result.hasPrevPage,
+          nextPage: result.nextPage,
+          prevPage: result.prevPage,
+          startIndex: (result.page - 1) * limit + 1,
+          endIndex: Math.min(result.page * limit, result.total)
+        },
+        filters: {
+          tag: tag.trim(),
+          sortBy,
+          sortOrder,
+          status: status || 'all'
+        }
+      });    
+    } catch (error) {
+      console.error("Error fetching blogs by tag:", error);
       response(res, 500, "Sorry, something went wrong", null, "SERVER_ERROR");
     }
   }

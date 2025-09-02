@@ -11,6 +11,7 @@ blogRoutes.get("/public", BlogController.retrieveAllBlogs); // Public view of al
 blogRoutes.get("/public/recent", BlogController.getRecentBlogs); // Public view of recent blogs with pagination
 blogRoutes.get("/public/:id", BlogController.getBlogById); // Public view of a single blog
 blogRoutes.get("/by-category/:id", BlogController.getBlogsByCategory);
+blogRoutes.get("/by-tag", BlogController.getBlogsByTags); // Get blogs by single tag with pagination
 blogRoutes.get("/by-title", BlogController.getBlogByTitle);
 blogRoutes.get("/by-slug/:slug", BlogController.getBlogBySlug); // SEO-friendly URL route
 

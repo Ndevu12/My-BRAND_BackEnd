@@ -6,39 +6,61 @@ import { generateUniqueSlug, isValidSlugFormat } from "../utils/slugGenerator";
 
 class BlogServices {
   /**
-   * Method to find blog documents by category ID.
+   * Method to find blog documents by category ID with pagination.
    * @param categoryId The category ID to filter blogs by.
-   * @returns Promise resolving to an array of blog documents matching the category.
+   * @param limit Number of blogs per page (default: 10).
+   * @param page Page number (default: 1).
+   * @returns Promise resolving to paginated blog documents matching the category.
    */
-  static async findBlogsByCategory(categoryId: string): Promise<IBlog[]> {
+  static async findBlogsByCategory(
+    categoryId: string,
+    limit: number = 10,
+    page: number = 1
+  ): Promise<{
+    blogs: IBlog[];
+    total: number;
+    page: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+    nextPage: number | null;
+    prevPage: number | null;
+  }> {
     try {
-      console.log(`🔍 Searching for blogs by category ID: "${categoryId}"`);
       
       // Validate that the categoryId is a valid ObjectId
       if (!mongoose.Types.ObjectId.isValid(categoryId)) {
-        console.log(`❌ Invalid category ID format: ${categoryId}`);
         throw new Error('Invalid category ID format');
       }
 
-      // Find blogs by category ObjectId
-      const blogs = await Blog.find({ category: new mongoose.Types.ObjectId(categoryId) })
+      const skip = (page - 1) * limit;
+      const categoryObjectId = new mongoose.Types.ObjectId(categoryId);
+
+      // Find blogs by category ObjectId with pagination
+      const blogs = await Blog.find({ category: categoryObjectId })
         .populate('author')
         .populate('category', '_id name icon')
         .populate('comments')
         .sort({ createdAt: -1 }) // Sort by newest first
+        .skip(skip)
+        .limit(limit)
         .exec();
+
+      // Get total count for pagination metadata
+      const total = await Blog.countDocuments({ category: categoryObjectId });
+      const totalPages = Math.ceil(total / limit);
       
-      console.log(`📊 Found ${blogs.length} blogs for category ID: ${categoryId}`);
-      
-      if (blogs.length > 0) {
-        const categoryName = blogs[0].category ? (blogs[0].category as any).name : 'Unknown';
-        console.log(`📂 Category: ${categoryName}`);
-        console.log(`📋 Blog titles found:`, blogs.map(blog => blog.title));
-      } else {
-        console.log(`⚠️ No blogs found for category ID: ${categoryId}`);
-      }
-      
-      return blogs;
+
+      return {
+        blogs,
+        total,
+        page,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1,
+        nextPage: page < totalPages ? page + 1 : null,
+        prevPage: page > 1 ? page - 1 : null
+      };
     } catch (error) {
       console.error(`❌ Error in findBlogsByCategory for category ID ${categoryId}:`, error);
       throw error;
@@ -395,8 +417,74 @@ class BlogServices {
     const blog = await Blog.findOne({ slug: slug.toLowerCase() })
       .populate('author')
       .populate('category', '_id name icon')
-      .populate('comments');
+      .populate('comments', '-email'); // Exclude email field from comments
     return blog;
+  }
+
+  /**
+   * Get blogs by tag with pagination
+   * @param tag - Single tag to search for
+   * @param limit - Number of blogs per page (default: 10)
+   * @param page - Page number (default: 1)
+   * @param sortBy - Field to sort by (default: 'createdAt')
+   * @param sortOrder - Sort order (default: 'desc')
+   * @param status - Blog status filter (optional)
+   * @returns Promise resolving to paginated blog documents matching the tag
+   */
+  static async getBlogsByTags(
+    tag: string,
+    limit: number = 10,
+    page: number = 1,
+    sortBy: string = 'createdAt',
+    sortOrder: 'asc' | 'desc' = 'desc',
+    status?: string
+  ): Promise<{
+    blogs: IBlog[];
+    total: number;
+    page: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+    nextPage: number | null;
+    prevPage: number | null;
+  }> {
+    const skip = (page - 1) * limit;
+    
+    // Build query filter
+    const filter: any = {
+      tags: tag // Match blogs that have the specified tag
+    };
+    
+    if (status && status !== 'all') {
+      filter.status = status;
+    }
+    
+    // Build sort object
+    const sortObj: any = {};
+    sortObj[sortBy] = sortOrder === 'desc' ? -1 : 1;
+    
+    const blogs = await Blog.find(filter)
+      .sort(sortObj)
+      .skip(skip)
+      .limit(limit)
+      .populate('author')
+      .populate('comments', '-email') // Exclude email field from comments
+      .populate('category', '_id name icon')
+      .exec();
+    
+    const total = await Blog.countDocuments(filter);
+    const totalPages = Math.ceil(total / limit);
+    
+    return {
+      blogs,
+      total,
+      page,
+      totalPages,
+      hasNextPage: page < totalPages,
+      hasPrevPage: page > 1,
+      nextPage: page < totalPages ? page + 1 : null,
+      prevPage: page > 1 ? page - 1 : null
+    };
   }
 
   /**
