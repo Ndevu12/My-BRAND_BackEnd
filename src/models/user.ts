@@ -1,6 +1,19 @@
 import mongoose, { Document, Schema } from "mongoose";
 
 /**
+ * Interface representing the safe user data (without password)
+ */
+export interface ISafeUser {
+  _id: string;
+  username: string;
+  email: string;
+  role: "admin" | "user";
+  verified?: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/**
  * Interface representing a user document in the database
  */
 export interface IUser extends Document {
@@ -11,6 +24,7 @@ export interface IUser extends Document {
   verified?: boolean;
   createdAt: Date;
   updatedAt: Date;
+  toSafeObject(): ISafeUser;
 }
 
 /**
@@ -51,6 +65,29 @@ const userSchema = new Schema<IUser>(
   },
   { timestamps: true }
 );
+
+// Add a method to exclude sensitive data
+userSchema.methods.toSafeObject = function(): ISafeUser {
+  const userObject = this.toObject();
+  delete userObject.password;
+  return {
+    _id: userObject._id,
+    username: userObject.username,
+    email: userObject.email,
+    role: userObject.role,
+    verified: userObject.verified,
+    createdAt: userObject.createdAt,
+    updatedAt: userObject.updatedAt
+  };
+};
+
+// Alternative: Add a transform function to JSON serialization
+userSchema.set('toJSON', {
+  transform: function(doc, ret, opt) {
+    const { password, ...safeRet } = ret;
+    return safeRet;
+  }
+});
 
 /**
  * User model

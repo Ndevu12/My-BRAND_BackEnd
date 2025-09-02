@@ -1,6 +1,6 @@
 import { Router } from "express";
 import UserController from "../controllers/authController";
-import { isAdmin, isAdminExist } from "../middlewares/authUtils";
+import { isAdmin, isAuth } from "../middlewares/authUtils";
 
 const authRoutes: Router = Router();
 
@@ -9,6 +9,7 @@ authRoutes.post("/signup",  UserController.registerUser);
 authRoutes.post("/login", UserController.loginUser);
 authRoutes.post("/logout", UserController.logout);
 authRoutes.get("/status", isAdmin, UserController.getCurrentUser);
+authRoutes.get("/me", isAuth, UserController.getCurrentUser); // Add /me endpoint
 
 // Testing/cleanup route (protected)
 authRoutes.delete("/users", isAdmin, UserController.deleteAllUsers);

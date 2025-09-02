@@ -74,6 +74,7 @@ class UserController {
 
       // Find the user by username
       const user = await UserServices.findUserByLogin(username);
+      console.log("Found user:", user);
       if (!user) {
         response(
           res,
@@ -87,6 +88,7 @@ class UserController {
 
       // Verify password
       const isPasswordValid = await check(password, user.password);
+      console.log("Password valid:", isPasswordValid);
       if (!isPasswordValid) {
         response(
           res,
@@ -115,7 +117,13 @@ class UserController {
         path: "/", // Available for all routes
       });
 
-      response(res, 200, "Login successful", null);
+      // Exclude password from user object in response
+      const userObj = user.toSafeObject();
+
+      console.log("User object without password:", userObj);
+
+      response(res, 200, "Login successful", userObj);
+
     } catch (error) {
       console.error("Error during login:", error);
       response(
