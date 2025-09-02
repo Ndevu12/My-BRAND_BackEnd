@@ -45,10 +45,14 @@ paths:
                   type: string
                   description: Brief summary of the blog content
                   example: "Learn the fundamentals of TypeScript and how to apply them in real projects"
+                category:
+                  type: string
+                  description: The category ID for the blog post
+                  example: "60a6b5f8d9b4c72a8c123456"
               required:
                 - title
                 - content
-                - imageUrl
+                - category
                 - description
       responses:
         "201":
@@ -231,18 +235,50 @@ paths:
     get:
       tags:
         - Blog
-      summary: Retrieve a blog by title
-      description: Retrieves a blog from the database by its title
+      summary: Search blogs by title with fuzzy matching
+      description: Search for blogs with similar titles using flexible matching. Supports both simple regex search and advanced fuzzy matching with relevance scoring.
       parameters:
         - name: title
           in: query
           required: true
-          description: The title of the blog to retrieve
+          description: The title or search query to find similar blog titles
           schema:
             type: string
+            example: "Getting Started"
+        - name: limit
+          in: query
+          required: false
+          description: Maximum number of results to return
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 50
+        - name: advanced
+          in: query
+          required: false
+          description: Use advanced search with fuzzy matching and relevance scoring
+          schema:
+            type: boolean
+            default: false
+        - name: sortBy
+          in: query
+          required: false
+          description: Sort results by relevance, date, or popularity (only applies to advanced search)
+          schema:
+            type: string
+            enum: ['relevance', 'date', 'popularity']
+            default: 'relevance'
+        - name: includeContent
+          in: query
+          required: false
+          description: Also search in blog descriptions/content (only applies to advanced search)
+          schema:
+            type: boolean
+            default: false
       responses:
         "200":
-          description: Blog retrieved successfully
+          description: Blogs found successfully
           content:
             application/json:
               schema:
@@ -253,11 +289,26 @@ paths:
                     example: 200
                   message:
                     type: string
-                    example: "Blog retrieved successfully"
+                    example: "Found 3 blog(s) with similar titles"
                   data:
-                    $ref: "#/components/schemas/blogs"
+                    type: object
+                    properties:
+                      blogs:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/blogs"
+                      searchQuery:
+                        type: string
+                        example: "Getting Started"
+                      totalResults:
+                        type: integer
+                        example: 3
+                      searchType:
+                        type: string
+                        enum: ['simple', 'advanced']
+                        example: "advanced"
         "404":
-          description: Blog not found
+          description: No blogs found with similar titles
         "500":
           description: Internal server error
   /blogs/by-slug/{slug}:
@@ -650,6 +701,22 @@ components:
           type: string
           description: Brief summary of the blog
           example: "Learn the fundamentals of TypeScript and how to apply them in real projects"
+        category:
+          type: object
+          description: Category of the blog
+          properties:
+            _id:
+              type: string
+              description: Category ID
+              example: "60a6b5f8d9b4c72a8c123456"
+            name:
+              type: string
+              description: Category name
+              example: "Web Development"
+            icon:
+              type: string
+              description: Category icon
+              example: "code"
         author:
           type: string
           description: Author of the blog

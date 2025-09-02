@@ -67,10 +67,16 @@ export const validateBlog = (blog: any) => {
       }),
       Joi.object().instance(mongoose.Types.ObjectId)
     ).required(),
-    category: Joi.alternatives().try(
-      Joi.string(),
-      Joi.array().items(Joi.string())
-    ).required(),
+    category: Joi.string().custom((value, helpers) => {
+      if (!mongoose.Types.ObjectId.isValid(value)) {
+        return helpers.error('any.invalid');
+      }
+      return value;
+    }).required().messages({
+      'string.base': 'Category must be a string',
+      'string.empty': 'Category is required',
+      'any.invalid': 'Category must be a valid ObjectId'
+    }),
     tags: Joi.array().items(Joi.string()),
     readTime: Joi.string()
   });

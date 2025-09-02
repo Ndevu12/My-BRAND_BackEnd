@@ -4,9 +4,56 @@ import { seedUser } from "./seedUser";
 import { seedBlog } from "./seedBlog";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
+import { User } from "../models/user";
+import { Category } from "../models/blogCategories";
+import { Blog } from "../models/Blog";
+import { Comment } from "../models/comments";
+import { Message } from "../models/messages";
+import { Notification } from "../models/notification";
+import { Subscriber } from "../models/Subscriber";
+import { UserProfile } from "../models/userProfile";
 
 // Load environment variables
 dotenv.config();
+
+/**
+ * Function to clear all data from the database
+ */
+async function clearDatabase() {
+  console.log("\n🗑️  Clearing all data from database...");
+  
+  try {
+    // Clear all collections in the right order (considering relationships)
+    await Comment.deleteMany({});
+    console.log("✅ Cleared comments");
+    
+    await Blog.deleteMany({});
+    console.log("✅ Cleared blogs");
+    
+    await Category.deleteMany({});
+    console.log("✅ Cleared categories");
+    
+    await Notification.deleteMany({});
+    console.log("✅ Cleared notifications");
+    
+    await Message.deleteMany({});
+    console.log("✅ Cleared messages");
+    
+    await Subscriber.deleteMany({});
+    console.log("✅ Cleared subscribers");
+    
+    await UserProfile.deleteMany({});
+    console.log("✅ Cleared user profiles");
+    
+    await User.deleteMany({});
+    console.log("✅ Cleared users");
+    
+    console.log("🎉 Database cleared successfully!");
+  } catch (error) {
+    console.error("❌ Error clearing database:", error);
+    throw error;
+  }
+}
 
 /**
  * Main function to run all seeders

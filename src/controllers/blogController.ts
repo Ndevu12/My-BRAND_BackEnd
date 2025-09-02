@@ -6,7 +6,7 @@ import cloudinary from "../helpers/cloudinary";
 import SubscriberService from "../services/subscriberService";
 import { Types } from "mongoose";
 import { CustomeRequest } from "../middlewares/authUtils";
-import { BlogDto } from "../types/blog.types";
+import { BlogDto, IBlog } from "../types/blog.types";
 import { validateBlog, sanitizeHtml } from "../helpers/validators/blogValidator";
 import UserProfileService from "../services/userProfileService";
 
@@ -39,7 +39,8 @@ class blogController {  /**
       }
 
       const { title } = req.body;
-      const blogExists = await BlogServices.getBlogByTitle(title);      if (blogExists) {
+      const blogExists = await BlogServices.getBlogByExactTitle(title);
+      if (blogExists) {
         response(res, 409, "Blog already exists", null, "BLOG_EXISTS");
         return;
       }// Get the current user ID (author of the blog)
@@ -61,9 +62,8 @@ class blogController {  /**
       const tags = Array.isArray(req.body.tags) ? req.body.tags.map(String) : 
         req.body.tags ? [String(req.body.tags)] : [];
       
-      const category = Array.isArray(req.body.category)
-        ? req.body.category.map(String)
-        : req.body.category ? [String(req.body.category)] : [];
+      // Category should be a single string ID, not an array
+      const category = String(req.body.category || '');
 
       // Sanitize HTML content
       const sanitizedContent = sanitizeHtml(req.body.content);
@@ -151,9 +151,8 @@ class blogController {  /**
       }
       
       if (req.body.category) {
-        blogData.category = Array.isArray(req.body.category)
-          ? req.body.category.map(String)
-          : [String(req.body.category)];
+        // Category should be a single string ID, not an array
+        blogData.category = String(req.body.category);
       }
 
       // Don't allow changing the author
@@ -205,15 +204,54 @@ class blogController {  /**
   }
   static async getBlogByTitle(req: Request, res: Response): Promise<void> {
     try {
-      const { title } = req.params;      const blog = await BlogServices.getBlogByTitle(title);
-      if (!blog) {
-        console.log("Blog not found");
-        response(res, 404, "Blog not found", null, "BLOG_NOT_FOUND");
+      // Get title from query parameters instead of params
+      const title = req.query.title as string;
+      
+      // Validate that title is provided and is a string
+      if (!title || typeof title !== 'string') {
+        response(res, 400, "Title query parameter is required", null, "TITLE_REQUIRED");
         return;
       }
-      response(res, 200, "Blog retrieved successfully", blog);    
-      } catch (error) {
-      console.error("Error fetching blog by title:", error);
+
+      // Validate minimum length to avoid overly broad searches
+      if (title.length < 1) {
+        response(res, 400, "Title must be at least 1 character long", null, "TITLE_TOO_SHORT");
+        return;
+      }
+      
+      // Get search options from query parameters
+      const limit = parseInt(req.query.limit as string) || 10;
+      const sortBy = (req.query.sortBy as 'relevance' | 'date' | 'popularity') || 'relevance';
+      const includeContent = req.query.includeContent === 'true';
+      const useAdvancedSearch = req.query.advanced === 'true';
+      
+      let blogs: IBlog[];
+      
+      if (useAdvancedSearch) {
+        // Use advanced search with fuzzy matching and relevance scoring
+        blogs = await BlogServices.searchBlogsByTitle(title, { 
+          limit, 
+          sortBy, 
+          includeContent 
+        });
+      } else {
+        // Use simple regex search
+        blogs = await BlogServices.getBlogByTitle(title);
+      }
+      
+      if (!blogs || blogs.length === 0) {
+        response(res, 404, "No blogs found with similar titles", null, "BLOGS_NOT_FOUND");
+        return;
+      }
+      
+      response(res, 200, `Found ${blogs.length} blog(s) with similar titles`, {
+        blogs,
+        searchQuery: title,
+        totalResults: blogs.length,
+        searchType: useAdvancedSearch ? 'advanced' : 'simple'
+      });    
+    } catch (error) {
+      console.error("Error fetching blogs by title:", error);
       response(res, 500, "Sorry, something went wrong", null, "SERVER_ERROR");
       return;
     }

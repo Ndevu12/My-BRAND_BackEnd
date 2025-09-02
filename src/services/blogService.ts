@@ -13,6 +13,7 @@ class BlogServices {
   static async findBlogsByCategory(query: string): Promise<IBlog[]> {
     const findBlogByCategor = await Blog.find({ category: query })
       .populate('author')
+      .populate('category', '_id name icon')
       .exec();
     return findBlogByCategor;
   }
@@ -49,7 +50,7 @@ class BlogServices {
     }
     
     const blog = await Blog.create(blogData);
-    return blog.populate('author');
+    return blog.populate('author').then(blog => blog.populate('category', '_id name icon'));
   }
   
   // Method to get all blogs with pagination and filtering options
@@ -87,6 +88,7 @@ class BlogServices {
       .limit(limit)
       .populate('author')
       .populate('comments')
+      .populate('category', '_id name icon')
       .exec();
     
     const total = await Blog.countDocuments(filter);
@@ -113,6 +115,7 @@ class BlogServices {
       .skip(skip)
       .limit(limit)
       .populate('author')
+      .populate('category', '_id name icon')
       .select('title description imageUrl category tags readTime publishedDate likes author slug') // Added slug to selection
       .exec();
     
@@ -130,6 +133,7 @@ class BlogServices {
   static async getblogById(id: string): Promise<IBlog | null> {
     const blog = await Blog.findById(id)
       .populate('author')
+      .populate('category', '_id name icon')
       .populate("comments");
     return blog;
   }
@@ -164,12 +168,15 @@ class BlogServices {
         updatedAt: new Date() 
       }, 
       { new: true }
-    ).populate('author');
+    ).populate('author')
+    .populate('category', '_id name icon');
     return blog;
   }
 
   static async deleteBlog(blogId: string): Promise<IBlog | null> {
-    const blog = await Blog.findByIdAndDelete(blogId).populate('author');
+    const blog = await Blog.findByIdAndDelete(blogId)
+      .populate('author')
+      .populate('category', '_id name icon');
     return blog;
   }
 
@@ -194,7 +201,7 @@ class BlogServices {
     }
     blog.likes = blog.likes + 1;
     await blog.save();
-    return blog.populate('author');
+    return blog.populate('author').then(blog => blog.populate('category', '_id name icon'));
   }
 
   static async findAuthor(blogId: string): Promise<any> {
@@ -206,9 +213,150 @@ class BlogServices {
     return author;
   }
 
-  static async getBlogByTitle(query: string): Promise<IBlog | null> {
-    const blog = await Blog.findOne({ title: query }).populate('author');
+  static async getBlogByTitle(query: string): Promise<IBlog[]> {
+    // Validate input
+    if (!query || typeof query !== 'string') {
+      throw new Error('Query parameter must be a non-empty string');
+    }
+
+    // Sanitize the query to prevent regex injection
+    const sanitizedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    
+    // Search for blogs with similar titles using case-insensitive regex
+    const blogs = await Blog.find({ 
+      title: { $regex: sanitizedQuery, $options: 'i' } 
+    })
+      .populate('author')
+      .populate('category', '_id name icon')
+      .sort({ createdAt: -1 }) // Sort by newest first
+      .limit(10); // Limit to 10 results to avoid performance issues
+    
+    return blogs;
+  }
+
+  /**
+   * Get blog by exact title match (used for checking duplicates during creation)
+   * @param title - The exact title to search for
+   * @returns Promise resolving to blog document or null
+   */
+  static async getBlogByExactTitle(title: string): Promise<IBlog | null> {
+    const blog = await Blog.findOne({ title: title })
+      .populate('author')
+      .populate('category', '_id name icon');
     return blog;
+  }
+
+  /**
+   * Advanced search for blogs by title with fuzzy matching and relevance scoring
+   * @param query - The search query
+   * @param options - Search options (limit, sortBy)
+   * @returns Promise resolving to array of blogs with relevance scoring
+   */
+  static async searchBlogsByTitle(
+    query: string, 
+    options: { 
+      limit?: number; 
+      sortBy?: 'relevance' | 'date' | 'popularity';
+      includeContent?: boolean;
+    } = {}
+  ): Promise<IBlog[]> {
+    // Validate input
+    if (!query || typeof query !== 'string') {
+      throw new Error('Query parameter must be a non-empty string');
+    }
+
+    // Sanitize the query to prevent regex injection
+    const sanitizedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    
+    const { limit = 10, sortBy = 'relevance', includeContent = false } = options;
+    
+    // Build search aggregation pipeline
+    const pipeline: any[] = [];
+    
+    // Match stage - search in title and optionally content
+    const matchConditions: any[] = [
+      { title: { $regex: sanitizedQuery, $options: 'i' } }
+    ];
+    
+    if (includeContent) {
+      matchConditions.push({ description: { $regex: sanitizedQuery, $options: 'i' } });
+    }
+    
+    pipeline.push({
+      $match: { $or: matchConditions }
+    });
+    
+    // Add relevance scoring
+    pipeline.push({
+      $addFields: {
+        relevanceScore: {
+          $add: [
+            // Exact title match gets highest score
+            { $cond: [{ $eq: [{ $toLower: '$title' }, query.toLowerCase()] }, 10, 0] },
+            // Title starts with query gets high score
+            { $cond: [{ $regexMatch: { input: { $toLower: '$title' }, regex: `^${query.toLowerCase()}` } }, 5, 0] },
+            // Title contains all words from query
+            { $cond: [{ $regexMatch: { input: { $toLower: '$title' }, regex: sanitizedQuery.toLowerCase() } }, 3, 0] },
+            // Boost popular blogs slightly
+            { $divide: ['$likes', 10] }
+          ]
+        }
+      }
+    });
+    
+    // Sort by relevance or other criteria
+    const sortStage: any = {};
+    switch (sortBy) {
+      case 'relevance':
+        sortStage.relevanceScore = -1;
+        sortStage.createdAt = -1; // Secondary sort by date
+        break;
+      case 'date':
+        sortStage.createdAt = -1;
+        break;
+      case 'popularity':
+        sortStage.likes = -1;
+        sortStage.createdAt = -1;
+        break;
+    }
+    
+    pipeline.push({ $sort: sortStage });
+    pipeline.push({ $limit: limit });
+    
+    // Lookup author and category
+    pipeline.push({
+      $lookup: {
+        from: 'userprofiles',
+        localField: 'author',
+        foreignField: '_id',
+        as: 'author'
+      }
+    });
+    
+    pipeline.push({
+      $lookup: {
+        from: 'categories',
+        localField: 'category',
+        foreignField: '_id',
+        as: 'category'
+      }
+    });
+    
+    // Convert arrays to single objects
+    pipeline.push({
+      $addFields: {
+        author: { $arrayElemAt: ['$author', 0] },
+        category: { $arrayElemAt: ['$category', 0] }
+      }
+    });
+    
+    // Remove relevanceScore from final output
+    pipeline.push({
+      $unset: 'relevanceScore'
+    });
+    
+    const results = await Blog.aggregate(pipeline);
+    return results;
   }
 
   /**
@@ -219,6 +367,7 @@ class BlogServices {
   static async getBlogBySlug(slug: string): Promise<IBlog | null> {
     const blog = await Blog.findOne({ slug: slug.toLowerCase() })
       .populate('author')
+      .populate('category', '_id name icon')
       .populate('comments');
     return blog;
   }
@@ -316,7 +465,7 @@ class BlogServices {
     if (category) {
       // Support both category ID and category name/slug
       if (mongoose.Types.ObjectId.isValid(category)) {
-        matchStage.category = { $in: [new mongoose.Types.ObjectId(category)] };
+        matchStage.category = new mongoose.Types.ObjectId(category);
       } else {
         // If not ObjectId, we'll need to lookup category by name later
         pipeline.push({
@@ -344,14 +493,26 @@ class BlogServices {
       matchStage.title = { $regex: search, $options: 'i' };
     }pipeline.push({ $match: matchStage });
 
-    // Lookup only categories - we only need category names
+    // Lookup categories - we need _id, name, and icon for frontend operations
     pipeline.push({
       $lookup: {
         from: 'categories',
         localField: 'category',
         foreignField: '_id',
-        as: 'category'
+        as: 'categoryDetails'
       }
+    });
+
+    // Add category details to the document
+    pipeline.push({
+      $addFields: {
+        category: { $arrayElemAt: ['$categoryDetails', 0] }
+      }
+    });
+
+    // Remove the temporary categoryDetails field
+    pipeline.push({
+      $unset: 'categoryDetails'
     });
 
     // Project only the 4 essential fields for admin dashboard

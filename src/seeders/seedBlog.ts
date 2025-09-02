@@ -40,12 +40,12 @@ const seedBlog = async (options = { forceUpdate: false }) => {
     
     // Process each dummy blog individually
     for (const blog of dummyBlogs) {
-      // Map category strings to actual category ObjectIds
-      const categoryIds = [];
+      // Map category strings to single category ObjectId
+      let categoryId: mongoose.Types.ObjectId | undefined;
       if (blog.category) {
         const categoryKey = blog.category.toLowerCase();
         if (categoryMap[categoryKey]) {
-          categoryIds.push(categoryMap[categoryKey]);
+          categoryId = categoryMap[categoryKey];
         } else {
           // If specific category doesn't exist, try to map to closest match
           // For example, "webdev" -> "Web Development"
@@ -54,19 +54,16 @@ const seedBlog = async (options = { forceUpdate: false }) => {
           );
           
           if (possibleMatch) {
-            categoryIds.push(categoryMap[possibleMatch]);
+            categoryId = categoryMap[possibleMatch];
           } else {
             // If no match, assign the first available category
-            const firstCategoryId = Object.values(categoryMap)[0];
-            if (firstCategoryId) {
-              categoryIds.push(firstCategoryId);
-            }
+            categoryId = Object.values(categoryMap)[0];
           }
         }
       }
 
       // If no category could be assigned, skip this blog
-      if (categoryIds.length === 0) {
+      if (!categoryId) {
         console.log(`Skipped blog '${blog.title}': No valid category could be assigned`);
         skippedCount++;
         continue;
@@ -95,7 +92,7 @@ const seedBlog = async (options = { forceUpdate: false }) => {
               description: blog.description,
               content: blog.content,
               imageUrl: blog.imageUrl,
-              category: categoryIds,
+              category: categoryId,
               tags: blog.tags || [],
               likes: blog.views || 0,
               readTime: blog.readTime,
@@ -122,7 +119,7 @@ const seedBlog = async (options = { forceUpdate: false }) => {
           content: blog.content,
           imageUrl: blog.imageUrl,
           author: authorId,
-          category: categoryIds,
+          category: categoryId,
           tags: blog.tags || [],
           likes: blog.views || 0,
           readTime: blog.readTime,

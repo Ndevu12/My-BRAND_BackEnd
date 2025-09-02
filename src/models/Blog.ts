@@ -80,10 +80,9 @@ const blogSchema = new Schema<IBlog>({
     default: [],
   },
   category: {
-    type: [mongoose.Schema.Types.ObjectId],
+    type: mongoose.Schema.Types.ObjectId,
     ref: "Category",
     required: true,
-    default: [],
   },
   tags: {
     type: [String],

@@ -13,6 +13,8 @@
         "migrate:slugs:regenerate": "ts-node src/migrations/addSlugToBlogs.ts regenerate",
         "migrate:category-icons": "ts-node src/migrations/addIconToCategories.ts",
         "migrate:category-icons:regenerate": "ts-node src/migrations/addIconToCategories.ts regenerate",
+        "migrate:category-single": "ts-node src/migrations/convertCategoryToSingle.ts",
+        "migrate:category-single:rollback": "ts-node src/migrations/convertCategoryToSingle.ts --rollback",
         "seed": "ts-node src/seeders/index.ts",
         "seed:categories": "ts-node src/seeders/index.ts categories",
         "seed:categories:force": "ts-node src/seeders/index.ts categories --force"
