@@ -180,11 +180,54 @@ class BlogServices {
   }
 
   static async getblogById(id: string): Promise<IBlog | null> {
-    const blog = await Blog.findById(id)
-      .populate('author')
-      .populate('category', '_id name icon')
-      .populate("comments");
-    return blog;
+    try {
+      // Validate ObjectId format
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        console.error('Invalid ObjectId format:', id);
+        return null;
+      }
+
+      const blog = await Blog.findById(id)
+        .populate('author')
+        .populate('category', '_id name icon')
+        .populate("comments");
+      
+      // If blog exists but author population failed, log it
+      if (blog && !blog.author) {
+        console.warn(`Blog ${id} found but author population failed. Author ID: ${(blog as any).author}`);
+      }
+      
+      return blog;
+    } catch (error) {
+      console.error('Error fetching blog by ID:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Get blog by ID with validation for required relationships
+   * @param id - Blog ID
+   * @returns Promise resolving to blog or null if not found or invalid
+   */
+  static async getBlogByIdSafe(id: string): Promise<IBlog | null> {
+    try {
+      const blog = await this.getblogById(id);
+      
+      if (!blog) {
+        return null;
+      }
+      
+      // Validate that required relationships are properly populated
+      if (!blog.author || typeof blog.author === 'string') {
+        console.error(`Blog ${id} has invalid or unpopulated author reference`);
+        return null;
+      }
+      
+      return blog;
+    } catch (error) {
+      console.error('Error fetching blog safely:', error);
+      return null;
+    }
   }
 
   static async updateBlog(

@@ -3,10 +3,13 @@
  * Diverse and distinct content for blog model - Updated May 2025
  */
 
+import { subtle } from "crypto";
+
 export const dummyBlogs = [  {
     id: '1',
     title: 'Quantum Computing: Breaking the Encryption Barrier',
     description: 'How quantum computers are reshaping cybersecurity and the race to develop quantum-resistant encryption methods',
+    subtitle: 'Exploring the Future of Secure Communication',
     author: 'Ndevu',
     createdAt: '2025-01-15T14:22:00Z',
     imageUrl: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb',
@@ -141,6 +144,7 @@ export const dummyBlogs = [  {
     title: 'Sustainable Web Development: Building Carbon-Neutral Websites',
     description: 'How developers can reduce the environmental impact of digital products through green coding practices and sustainable architecture',
     author: 'Ndevu',
+    subtitle: 'Building a Greener Web',
     createdAt: '2025-02-08T11:30:00Z',
     imageUrl: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64',
     category: 'sustainability',
@@ -317,6 +321,7 @@ export const dummyBlogs = [  {
     title: 'UI/UX Design Fundamentals for Developers',
     description: 'Learn the core principles of effective user interface design that every developer should understand',
     author: 'Ndevu',
+    subtitle: "Mastering UI/UX Design",
     createdAt: '2023-04-10T09:45:00Z',
     imageUrl: 'https://images.unsplash.com/photo-1586717791821-3f44a563fa4c',
     category: 'design',
@@ -636,6 +641,7 @@ export const dummyBlogs = [  {
     title: 'Building a Startup: Lessons from Early-Stage Failures',
     description: 'Essential insights from startup failures and how to avoid common entrepreneurial pitfalls in your journey',
     author: 'Ndevu',
+    subtitle: "Learning from Mistakes",
     createdAt: '2025-03-15T14:00:00Z',
     imageUrl: 'https://images.unsplash.com/photo-1559136555-9303baea8ebd',
     category: 'entrepreneurship',
@@ -774,6 +780,7 @@ export const dummyBlogs = [  {
     title: 'The Future of AI in Tech',
     description: 'Exploring how artificial intelligence is shaping the technology landscape in 2023 and beyond',
     author: 'Ndevu',
+    subtitle: "Navigating the AI Landscape",
     createdAt: '2023-05-05T16:20:00Z',
     imageUrl: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b',
     category: 'technology',
@@ -871,6 +878,7 @@ export const dummyBlogs = [  {
     title: 'Starting Your Tech Startup: A Practical Guide',
     description: 'Essential tips for launching a successful technology startup in today\'s competitive landscape',
     author: 'Ndevu',
+    subtitle: 'A Comprehensive Guide for Aspiring Entrepreneurs',
     createdAt: '2023-06-12T11:10:00Z',
     imageUrl: 'https://images.unsplash.com/photo-1559136555-9303baea8ebd',
     category: 'entrepreneurship',
@@ -976,6 +984,7 @@ export const dummyBlogs = [  {
     title: 'Advanced Data Visualization with D3.js',
     description: 'Master the art of creating interactive and compelling data visualizations using D3.js library',
     author: 'Ndevu',
+    subtitle: "Unleashing the Power of Data",
     createdAt: '2025-04-20T10:30:00Z',
     imageUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71',
     category: 'data science',
@@ -1017,6 +1026,7 @@ export const dummyBlogs = [  {
     category: 'sustainability',
     tags: ['Green Tech', 'Sustainable Development', 'Energy Efficiency', 'Climate Tech'],
     readTime: '9 min read',
+    subtitle: 'Adopting Eco-Friendly Coding Practices',
     content: `
       <p class="lead text-xl text-gray-300 mb-6 leading-relaxed">
         As the digital economy grows, so does its environmental impact. The software we write and the systems we build have real energy costs. This guide explores how developers can adopt green coding practices to minimize their environmental footprint.
@@ -1049,6 +1059,7 @@ export const dummyBlogs = [  {
     title: 'UI/UX Design Fundamentals for Developers',
     description: 'Learn the core principles of effective user interface design that every developer should understand',
     author: 'Ndevu',
+    subtitle: "Bridging the Gap Between Design and Development",
     createdAt: '2023-04-10T09:45:00Z',
     imageUrl: 'https://images.unsplash.com/photo-1586717791821-3f44a563fa4c',
     category: 'design',
@@ -1163,6 +1174,7 @@ export const dummyBlogs = [  {
   },
   {
     id: '10',
+    subtitle: 'Exploring the Future of AI in Tech',
     title: 'The Future of AI in Tech',
     description: 'Exploring how artificial intelligence is shaping the technology landscape in 2023 and beyond',
     author: 'Ndevu',
@@ -1268,6 +1280,7 @@ export const dummyBlogs = [  {
     category: 'entrepreneurship',
     tags: ['Startup', 'Business', 'Entrepreneurship'],
     readTime: '10 min read',
+    subtitle: 'Essential Tips for Launching a Successful Technology Startup',
     content: `
       <p class="lead text-xl text-gray-300 mb-6 leading-relaxed">
         Launching a tech startup is an exhilarating journey filled with challenges and opportunities. This guide covers essential strategies for transforming your idea into a successful technology business in today's competitive landscape.

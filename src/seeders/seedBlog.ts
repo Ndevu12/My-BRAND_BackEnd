@@ -1,6 +1,7 @@
 import { Blog } from "../models/Blog";
 import { Category } from "../models/blogCategories";
 import { User } from "../models/user";
+import { UserProfile } from "../models/userProfile";
 import { dummyBlogs } from "./data/blogs";
 import mongoose from "mongoose";
 import { generateUniqueSlug } from "../utils/slugGenerator";
@@ -26,16 +27,18 @@ const seedBlog = async (options = { forceUpdate: false }) => {
       categoryMap[category.name.toLowerCase()] = category._id as mongoose.Types.ObjectId;
     }
     
-    // Find author - using the one created by seedUser
-    const defaultAuthor = await User.findOne({ username: "ndevu" });
-    if (!defaultAuthor) {
-      console.log("No author with username 'ndevu' found. Please run user seeder first.");
+    // Find author profiles - get them from existing UserProfiles (seeded by UserProfile seeder)
+    const authorProfiles = await UserProfile.find({}).populate('user');
+    if (authorProfiles.length === 0) {
+      console.log("No UserProfiles found. Please run user and user profile seeders first.");
       return;
     }
     
-    // Find alternate authors for variety
-    const alternateAuthors = await User.find({ username: { $ne: "ndevu" } });
-    const allAuthors = [defaultAuthor, ...alternateAuthors];    let createdCount = 0;
+    console.log(`Found ${authorProfiles.length} author profile(s) to use for blogs.`);
+    
+    // Use the first profile as default (should be the admin profile)
+    
+    let createdCount = 0;
     let updatedCount = 0;
     let skippedCount = 0;
     
@@ -70,10 +73,10 @@ const seedBlog = async (options = { forceUpdate: false }) => {
         continue;
       }
       
-      // Choose an author - use the default author or randomly select from available authors
-      const authorId = allAuthors.length > 1 
-        ? allAuthors[Math.floor(Math.random() * allAuthors.length)]._id 
-        : defaultAuthor._id;
+      // Choose an author profile - randomly select from available profiles
+      const authorProfile = authorProfiles.length > 1 
+        ? authorProfiles[Math.floor(Math.random() * authorProfiles.length)]
+        : authorProfiles[0];
       
       // Check if this blog already exists by title
       const existingBlog = await Blog.findOne({ title: blog.title }) as (mongoose.Document & { _id: mongoose.Types.ObjectId, slug?: string });
@@ -100,6 +103,7 @@ const seedBlog = async (options = { forceUpdate: false }) => {
               description: blog.description,
               content: blog.content,
               imageUrl: blog.imageUrl,
+              author: authorProfile._id,
               category: categoryId,
               tags: blog.tags || [],
               likes: blog.views || 0,
@@ -130,7 +134,7 @@ const seedBlog = async (options = { forceUpdate: false }) => {
           description: blog.description,
           content: blog.content,
           imageUrl: blog.imageUrl,
-          author: authorId,
+          author: authorProfile._id,
           category: categoryId,
           tags: blog.tags || [],
           likes: blog.views || 0,

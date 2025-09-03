@@ -107,14 +107,27 @@ class blogController {  /**
     try {
       const { id } = req.params;
       
-      // Find the blog first to check ownership
-      const existingBlog = await BlogServices.getblogById(id);
-      if (!existingBlog) {
-        response(res, 404, "Blog not found", null, "BLOG_NOT_FOUND");
+      // Validate blog ID format
+      if (!id || id.trim() === '') {
+        response(res, 400, "Blog ID is required", null, "INVALID_INPUT");
         return;
-      }      // Check if the user is the author of the blog
+      }
+      
+      // Find the blog first to check ownership
+      const existingBlog = await BlogServices.getBlogByIdSafe(id);
+      if (!existingBlog) {
+        response(res, 404, "Blog not found or has invalid data", null, "BLOG_NOT_FOUND");
+        return;
+      }
+
+      // Check if the user is the author of the blog or an admin
       const userId = req.user?.id;
-      if (!userId || (existingBlog.author._id.toString() !== userId && req.user?.role !== 'admin')) {
+      if (!userId) {
+        response(res, 401, "Authentication required", null, "UNAUTHORIZED");
+        return;
+      }
+
+      if (existingBlog.author._id.toString() !== userId && req.user?.role !== 'admin') {
         response(res, 403, "You don't have permission to update this blog", null, "FORBIDDEN");
         return;
       }
@@ -179,24 +192,39 @@ class blogController {  /**
     try {
       const { id } = req.params;
       
-      // Find the blog first to check ownership
-      const existingBlog = await BlogServices.getblogById(id);
-      if (!existingBlog) {
-        response(res, 404, "Blog not found", null, "BLOG_NOT_FOUND");
+      // Validate blog ID format
+      if (!id || id.trim() === '') {
+        response(res, 400, "Blog ID is required", null, "INVALID_INPUT");
         return;
-      }      // Check if the user is the author of the blog or an admin
+      }
+
+      // Find the blog first to check ownership
+      const existingBlog = await BlogServices.getBlogByIdSafe(id);
+      if (!existingBlog) {
+        response(res, 404, "Blog not found or has invalid data", null, "BLOG_NOT_FOUND");
+        return;
+      }
+
+      // Check if the user is the author of the blog or an admin
       const userId = req.user?.id;
-      if (!userId || (existingBlog.author._id.toString() !== userId && req.user?.role !== 'admin')) {
+      if (!userId) {
+        response(res, 401, "Authentication required", null, "UNAUTHORIZED");
+        return;
+      }
+
+      if (existingBlog.author._id.toString() !== userId && req.user?.role !== 'admin') {
         response(res, 403, "You don't have permission to delete this blog", null, "FORBIDDEN");
         return;
       }
-        const deletedBlog = await BlogServices.deleteBlog(id);
+        
+      const deletedBlog = await BlogServices.deleteBlog(id);
       if (!deletedBlog) {
-        response(res, 404, "Blog is not deleted yet", null, "DELETE_FAILED");
+        response(res, 404, "Blog could not be deleted", null, "DELETE_FAILED");
         return;
       }
-      response(res, 200, "Blog deleted successfully", null);    
-      } catch (error) {
+      
+      response(res, 200, "Blog deleted successfully", { deletedBlogId: id });
+    } catch (error) {
       console.error("Error deleting blog:", error);
       response(res, 500, "Sorry, something went wrong", null, "SERVER_ERROR");
       return;

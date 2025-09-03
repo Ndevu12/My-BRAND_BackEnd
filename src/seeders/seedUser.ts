@@ -19,13 +19,6 @@ const seedUser = async (options = { forceUpdate: false }) => {
                 verified: true
             },
             {
-                username: "blogauthor",
-                email: "author@example.com",
-                password: "@Author123",
-                role: "admin",
-                verified: true
-            },
-            {
                 username: "regularuser",
                 email: "user@example.com",
                 password: "@User123",
