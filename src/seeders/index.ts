@@ -1,6 +1,7 @@
 import connectDb from "../start-ups/connectdb";
 import { seedCategories } from "./seedCategories";
 import { seedUser } from "./seedUser";
+import { seedUserProfile } from "./seedUserProfile";
 import { seedBlog } from "./seedBlog";
 import { clearEntireDatabase } from "./clearDatabase";
 import dotenv from "dotenv";
@@ -16,11 +17,13 @@ dotenv.config();
  * - yarn seed                    // Seeds all collections
  * - yarn seed:categories         // Seeds only categories
  * - yarn seed:users              // Seeds only users
+ * - yarn seed:profiles           // Seeds only user profiles
  * - yarn seed:blogs              // Seeds only blogs
  * 
  * Force mode (updates existing records):
  * - yarn seed:categories:force   // Updates existing categories
  * - yarn seed:users:force        // Updates existing users
+ * - yarn seed:profiles:force     // Updates existing user profiles
  * - yarn seed:blogs:force        // Updates existing blogs
  * 
  * Database clearing and reset:
@@ -61,17 +64,23 @@ async function runSeeders() {
     // Determine which seeders to run
     const shouldRunCategories = isFullSeed || args.includes('categories');
     const shouldRunUsers = isFullSeed || args.includes('users');
+    const shouldRunProfiles = isFullSeed || args.includes('profiles');
     const shouldRunBlogs = isFullSeed || args.includes('blogs');
 
     // Run seeders in the correct order (dependencies first)
-    if (shouldRunCategories) {
-      console.log("\n=== Running Category Seeder ===");
-      await seedCategories({ forceUpdate: isForceMode });
-    }
-
     if (shouldRunUsers) {
       console.log("\n=== Running User Seeder ===");
       await seedUser({ forceUpdate: isForceMode });
+    }
+
+    if (shouldRunProfiles) {
+      console.log("\n=== Running UserProfile Seeder ===");
+      await seedUserProfile({ forceUpdate: isForceMode });
+    }
+
+    if (shouldRunCategories) {
+      console.log("\n=== Running Category Seeder ===");
+      await seedCategories({ forceUpdate: isForceMode });
     }
     
     if (shouldRunBlogs) {

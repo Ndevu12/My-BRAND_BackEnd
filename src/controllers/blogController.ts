@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { Blog } from "../models/Blog";
 import BlogServices from "../services/blogService";
 import response from "../helpers/response";
-import cloudinary from "../helpers/cloudinary";
+import { uploadImageToCloudinary, handleRequestImageUpload } from "../helpers/imageUpload";
 import SubscriberService from "../services/subscriberService";
 import { Types } from "mongoose";
 import { CustomeRequest } from "../middlewares/authUtils";
@@ -20,23 +20,15 @@ interface RequestWithFile extends Request {
  */
 class blogController {  /**
    * Creates a new blog post.
-   * @param req The request object.
+   * @param req The request object with FormData
    * @param res The response object.
    */
   static async createBlog(req: CustomeRequest & RequestWithFile, res: Response): Promise<void> {
     try {
-      let imageURL: string | undefined;
-      
-      // Priority: URL takes precedence over file upload
-      if (req.body?.imageUrl) {
-        // URL provided - use the URL
-        imageURL = req.body.imageUrl;
-      } else if (req.file !== undefined) {
-        // No URL provided, but file uploaded - upload to Cloudinary
-        const file = req.file.path;
-        const link = await cloudinary.uploader.upload(file);
-        imageURL = link.secure_url;
-      }
+      // Handle image upload from FormData (image field or imageUrl field)
+      const uploadResult = await blogController.handleImageUpload(req, res);
+      if (uploadResult === null) return; // Error response already sent
+      const imageURL = uploadResult;
 
       const { title } = req.body;
       const blogExists = await BlogServices.getBlogByExactTitle(title);
@@ -59,10 +51,11 @@ class blogController {  /**
         return;
       }
 
+      // Parse tags from FormData (comma-separated string or array)
       const tags = Array.isArray(req.body.tags) ? req.body.tags.map(String) : 
-        req.body.tags ? [String(req.body.tags)] : [];
+        req.body.tags ? req.body.tags.split(',').map((tag: string) => tag.trim()) : [];
       
-      // Category should be a single string ID, not an array
+      // Category should be a single string ID
       const category = String(req.body.category || '');
 
       // Sanitize HTML content
@@ -70,7 +63,7 @@ class blogController {  /**
 
       const blogData: BlogDto = {
         title: req.body.title,
-        slug: req.body.slug, // Optional - will be auto-generated if not provided
+        slug: req.body.slug,
         metaTitle: req.body.metaTitle,
         metaDescription: req.body.metaDescription,
         publishDate: req.body.publishDate,
@@ -107,30 +100,35 @@ class blogController {  /**
     try {
       const { id } = req.params;
       
-      // Find the blog first to check ownership
-      const existingBlog = await BlogServices.getblogById(id);
-      if (!existingBlog) {
-        response(res, 404, "Blog not found", null, "BLOG_NOT_FOUND");
+      // Validate blog ID format
+      if (!id || id.trim() === '') {
+        response(res, 400, "Blog ID is required", null, "INVALID_INPUT");
         return;
-      }      // Check if the user is the author of the blog
+      }
+      
+      // Find the blog first to check ownership
+      const existingBlog = await BlogServices.getBlogByIdSafe(id);
+      if (!existingBlog) {
+        response(res, 404, "Blog not found or has invalid data", null, "BLOG_NOT_FOUND");
+        return;
+      }
+
+      // Check if the user is the author of the blog or an admin
       const userId = req.user?.id;
-      if (!userId || (existingBlog.author._id.toString() !== userId && req.user?.role !== 'admin')) {
+      if (!userId) {
+        response(res, 401, "Authentication required", null, "UNAUTHORIZED");
+        return;
+      }
+
+      if (existingBlog.author._id.toString() !== userId && req.user?.role !== 'admin') {
         response(res, 403, "You don't have permission to update this blog", null, "FORBIDDEN");
         return;
       }
       
-      let imageURL: string | undefined;
-      
-      // Priority: URL takes precedence over file upload
-      if (req.body?.imageUrl !== undefined) {
-        // URL provided - use the URL
-        imageURL = req.body.imageUrl;
-      } else if (req.file !== undefined) {
-        // No URL provided, but file uploaded - upload to Cloudinary
-        const file = req.file.path;
-        const link = await cloudinary.uploader.upload(file);
-        imageURL = link.secure_url;
-      }
+      // Handle image upload from FormData (image field or imageUrl field)
+      const uploadResult = await blogController.handleImageUpload(req, res);
+      if (uploadResult === null) return; // Error response already sent
+      const imageURL = uploadResult !== undefined ? uploadResult : existingBlog.imageUrl;
 
       
       // If content is provided, sanitize it
@@ -140,18 +138,17 @@ class blogController {  /**
 
       const blogData: Partial<BlogDto> = {
         ...req.body,
-        imageUrl: imageURL !== undefined ? imageURL : existingBlog.imageUrl
+        imageUrl: imageURL
       };
 
-
-      // Handle tags and category properly
+      // Handle tags and category properly from FormData
       if (req.body.tags) {
         blogData.tags = Array.isArray(req.body.tags) ? req.body.tags.map(String) : 
-          [String(req.body.tags)];
+          req.body.tags.split(',').map((tag: string) => tag.trim());
       }
       
       if (req.body.category) {
-        // Category should be a single string ID, not an array
+        // Category should be a single string ID
         blogData.category = String(req.body.category);
       }
 
@@ -179,24 +176,39 @@ class blogController {  /**
     try {
       const { id } = req.params;
       
-      // Find the blog first to check ownership
-      const existingBlog = await BlogServices.getblogById(id);
-      if (!existingBlog) {
-        response(res, 404, "Blog not found", null, "BLOG_NOT_FOUND");
+      // Validate blog ID format
+      if (!id || id.trim() === '') {
+        response(res, 400, "Blog ID is required", null, "INVALID_INPUT");
         return;
-      }      // Check if the user is the author of the blog or an admin
+      }
+
+      // Find the blog first to check ownership
+      const existingBlog = await BlogServices.getBlogByIdSafe(id);
+      if (!existingBlog) {
+        response(res, 404, "Blog not found or has invalid data", null, "BLOG_NOT_FOUND");
+        return;
+      }
+
+      // Check if the user is the author of the blog or an admin
       const userId = req.user?.id;
-      if (!userId || (existingBlog.author._id.toString() !== userId && req.user?.role !== 'admin')) {
+      if (!userId) {
+        response(res, 401, "Authentication required", null, "UNAUTHORIZED");
+        return;
+      }
+
+      if (existingBlog.author._id.toString() !== userId && req.user?.role !== 'admin') {
         response(res, 403, "You don't have permission to delete this blog", null, "FORBIDDEN");
         return;
       }
-        const deletedBlog = await BlogServices.deleteBlog(id);
+        
+      const deletedBlog = await BlogServices.deleteBlog(id);
       if (!deletedBlog) {
-        response(res, 404, "Blog is not deleted yet", null, "DELETE_FAILED");
+        response(res, 404, "Blog could not be deleted", null, "DELETE_FAILED");
         return;
       }
-      response(res, 200, "Blog deleted successfully", null);    
-      } catch (error) {
+      
+      response(res, 200, "Blog deleted successfully", { deletedBlogId: id });
+    } catch (error) {
       console.error("Error deleting blog:", error);
       response(res, 500, "Sorry, something went wrong", null, "SERVER_ERROR");
       return;
@@ -621,6 +633,38 @@ class blogController {  /**
     } catch (error) {
       console.error("Error retrieving recent blogs:", error);
       response(res, 500, "Something went wrong", null, "SERVER_ERROR");
+    }
+  }
+
+  /**
+   * Helper method to handle image upload logic
+   * @param req Request with potential file upload
+   * @param res Response object
+   * @returns Promise<string | undefined | null> - URL of uploaded image, undefined if no upload, null if error
+   */
+  private static async handleImageUpload(
+    req: CustomeRequest & RequestWithFile, 
+    res: Response
+  ): Promise<string | undefined | null> {
+    try {
+      // Use the enhanced image upload handler (image field or imageUrl field only)
+      const imageUrl = await handleRequestImageUpload(req, {
+        folder: 'my_brand_blog/posts',
+        width: 1200,
+        height: 630,
+        quality: 'auto',
+        format: 'auto'
+      });
+      
+      if (imageUrl) {
+        console.log('✅ Image processed successfully:', imageUrl);
+      }
+      
+      return imageUrl;
+    } catch (error) {
+      console.error('❌ Image upload failed:', error);
+      response(res, 500, `Failed to upload image: ${error instanceof Error ? error.message : 'Unknown error'}`, null, "IMAGE_UPLOAD_ERROR");
+      return null;
     }
   }
 }
