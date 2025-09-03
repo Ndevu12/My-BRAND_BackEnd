@@ -3,6 +3,7 @@ import { Router } from "express";
 import BlogController from "../controllers/blogController";
 import { isAdmin, isAuth, isAdminOrSubscriber } from "../middlewares/authUtils";
 import upload from "../helpers/multer";
+import { handleUploadError } from "../middlewares/uploadMiddleware";
 
 const blogRoutes: Router = Router();
 
@@ -18,9 +19,9 @@ blogRoutes.get("/by-slug/:slug", BlogController.getBlogBySlug); // SEO-friendly 
 // Author related routes (specific routes before generic ones)
 blogRoutes.get("/author/:id", BlogController.getAuthorByBlogId);
 
-// Protected routes - require authentication
-blogRoutes.post("/create", isAdmin, upload.single('image'), BlogController.createBlog);
-blogRoutes.put("/update/:id", isAuth, upload.single('image'), BlogController.updateBlog); // Author or admin can update
+// Protected routes - require authentication (FormData expected)
+blogRoutes.post("/create", isAdmin, upload.single('image'), handleUploadError, BlogController.createBlog);
+blogRoutes.put("/update/:id", isAuth, upload.single('image'), handleUploadError, BlogController.updateBlog); // Author or admin can update
 blogRoutes.delete("/delete/:id", isAuth, BlogController.deleteBlog); // Author or admin can delete
 blogRoutes.put("/like/:id", isAdminOrSubscriber, BlogController.likeBlog); // isAuthd users can like
 

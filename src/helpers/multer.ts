@@ -1,24 +1,39 @@
-import multer, { diskStorage, FileFilterCallback } from "multer";
+import multer, { memoryStorage, FileFilterCallback } from "multer";
 import path from "path";
 import { Request } from "express";
 
-interface MulterExtendedOptions extends multer.Options {
-  filename: (req: Request, file: Express.Multer.File, cb: (error: Error | null, filename: string) => void) => void;
-}
-
+/**
+ * Multer configuration for handling image uploads
+ * Uses memory storage to avoid temporary file issues
+ */
 const upload: multer.Multer = multer({
-  storage: diskStorage({}),
-  filename: (req: Request, file: Express.Multer.File, cb: (error: Error | null, filename: string) => void) => {
-    cb(null, new Date().toISOString() + '-' + file.originalname)
+  storage: memoryStorage(),
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit
+    files: 1 // Only allow 1 file per request
   },
   fileFilter: (req: Request, file: Express.Multer.File, cb: FileFilterCallback) => {
-    const extension = path.extname(file.originalname);
-    if (extension === '.png' || extension === '.jpg' || extension === '.jpeg' || extension === '.svg') {
+    // Allowed file extensions
+    const allowedExtensions = ['.png', '.jpg', '.jpeg', '.svg', '.webp', '.gif'];
+    
+    // Allowed MIME types
+    const allowedMimeTypes = [
+      'image/png', 
+      'image/jpg', 
+      'image/jpeg', 
+      'image/svg+xml', 
+      'image/webp', 
+      'image/gif'
+    ];
+    
+    const extension = path.extname(file.originalname).toLowerCase();
+    
+    if (allowedExtensions.includes(extension) && allowedMimeTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
       cb(null, false);
     }
   }
-} as MulterExtendedOptions);
+});
 
 export default upload;
